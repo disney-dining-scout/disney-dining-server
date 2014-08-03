@@ -1,0 +1,31 @@
+{
+  "name": "exhibitor-bower",
+  "version": "0.1.0",
+  "dependencies": {
+    "handlebars": "*",
+    "bootstrap": "*",
+    "underscore": "*",
+    "marionette": "*",
+    "backbone.wreqr": "*",
+    "backbone.babysitter": "https://github.com/marionettejs/backbone.babysitter.git",
+    "backbone.marionette.handlebars": "https://github.com/asciidisco/Backbone.Marionette.Handlebars.git",
+    "json2": "*",
+    "font-awesome": "*",
+    "swag": "*",
+    "backbone-forms": "*",
+    "selectize": "*",
+    "ladda-bootstrap": "*",
+    "moment": "*",
+    "bootcards": "*",
+    "jQuery-Mask-Plugin": "*",
+    "bootstrap-jasny": "*",
+    "backbone.supermodel": "https://github.com/laoshanlung/backbone.supermodel.git",
+    "ie-alert": "*",
+    "messenger": "*",
+    "pickadate": "*",
+    "bootstrap-touchspin": "*",
+    "backbone.modal": "https://github.com/mattvoss/backbone.modal.git",
+    "he": "*",
+    "switchery": "*"
+  }
+}

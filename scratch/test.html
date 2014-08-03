@@ -1,0 +1,226 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Responsive Email Template</title>
+  <style type="text/css">
+    .ReadMsgBody {width: 100%; background-color: #ffffff;}
+    .ExternalClass {width: 100%; background-color: #ffffff;}
+    body     {width: 100%; background-color: #ffffff; margin:0; padding:0; -webkit-font-smoothing: antialiased;font-family: Georgia, Times, serif}
+    table {border-collapse: collapse;}
+    p {
+      color: #777;
+      font-size: 1.25em;
+    }
+
+    .pure-button {
+        /* Structure */
+        display: inline-block;
+        *display: inline; /*IE 6/7*/
+        zoom: 1;
+        line-height: normal;
+        white-space: nowrap;
+        vertical-align: baseline;
+        text-align: center;
+        cursor: pointer;
+        -webkit-user-drag: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Firefox: Get rid of the inner focus border */
+    .pure-button::-moz-focus-inner {
+        padding: 0;
+        border: 0;
+    }
+
+    .pure-button {
+        font-family: inherit;
+        font-size: 100%;
+        *font-size: 90%; /*IE 6/7 - To reduce IE's oversized button text*/
+        *overflow: visible; /*IE 6/7 - Because of IE's overly large left/right padding on buttons */
+        padding: 0.5em 1em;
+        color: #444; /* rgba not supported (IE 8) */
+        color: rgba(0, 0, 0, 0.80); /* rgba supported */
+        *color: #444; /* IE 6 & 7 */
+        border: 1px solid #999;  /*IE 6/7/8*/
+        border: none rgba(0, 0, 0, 0);  /*IE9 + everything else*/
+        background-color: #E6E6E6;
+        text-decoration: none;
+        border-radius: 2px;
+    }
+
+    .pure-button-hover,
+    .pure-button:hover,
+    .pure-button:focus {
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#1a000000',GradientType=0);
+        background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.10)));
+        background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+        background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.10));
+        background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+        background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
+    }
+    .pure-button:focus {
+        outline: 0;
+    }
+    .pure-button-active,
+    .pure-button:active {
+        box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset, 0 0 6px rgba(0,0,0, 0.20) inset;
+    }
+
+    .pure-button[disabled],
+    .pure-button-disabled,
+    .pure-button-disabled:hover,
+    .pure-button-disabled:focus,
+    .pure-button-disabled:active {
+        border: none;
+        background-image: none;
+        filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+        filter: alpha(opacity=40);
+        -khtml-opacity: 0.40;
+        -moz-opacity: 0.40;
+        opacity: 0.40;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .pure-button-hidden {
+        display: none;
+    }
+
+    /* Firefox: Get rid of the inner focus border */
+    .pure-button::-moz-focus-inner{
+        padding: 0;
+        border: 0;
+    }
+
+    .pure-button-primary,
+    .pure-button-selected,
+    a.pure-button-primary,
+    a.pure-button-selected {
+        background-color: rgb(0, 120, 231);
+        color: #fff;
+    }
+
+    .button-success,
+    .button-error,
+    .button-warning,
+    .button-secondary {
+        color: white;
+        border-radius: 4px;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-success {
+        background: rgb(28, 184, 65); /* this is a green */
+    }
+
+    .button-error {
+        background: rgb(202, 60, 60); /* this is a maroon */
+    }
+
+    .button-warning {
+        background: rgb(223, 117, 20); /* this is an orange */
+    }
+
+    .button-secondary {
+        background: rgb(66, 184, 221); /* this is a light blue */
+    }
+
+    @media only screen and (max-width: 640px)  {
+      body[yahoo] .deviceWidth {width:440px!important; padding:0;}
+      body[yahoo] .center {text-align: center!important;}
+    }
+
+    @media only screen and (max-width: 479px) {
+      body[yahoo] .deviceWidth {width:280px!important; padding:0;}
+      body[yahoo] .center {text-align: center!important;}
+    }
+
+  </style>
+</head>
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" yahoo="fix" style="font-family: Georgia, Times, serif">
+  <!-- Wrapper -->
+  <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+    <tr>
+      <td width="100%" valign="top" bgcolor="#ffffff" style="padding-top:20px">
+        <!-- Start Header-->
+        <table width="580" border="0" cellpadding="0" cellspacing="0" align="center" class="deviceWidth">
+          <tr>
+            <td valign="top" style="padding:0" bgcolor="#ffffff">
+                <a href="#"><img  class="deviceWidth" src="disney-dining-email-logo.png" alt="" border="0" style="display: block; border-radius: 4px;" /></a>
+            </td>
+          </tr>
+        </table><!-- End Nav -->
+      </td>
+    </tr>
+  </table><!-- End Header -->
+
+  <!-- One Column -->
+  <table width="580"  class="deviceWidth" border="0" cellpadding="0" cellspacing="0" align="center" bgcolor="#fafafa">
+
+    <tr>
+      <td style="text-align: left; font-family: Georgia, Times, serif; line-height: 24px; vertical-align: top; padding:10px 8px 10px 8px" bgcolor="#eeeeed">
+
+        <p>Hi Matthew,</p>
+        <p>We got a request to reset your Disney Dining Scout password.</p>
+        <p style="text-align: center;"><a href="https://disneydining.io/reset/password/lsaduj0980980948" class="button-secondary pure-button">Reset Password</a></p>
+        <p>If you ignore this message, your password will not be changed.</p>
+        <p>If you did not request your password be reset please <a href="http://app.disneydining.io/support">let us know</a>.</p>
+      </td>
+    </tr>
+  </table><!-- End One Column -->
+
+
+  <!-- Begin Footer -->
+  <div style="height:35px">&nbsp;</div><!-- spacer -->
+
+  <!-- 4 Columns -->
+  <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+    <tr>
+      <td>
+        <table width="580" border="0" style="padding:30px 0px;" cellpadding="0" cellspacing="0" align="center" class="deviceWidth" bgcolor="#363636">
+          <tr>
+            <td>
+              <table width="45%" cellpadding="0" cellspacing="0"  border="0" align="left" class="deviceWidth">
+                <tr>
+                  <td valign="top" style="font-size: 11px; color: #f1f1f1; color:#999; font-family: Arial, sans-serif; padding:20px; 0px;" class="center">
+
+
+                  </td>
+                </tr>
+              </table>
+
+              <table width="40%" cellpadding="0" cellspacing="0"  border="0" align="right" class="deviceWidth" >
+                <tr>
+                  <td valign="top" style="font-size: 11px; color: #f1f1f1; font-weight: normal; font-family: Georgia, Times, serif; line-height: 26px; vertical-align: top; text-align:right; width: 95%; padding-right: 5%; padding:20px; 0px;" class="center">
+
+                      <a href=""><img src="http://www.emailonacid.com/images/emails/5_13/footer_rss.gif" width="42" height="42" alt="RSS Feed" title="RSS Feed" border="0" /></a>
+
+                      <a href=""><img src="http://www.emailonacid.com/images/emails/5_13/footer_twitter.gif" width="42" height="42" alt="Twitter" title="Twitter" border="0" /></a>
+
+                      <a href=""><img src="http://www.emailonacid.com/images/emails/5_13/footer_vm.gif" width="42" height="42" alt="Vimeo" title="Vimeo" border="0" /></a>
+
+                      <a href=""><img src="http://www.emailonacid.com/images/emails/5_13/footer_fb.gif" width="42" height="42" alt="Facebook" title="Facebook" border="0" /></a>
+                      <br />
+
+                      <a href="http://disneydining.io"><img src="disney-dining-logo.png" alt="" border="0" style="padding-top: 5px;" /></a><br/>
+                      <a href="mailto:support@disneydining.io" style="text-decoration: none; color: #848484; font-weight: normal;">support@disneydining.io</a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table><!-- End 4 Columns -->
+  <!-- End Footer -->
+
+
+
+</body>
+</html>

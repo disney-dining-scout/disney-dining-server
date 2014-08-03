@@ -1,0 +1,46 @@
+{
+  "name": "disney-dining-app",
+  "version": "0.1.0",
+  "dependencies": {
+    "underscore": "latest",
+    "express.io": "latest",
+    "nodemailer": "latest",
+    "nodemailer-smtp-transport": "latest",
+    "async": "latest",
+    "node-uuid": "latest",
+    "handlebars": "latest",
+    "redis": "latest",
+    "connect-redis": "~1.4.7",
+    "sequelize": "sequelize/sequelize",
+    "commander": "latest",
+    "swag": "latest",
+    "glob": "latest",
+    "moment": "latest",
+    "nconf": "latest",
+    "express-cache-control": "latest",
+    "mariasql": "latest",
+    "bcrypt": "latest",
+    "email-templates": "latest"
+  },
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-contrib-nodeunit": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-cssmin": "latest",
+    "matchdep": "latest",
+    "grunt-contrib-copy": "latest",
+    "grunt-contrib-handlebars": "latest",
+    "grunt-bower-task": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-contrib-watch": "latest",
+    "grunt-express-server": "latest",
+    "grunt-node-inspector": "latest",
+    "grunt-execute": "latest",
+    "grunt-json": "latest"
+  },
+  "scripts": {
+    "start": "grunt server"
+  },
+  "main": "server.js"
+}

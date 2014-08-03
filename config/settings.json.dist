@@ -1,0 +1,19 @@
+{
+  "mysql":{
+    "host"     : "mysql:hostname",
+    "username" : "mysql:username",
+    "password" : "mysql:password",
+    "database" : "mysql:dbname",
+    "multipleStatements": true
+  },
+  "redis": {
+    "host": "redis:hostname",
+    "port": 6379,
+    "db": 0
+  },
+  "mail": {
+    "host": "mail:hostname",
+    "port": 25
+  },
+  "port": 3001
+}

@@ -1,0 +1,7 @@
+node_modules/
+bower_components/
+lib/
+config/settings.json
+access.log
+public/
+tmp/

@@ -1,0 +1,227 @@
+html, body {
+  overflow-y: auto;
+}
+
+body {
+  padding-top: 0px;
+  padding-bottom: 70px;
+}
+.cont {
+  overflow: hidden;
+}
+
+#main {
+  padding-top: 56px;
+}
+.dashboard {
+  margin-right: 0px;
+  margin-left: 0px;
+  padding: 0 0px;
+  width: auto;
+}
+
+.dashboard .row {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+#main #dash-row-1 {
+  margin-right: 0px;
+}
+
+a {
+  cursor: pointer;
+}
+
+.picker__input[readonly],
+.picker__input:hover {
+    background: #fff;
+    cursor: text;
+}
+
+.navbar-brand {
+  padding-top: 14px;
+  padding-bottom: 10px;
+}
+
+.logged-out {
+  display: block;
+}
+
+.logged-in, .hidden {
+  display: none;
+}
+
+.log-out {
+  margin-top: 10px;
+}
+
+.has-feedback .form-control-feedback {
+  top: 2px;
+}
+
+/*
+.loginContainer .row {
+  display:table-cell;
+  vertical-align: middle;
+  width: 60%;
+  height: 60%;
+  min-height: 550px;
+  padding: 40px;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+*/
+
+.loginContainer .nav-tabs > li,
+.loginContainer .nav-pills > li {
+  float:none;
+  display:inline-block;
+}
+
+.loginContainer .nav-tabs {
+    text-align:center;
+}
+.loginContainer .big {
+  font-size:19px;
+}
+
+.loginContainer ul {
+  padding-bottom:20px;
+}
+
+.loginContainer .q,
+.loginContainer p,
+.loginContainer i {
+  color: #b7bbc4;
+}
+
+.loginContainer .left-inner-addon {
+  position: relative;
+}
+.loginContainer .left-inner-addon input {
+  padding-left: 30px;
+}
+.loginContainer .left-inner-addon i {
+  position: absolute;
+  padding: 10px 12px;
+  pointer-events: none;
+}
+
+.loginContainer .right-inner-addon {
+  position: relative;
+}
+.loginContainer .right-inner-addon input {
+  padding-right: 30px;
+}
+.loginContainer .right-inner-addon i {
+  position: absolute;
+  right: 0px;
+  padding: 17px 12px;
+  pointer-events: none;
+}
+.loginContainer .selectize-input {
+  font-size: 18px;
+  color: #555;
+  padding: 15px;
+}
+.loginContainer .selectize-input input {
+  font-size: 18px;
+}
+.loginContainer .usericon input {
+  padding-left:25px;
+}
+.loginContainer .usericon:before {
+  opacity:.8;
+  height:100%;
+  width:25px;
+  display:-webkit-box;
+  -webkit-box-pack:center;
+  -webkit-box-align:center;
+  position: absolute;
+  content:"\e008";
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  pointer-events: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.loginContainer .form-control[type="search"]::-webkit-input-placeholder:first-letter {
+  font-family:"Glyphicons Halflings";
+}
+.loginContainer .form-control[type="search"]:-moz-placeholder:first-letter {
+  font-family:"Glyphicons Halflings";
+}
+.loginContainer .form-control[type="search"]::-moz-placeholder:first-letter {
+  font-family:"Glyphicons Halflings";
+}
+.loginContainer .form-control[type="search"]:-ms-input-placeholder:first-letter {
+  font-family:"Glyphicons Halflings";
+}
+.loginContainer .nav-tabs {
+  border-bottom: 0px;
+}
+.loginContainer .nav-tabs > li.active > a,
+.loginContainer .nav-tabs > li.active > a:hover,
+.loginContainer .nav-tabs > li.active > a:focus {
+  color: rgb(85, 85, 85);
+  cursor: default;
+  background-color: #eee;
+  border-radius:2px;
+  //border-width: 4px;
+  //border-style: solid;
+  border-color: transparent;
+  //border-bottom-color: #eee;
+  //-moz-border-bottom-colors: none;
+}
+.loginContainer .f {
+    padding-right: 0px;
+}
+.loginContainer .panel-body {
+  background-color:#eee;
+}
+.loginContainer .btn {
+  border-radius:2px !important;
+  padding:15px;
+  font-size:16px;
+  font-weight:600;
+  //height:56px;
+}
+
+/* -------------------------------------------------------- */
+/*                                                          */
+/* A media query that captures:                             */
+/*                                                          */
+/* - Retina iOS devices                                     */
+/* - Retina Macs running Safari                             */
+/* - High DPI Windows PCs running IE 8 and above            */
+/* - Low DPI Windows PCs with IE zoomed in                  */
+/* - Android hdpi devices and above                         */
+/* - Android tvdpi devices, including Google Nexus 7        */
+/* - Chrome running on high DPI Macs and PCs                */
+/*                                                          */
+/* Please note that that this code assumes you'll swap a    */
+/* 2× version of your images. If you'd like to supply       */
+/* finer increments, other thresholds might be appropriate. */
+/*                                                          */
+/*
+                   @marcedwards from @bjango */
+/*                                                          */
+/* -------------------------------------------------------- */
+
+@media
+  only screen and (-webkit-min-device-pixel-ratio: 1.3),
+  only screen and (min-device-pixel-ratio: 1.3),
+  only screen and (min-resolution: 120dpi)
+  {
+    /* Your code to swap higher DPI images */
+
+    .loginContainer .row {
+      width: 100%;
+      padding: 5px;
+    }
+
+  }

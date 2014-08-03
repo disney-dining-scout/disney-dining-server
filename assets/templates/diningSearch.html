@@ -1,0 +1,39 @@
+<div class="row">
+  <div class="col-sm-1">
+    {{#if past}}
+      <i class="fa fa-3x pull-left fa-exclamation-circle text-danger"></i>
+    {{else}}
+      {{#if logs.0.foundSeats}}
+      <i class="fa fa-3x pull-left fa-smile-o text-success"></i>
+      {{else}}
+      <i class="fa fa-3x pull-left fa-frown-o text-danger"></i>
+      {{/if}}
+    {{/if}}
+  </div>
+  <div class="col-sm-7">
+    <h4 class="list-group-item-heading">{{restaurant.name}} <i class="fa fa-history" style="text-align: left;"></i></h4>
+    <p class="list-group-item-text"><i class="fa fa-calendar"></i>{{{dateFormat date format="ddd. MMM. DD, YYYY"}}}</p>
+    <p class="list-group-item-text"><i class="fa fa-clock-o"></i>{{{dateFormat date format="h:mm A"}}}</p>
+    <p class="list-group-item-text"><i class="fa fa-users"></i><strong>{{partySize}}</strong> </p>
+  </div>
+  <div class="col-sm-4">
+    <p class="list-group-item-text">
+      {{#any logs}}
+        {{#if logs.0.foundSeats}}
+          Table(s) available <br />
+          {{#any logs}}<span class="text-muted">{{timeago logs.0.dateSearched}}</span>{{/any}}
+        {{else}}
+          No table(s) available <br />
+          {{#any logs}}<span class="text-muted">{{timeago logs.0.dateSearched}}</span>{{/any}}
+        {{/if}}
+      {{else}}
+        No searches available yet
+      {{/any}}
+    </p>
+    <p class="list-group-item-text">
+      {{#if logs.0.times}}
+        {{join logs.0.times ", "}}
+      {{/if}}
+    </p>
+  </div>
+</div>
