@@ -1,6 +1,6 @@
 {
-  "name": "disney-dining-app",
-  "version": "0.1.0",
+  "name": "disney-dining-server",
+  "version": "0.1.1",
   "dependencies": {
     "underscore": "latest",
     "express.io": "latest",
@@ -40,7 +40,7 @@
     "grunt-json": "latest"
   },
   "scripts": {
-    "start": "grunt server"
+    "start": "node server"
   },
   "main": "server.js"
 }

@@ -58,7 +58,8 @@ exports.initialize = function() {
       };
   transport = nodemailer.createTransport(smtpTransport({
     host: opts.configs.get("mail:host"),
-    port: opts.configs.get("mail:port")
+    port: opts.configs.get("mail:port"),
+    ignoreTLS: true
   }));
 
   console.log(opts.configs.get("redis"));
@@ -83,7 +84,7 @@ exports.initialize = function() {
     opts.configs.get("mysql:username"),
     opts.configs.get("mysql:password"),
     {
-        dialect: 'mysql',
+        dialect: 'mariadb',
         omitNull: true,
         host: opts.configs.get("mysql:host") || "localhost",
         port: opts.configs.get("mysql:port") || 3306,
