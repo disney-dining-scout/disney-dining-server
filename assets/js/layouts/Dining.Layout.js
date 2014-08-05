@@ -1,20 +1,11 @@
 Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
 
   Layout.Body = Marionette.LayoutView.extend({
-    className: "cont",
+    tagName: 'body',
+    template: Templates.bodyMain,
     initialize: function(options){
       this.options = _.extend({login: false}, options);
       var view = this;
-      this.addRegions({
-        login: '#loginContainer',
-        header: '#header',
-        main: "#main",
-        modal: {
-          selector:   '#modal',
-          regionType: Backbone.Marionette.Modals
-        }
-      });
-      this.template = Templates.bodyMain;
       App.vent.on('showLogin', function (view) {
         App.layoutView.main.$el.addClass("loginContainer");
       });
@@ -37,6 +28,7 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
     },
 
     onShow: function() {
+
       this.resize();
     }
   });

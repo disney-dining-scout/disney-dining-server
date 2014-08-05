@@ -111,7 +111,9 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       className: "row",
       events: {
         "click .btn-add"    : "showAddSearch",
-        "keyup #search"   : "filterSearches"
+        "keyup #search"     : "filterSearches",
+        "click .clearer"    : "clearerOnClick",
+        "keyup .hasclear"   : "hasClearKeyUp"
       },
       collectionEvents: {
         "add": "modelAdded"
@@ -129,7 +131,18 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       },
 
       onShow: function(e) {
-        //$(".panel-collapse:first", this.$el).addClass("in");
+        $(".clearer").hide();
+      },
+
+      clearerOnClick: function(e) {
+        $(".hasclear", this.$el).val('').focus();
+        $(".clearer", this.$el).hide();
+        this.filterSearches(e);
+      },
+
+      hasClearKeyUp: function(e) {
+        var t = $(".clearer", this.$el);
+        t.toggle(Boolean($(".hasclear", this.$el).val()));
       },
 
       showAddSearch: function(e) {

@@ -1,7 +1,10 @@
 var Dining = new Backbone.Marionette.Application();
 
 Dining.addRegions({
-  body: '#body'
+  body: {
+    selector: '#body',
+    regionClass: ReplaceRegion
+  }
 });
 
 Dining.ioEvent = function(data) {
@@ -53,7 +56,18 @@ Dining.vent.on('initBody', function (action) {
 
   if (Dining.layoutView === null) {
     Dining.layoutView = new Dining.Layout.Body();
+    Dining.layoutView.render();
     Dining.body.show(Dining.layoutView);
+    Dining.layoutView.addRegions({
+      login: '#loginContainer',
+      header: '#header',
+      main: "#main",
+      modal: {
+        selector:   '#modal',
+        regionType: Backbone.Marionette.Modals
+      }
+    });
+
   }
   if ("reset" in action) {
     if (action.reset === "header") {

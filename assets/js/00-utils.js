@@ -1,12 +1,7 @@
-$(window).resize(function () {
-  //Politkz.vent.trigger('layout:resize');
-});
-
-
 ReplaceRegion = Marionette.Region.extend({
-    open: function(view){
-        this.$el.replaceWith(view.$el);
-    }
+  attachHtml: function(view){
+    this.$el.replaceWith(view.$el);
+  }
 });
 
 Swag.registerHelpers(Handlebars);
