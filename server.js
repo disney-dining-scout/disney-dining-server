@@ -7,11 +7,15 @@ var express = require('express.io'),
     nconf = require('nconf'),
     path = require('path'),
     redis = require("redis"),
-    redisClient = redis.createClient(),
-    redisStore = require('connect-redis')(express),
     CacheControl = require("express-cache-control"),
     cache = new CacheControl().middleware,
-    config, configFile, opts, userSockets = [];
+    config, configFile, opts, userSockets = [],
+    redisConfig = {
+        "host": "localhost",
+        "port": "6379",
+        "ttl": 43200,
+        "db": 0
+    };
 
 /*  ==============================================================
     Configuration
@@ -62,15 +66,11 @@ if (config.get("ssl")) {
 
 //Session Conf
 if (config.get("redis")) {
-    var redisConfig = config.get("redis");
-} else {
-    var redisConfig = {
-        "host": "localhost",
-        "port": "6379",
-        "ttl": 43200,
-        "db": 0
-    };
+  redisConfig = config.get("redis");
 }
+
+var redisClient = redis.createClient(redisConfig.port, redisConfig.host),
+    RedisStore = require('connect-redis')(express);
 
 var app = module.exports = express(opts);
 
@@ -97,7 +97,7 @@ app.configure(function(){
     }
     app.use(cookieParser);
     app.use(express.session({
-        store: new redisStore(redisConfig),
+        store: new RedisStore(redisConfig),
         secret: salt
     }));
     app.use(express.json());
