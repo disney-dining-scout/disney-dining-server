@@ -20,7 +20,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       sendEmail: '#sendEmail'
     },
     initialize: function() {
-      if (this.model.get("sms").length > 0) {
+      if ("sms" in this.model.attributes && this.model.get("sms").length > 0) {
         var entities = JSON.stringify({
               "name": this.model.get("sms").get("name"),
               "id": this.model.get("sms").get("id")
