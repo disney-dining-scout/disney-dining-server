@@ -138,7 +138,7 @@ exports.initialize = function() {
     lastName :            { type: Sequelize.STRING(255) },
     zipCode:              { type: Sequelize.STRING(15) },
     phone :               { type: Sequelize.STRING(25) },
-    carrier:              { type: Sequelize.STRING(255) },
+    carrier:              { type: Sequelize.STRING(100) },
     sendTxt :             { type: Sequelize.BOOLEAN, defaultValue: 0 },
     sendEmail :           { type: Sequelize.BOOLEAN, defaultValue: 1 }
   });
