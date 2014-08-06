@@ -53,7 +53,7 @@ exports.initialize = function() {
           console.log("channel ", channel, ": ", message);
           message = JSON.parse(message);
           message.objectType = "search-update";
-          opts.io.broadcast('talk', message);
+          opts.io.room(message.uid).broadcast('talk', message);
         });
       };
   transport = nodemailer.createTransport(smtpTransport({
@@ -138,13 +138,13 @@ exports.initialize = function() {
     lastName :            { type: Sequelize.STRING(255) },
     zipCode:              { type: Sequelize.STRING(15) },
     phone :               { type: Sequelize.STRING(25) },
-    carrier:              { type: Sequelize.INTEGER },
+    carrier:              { type: Sequelize.STRING(255) },
     sendTxt :             { type: Sequelize.BOOLEAN, defaultValue: 0 },
     sendEmail :           { type: Sequelize.BOOLEAN, defaultValue: 1 }
   });
 
   models.SmsGateways = db.dining.define('smsGateways', {
-    id:                   { type: Sequelize.INTEGER(11), primaryKey: true },
+    id:                   { type: Sequelize.STRING(100), primaryKey: true },
     country :             { type: Sequelize.STRING(255) },
     name :                { type: Sequelize.STRING(255) },
     gateway :             { type: Sequelize.STRING(255) }
@@ -158,6 +158,12 @@ exports.initialize = function() {
     used :                { type: Sequelize.BOOLEAN, defaultValue: 0 }
   });
 
+  models.ActivationCodes = db.dining.define('activationCodes', {
+    id:                   { type: Sequelize.INTEGER(11), primaryKey: true },
+    token :               { type: Sequelize.STRING(255) },
+    used :                { type: Sequelize.BOOLEAN, defaultValue: 0 }
+  });
+
 };
 
 /************
@@ -165,21 +171,32 @@ exports.initialize = function() {
 *************/
 
 exports.index = function(req, res){
-    var init = "$(document).ready(function() { Dining.start(); });";
-    if (typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') {
-      console.log(req.session.user);
-      init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
-    }
-    fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
-      if (error) { console.log(error); }
-      var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
-      var pageBuilder = handlebars.compile(content),
-          html = pageBuilder({'init':init, 'prefix':prefix});
+  var init = "$(document).ready(function() { Dining.start(); });",
+      send = function() {
+        fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
+          if (error) { console.log(error); }
+          var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
+          var pageBuilder = handlebars.compile(content),
+              html = pageBuilder({'init':init, 'prefix':prefix});
 
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.write(html, 'utf-8');
-      res.end('\n');
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.write(html, 'utf-8');
+          res.end('\n');
+        });
+      };
+  if (typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') {
+    console.log(req.session.user);
+    getUser(req.session.user, true, function(user) {
+      createUserModel(user, function(user) {
+        req.session.user = user;
+        init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+        send();
+      });
     });
+  } else {
+    send();
+  }
+
 };
 
 //Log in an existing user, starting a session
@@ -188,38 +205,74 @@ exports.index = function(req, res){
 //Add a user
 exports.addUser = function(req, res) {
   console.log("adding user");
-    var request = req,
-        user = {
-          created: moment().format("YYYY-MM-DD HH:m:ss"),
-          email: req.body.email,
-          password: null,
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          zipCode: req.body.zipCode,
-          phone: req.body.phone,
-          carrier: req.body.carrier,
-          sendTxt: req.body.sendTxt,
-          sendEmail: req.body.sendEmail
-        };
-    bcrypt.hash(req.body.password, 8, function(err, hash) {
-      user.password = hash;
-      models.Users.create(user).success(function(userRec) {
-        //console.log(userRec);
-        userRec = userRec.toJSON();
-        createUserModel(userRec, function(user) {
-          console.log("Sending back new user");
-          request.session.user = user;
-          delete user.password;
-          sendBack(user, 200, res);
-        });
-      }).error(function(error) {
-        var errorMsg = {
-              status: "error",
-              messsage: error
+  var code = req.body.activationCode;
+  if ("activationCode" in req.body) {
+    models.ActivationCodes.find({
+      where: {
+        token: code,
+        used: 0
+      }
+    }).success(function(token) {
+      if (token) {
+        var request = req,
+            user = {
+              created: moment().format("YYYY-MM-DD HH:m:ss"),
+              email: req.body.email,
+              password: null,
+              firstName: req.body.firstName,
+              lastName: req.body.lastName,
+              zipCode: req.body.zipCode,
+              phone: req.body.phone,
+              carrier: req.body.carrier,
+              sendTxt: req.body.sendTxt,
+              sendEmail: req.body.sendEmail
             };
-        sendBack(errorMsg, 500, res);
-      });
+        bcrypt.hash(req.body.password, 8, function(err, hash) {
+          user.password = hash;
+          models.Users.create(user).success(function(userRec) {
+            //console.log(userRec);
+            userRec = userRec.toJSON();
+            createUserModel(userRec, function(user) {
+              expireActivationCode(code, function(code) {
+                console.log("Sending back new user");
+                request.session.user = user;
+                delete user.password;
+                sendBack(user, 200, res);
+              });
+            });
+          }).error(function(error) {
+            var errorMsg = {
+                  success: false,
+                  data: {
+                    message: "This email is already in use. Please use another. Do you already have an account?",
+                    code: error.code,
+                    error: "email"
+                  }
+                };
+            sendBack(errorMsg, 500, res);
+          });
+        });
+      } else {
+        var errorMsg = {
+            success: false,
+            data: {
+              message: "Invalid invitation code",
+              code: "ERR_INVALID_INVITE_CODE"
+            }
+          };
+        sendBack(errorMsg, 401, res);
+      }
     });
+  } else {
+    var errorMsg = {
+          success: false,
+          data: {
+            message: "Invalid invitation code",
+            code: "ERR_INVALID_INVITE_CODE"
+          }
+        };
+    sendBack(errorMsg, 401, res);
+  }
 };
 
 //Update User
@@ -237,9 +290,11 @@ exports.updateUser = function(req, res) {
   models.Users.find(req.params.userId).success(function(user) {
     user.updateAttributes(userAttributes).success(function(user) {
       user = user.toJSON();
-      createUserModel(user, function(user) {
-        req.session.user = user;
-        sendBack(user, 200, res);
+      getUser(user.id, true, function(user) {
+        createUserModel(user, function(user) {
+          req.session.user = user;
+          sendBack(user, 200, res);
+        });
       });
     });
   });
@@ -359,9 +414,8 @@ exports.checkResetToken = function(req, res) {
     }
   }).success(function(token) {
     if (token) {
-      getUser(token.user, function(user) {
+      getUser(token.user, true, function(user) {
         token = token.toJSON();
-        user = user.toJSON();
         token = underscore.extend(token, user);
         console.log(token);
         sendBack(token, 200, res);
@@ -388,7 +442,7 @@ exports.updatePassword = function(req, res) {
       }
     }).success(function(token) {
       if (token) {
-        getUser(token.user, function(user) {
+        getUser(token.user, true, function(user) {
           updateUserPassword(user, req.body.password, function(user) {
             var tokenAttributes = {
                   used: true
@@ -401,9 +455,9 @@ exports.updatePassword = function(req, res) {
         });
       } else {
         var errorMsg = {
-              "success": false,
+              success: false,
               data: {
-                "message": "No valid reset token found.",
+                "message": "No valid reset token found",
                 "code": "ERR_NO_VALID_RESET_TOKEN"
               }
             };
@@ -411,9 +465,16 @@ exports.updatePassword = function(req, res) {
       }
     });
   } else {
-    getUser(token.user, function(user) {
-      updatePassword(user, req.body.password, function(user) {
-        sendBack(user, 200, res);
+    getUser(req.session.user.id, function(user) {
+      updateUserPassword(user, true, req.body.password, function(user) {
+        delete user.password;
+         var successMsg = {
+              success: true,
+              data: {
+                "message": "Password updated",
+              }
+            };
+        sendBack(successMsg, 200, res);
       });
     });
   }
@@ -574,10 +635,32 @@ var sendBack = function(data, status, res) {
   res.end('\n');
 };
 
-var getUser = function(userId, cb) {
-  models.Users.find(userId).success(function(user) {
-    cb(user);
+var getUser = function(userId, toJson, callback) {
+  toJson = toJson || true;
+  async.waterfall([
+    function(cb){
+      models.Users.find(userId).success(function(user) {
+        if (toJson) {
+          user = user.toJSON();
+        }
+        cb(null, user);
+      });
+    },
+    function(user, cb){
+      if (user.carrier !== "") {
+        models.SmsGateways.find(user.carrier).success(function(carrier) {
+          user.sms = carrier.toJSON();
+          cb(null, search);
+        });
+      } else {
+        user.sms = {};
+      }
+      cb(null, user);
+    }
+  ], function (err, user) {
+   callback(user);
   });
+
 };
 
 var updateUserPassword = function(user, password, cb) {
@@ -790,6 +873,17 @@ var getUserSearch = function(id, callback) {
     }
   ], function (err, search) {
    callback(search);
+  });
+};
+
+var expireActivationCode = function(code, callback) {
+  var tokenAttributes = {
+        "used": 1
+      };
+  models.ActivationCodes.find({where:{token:code}}).success(function(token) {
+    token.updateAttributes(tokenAttributes).success(function(token) {
+      callback(token);
+    });
   });
 };
 

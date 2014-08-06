@@ -24,7 +24,12 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     },
     validate: function(attrs, options) {
       if (attrs.checkAttrs) {
-        if (attrs.password !== attrs.passwordConfirm) {
+        if (attrs.password.length === 0) {
+          return {
+            "error": "passwordNew",
+            "message": "A password must be entered"
+          };
+        } else if (attrs.password !== attrs.passwordConfirm) {
           return {
             "error": "passwordNew",
             "message": "Passwords do not match"
@@ -115,9 +120,11 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       firstName: '',
       lastName: '',
       carrier: 0,
+      activationCode: '',
       sendEmail: true,
       sendTxt: false,
-      checkAttrs: false
+      checkAttrs: false,
+      existing: false
     },
     relations: {
       'searches': Models.Searches
@@ -153,6 +160,13 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
           return {
             "error": "zipCode",
             "message": "Zip code must be entered"
+          };
+        }
+
+        if (this.isNew() && attrs.activationCode.length === 0) {
+          return {
+            "error": "activationCode",
+            "message": "Your invitation code must be entered"
           };
         }
       } else {

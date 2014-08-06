@@ -39,7 +39,11 @@
         </div>
         <div>
           <label for="carrier">Mobile Phone Carrier</label>
-          <select id="carrier" placeholder="Select a carrier..." ></select>
+          <select id="carrier" placeholder="Select a carrier..." >
+            {{#if sms.name}}
+            <option value="{{sms.id}}" data-data='{{{entities}}}'>{{sms.name}}</option>
+            {{/if}}
+          </select>
           <span class="help-block">Start typing your mobile phone carrier's name and a list will automagically appear that you can select from.</span>
         </div>
         <div class="checkbox">

@@ -157,7 +157,8 @@ app.put('/api/user/:userId', routes.updateUser);
 app.get('/api/user/authenticate/logout', routes.logoutUser);
 app.del('/api/user/:userId', routes.logoutUser);
 app.post('/api/user/password/reset', routes.resetPassword);
-app.put('/api/user/password/reset/:userId', routes.updatePassword);
+app.put('/api/user/password/update/:userId', routes.updatePassword);
+app.post('/api/user/password/update', routes.updatePassword);
 app.get('/api/restaurants', routes.getRestaurants);
 app.get('/api/search/restaurants/:name', routes.searchRestaurants);
 app.get('/api/search/carriers/:name', routes.searchCarriers);
@@ -177,6 +178,8 @@ app.get('*', cache("hours", 1), routes.index);
 
 routes.setKey("io", app.io);
 app.io.route('ready', ioEvents.connection);
+app.io.route('room:join', ioEvents.onJoinRoom);
+app.io.route('room:leave', ioEvents.onLeaveRoom);
 
 /*  ==============================================================
     Launch the server

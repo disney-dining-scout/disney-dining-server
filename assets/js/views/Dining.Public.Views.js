@@ -38,11 +38,14 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         $("#"+model.get("error"), this.$el).addClass(model.get("class"));
       }
       $(alert.$el).prependTo("#resetFields", this.$el);
+      $('html, body').animate({
+        scrollTop: $(".alert").offset().top-70
+      }, 2000);
     },
 
     update: function(e) {
       var view = this;
-      this.model.urlRoot = '/api/user/password/reset';
+      this.model.urlRoot = '/api/user/password/update';
       this.model.set({
         checkAttrs: true,
         password: this.ui.passwordNew.val().trim(),
@@ -62,7 +65,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
               App.vent.trigger("resetPasswordInfo", alertModel);
             },
             error: function(model, xhr, options) {
-              var err = xhr.responseJSON();
+              var err = xhr.responseJSON;
               alertModel = new App.Models.AlertModel({
                 'error': 'email',
                 'message': 'There has been an error updating your password.('+err.data.code+')'
@@ -82,10 +85,10 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
     template: Templates.public,
     className: "row",
     events: {
-      'keypress #username'  :   'onInputKeypress',
-      'click .sign-in'      :   'logIn',
-      'click .create'       :   'createAccount',
-      'click .forgotPassword' : 'forgotPassword'
+      'keypress #password'    :   'onInputKeypress',
+      'click .sign-in'        :   'logIn',
+      'click .create'         :   'createAccount',
+      'click .forgotPassword' :   'forgotPassword'
     },
 
     ui: {
@@ -100,7 +103,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       lastName: '#lastName',
       zipCode: '#zipCode',
       sendEmail: '#sendEmail',
-      sendTxt: '#sendTxt'
+      sendTxt: '#sendTxt',
+      activationCode: '#activationCode'
     },
 
     initialize: function() {
@@ -169,7 +173,10 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         $("#"+model.get("error"), this.$el).addClass(model.get("class"));
       }
       $(alert.$el).prependTo(".tab-content", this.$el);
-    },
+      $('html, body').animate({
+        scrollTop: $(".alert").offset().top-70
+      }, 2000);
+},
 
     logIn: function(e) {
       var view = this;
@@ -220,7 +227,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         zipCode: this.ui.zipCode.val().trim(),
         carrier: this.ui.carrier.val().trim(),
         sendTxt: this.ui.sendTxt[0].checked,
-        sendEmail: this.ui.Email[0].checked
+        sendEmail: this.ui.sendEmail[0].checked,
+        activationCode: this.ui.activationCode.val().trim()
       });
       if (user.isValid()) {
 
@@ -236,9 +244,11 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
             error: function(model, xhr, options) {
               var err = xhr.responseJSON,
                   alertModel = new App.Models.AlertModel({
-                    'error': 'email',
-                    'message': 'This email already exists. Please use another or check your password.('+err.messsage.code+')'
+                    'message': err.data.message + ' ('+err.data.code+')'
                   });
+              if ("error" in err.data) {
+                alertModel.set({"error": err.data.error});
+              }
               view.showAlert(alertModel);
             }
           }
@@ -294,7 +304,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
               return true;
             },
             error: function(model, response, options) {
-              var err = options.xhr.responseJSON();
+              var err = options.xhr.responseJSON;
               alertModel.set({
                 'message': 'The email and/or zip code is not recognized.('+err.messsage.code+')',
                 'class': 'alert-danger'
@@ -316,7 +326,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       $("input", this.$el).removeClass("alert-danger");
       $(".alert", this.$el).remove();
       alert.render();
-      $("#"+model.get("error"), this.$el).addClass("alert-danger");
+      $("#"+model.get("error"), this.$el).addClass(alert.get("class"));
       $(alert.$el).prependTo(".modal-body", this.$el);
 
     }

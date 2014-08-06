@@ -98,6 +98,12 @@ Dining.on('before:start', function() {
 Dining.on('start', function() {
   if (typeof this.user !== 'undefined' && "id" in this.user) {
     this.Io.emit('ready', {'user': this.user.get("id")});
+    var searches = Dining.user.get("searches");
+    searches.each(function(search) {
+      Dining.updateRoom(search);
+    });
+    searches.on('add', this.updateRooms, this);
+    searches.on('change:uid', this.updateRooms, this);
     if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
     } else if (Backbone.history.fragment !== "searches") {
@@ -137,6 +143,12 @@ Dining.fixTime = function(model, attr) {
       var date = moment(model.get("date"));
       model.set("past", date.isBefore(moment()));
     }
+  }
+};
+
+Dining.updateRoom = function(model) {
+  if (model.get("uid") !== "") {
+    Dining.Io.emit('room:join', model.get("uid"));
   }
 };
 

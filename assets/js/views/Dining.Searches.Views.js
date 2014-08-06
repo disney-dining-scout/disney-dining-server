@@ -4,175 +4,189 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
   // --------------
 
   Views.SearchView = Marionette.ItemView.extend({
-      template: Templates.diningSearch,
-      tagName: "a",
-      className: "list-group-item",
-      events: {
-        "click .fa-history"   : "showHistory",
-        "click"               : "editSearch"
-      },
+    template: Templates.diningSearch,
+    tagName: "a",
+    className: "list-group-item",
+    events: {
+      "click .fa-history"   : "showHistory",
+      "click"               : "editSearch"
+    },
 
-      modelEvents: {
-        'change': 'fieldsChanged'
-      },
+    modelEvents: {
+      'change': 'fieldsChanged'
+    },
 
-      initialize: function() {
-        //if (this.model.get("id")) this.model.set({uuid: this.model.get("id")});
-        this.justUpdated = false;
-      },
+    initialize: function() {
+      //if (this.model.get("id")) this.model.set({uuid: this.model.get("id")});
+      this.justUpdated = false;
+    },
 
-      fieldsChanged: function() {
-        console.log("clearing timeout");
-        clearTimeout(this.timeout);
-        this.justUpdated = true;
-        this.render();
-      },
+    fieldsChanged: function() {
+      console.log("clearing timeout");
+      clearTimeout(this.timeout);
+      this.justUpdated = true;
+      this.render();
+    },
 
-      onRender: function(e) {
-        var view = this,
-            millis = (!this.model.get("past")) ? 30000 : 3600000;
-        this.timeout = setTimeout(
-          function() {
-            view.render();
-            console.log("Rendering:", view.model.get("restaurant").get("name"));
-          },
-          millis
-        );
-      },
+    onRender: function(e) {
+      var view = this,
+          millis = (!this.model.get("past")) ? 30000 : 3600000;
+      this.timeout = setTimeout(
+        function() {
+          view.render();
+          console.log("Rendering:", view.model.get("restaurant").get("name"));
+        },
+        millis
+      );
+    },
 
-      editSearch: function(e) {
-        var entities = JSON.stringify({
-              "name": this.model.get("restaurant").get("name"),
-              "id": this.model.get("restaurant").get("id")
-            });
-        this.model.set({"entities": he.encode(entities)});
-        var searchModal = new Views.SearchModal({model: this.model});
-        App.layoutView.modal.show(searchModal);
-      },
+    editSearch: function(e) {
+      var entities = JSON.stringify({
+            "name": this.model.get("restaurant").get("name"),
+            "id": this.model.get("restaurant").get("id")
+          });
+      this.model.set({"entities": he.encode(entities)});
+      var searchModal = new Views.SearchModal({model: this.model});
+      App.layoutView.modal.show(searchModal);
+    },
 
-      updateSearch: function(e) {
-        var view = this,
-            errors = this.form.commit();
-        if (typeof errors === 'undefined') {
-          $(".update", this.$el).attr("disabled", "disabled");
-          this.model.save(
-            {},
-            {
-              success: function(model, response, options) {
-                var restaurant = model.get("restaurant");
+    updateSearch: function(e) {
+      var view = this,
+          errors = this.form.commit();
+      if (typeof errors === 'undefined') {
+        $(".update", this.$el).attr("disabled", "disabled");
+        this.model.save(
+          {},
+          {
+            success: function(model, response, options) {
+              var restaurant = model.get("restaurant");
 
-                Messenger().post("Dining Search for "+restaurant+" has been updated.");
-                $(".update", view.$el).removeAttr("disabled");
-              },
-              error: function(model, xhr, options) {
-                if (view.$el.find('.alert').length > 0) view.$el.find('.alert').remove();
-                view.$el.find('.page-header').before('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>There has been a error trying to create this search. This is what the server told me: <strong>'+xhr.responseJSON.messsage.detail+'</strong></div>');
-                $(".update", view.$el).removeAttr("disabled");
-                $('html, body').animate({
-                  scrollTop: $(".alert-dismissable").offset().top-70
-                }, 2000);
+              Messenger().post("Dining Search for "+restaurant+" has been updated.");
+              $(".update", view.$el).removeAttr("disabled");
+            },
+            error: function(model, xhr, options) {
+              if (view.$el.find('.alert').length > 0) view.$el.find('.alert').remove();
+              view.$el.find('.page-header').before('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>There has been a error trying to create this search. This is what the server told me: <strong>'+xhr.responseJSON.messsage.detail+'</strong></div>');
+              $(".update", view.$el).removeAttr("disabled");
+              $('html, body').animate({
+                scrollTop: $(".alert-dismissable").offset().top-70
+              }, 2000);
 
-              }
             }
-          );
-        } else {
-          var errorList = "",
-              i = 0;
-          _.each(errors, function(value, key, list) {
-            errorList += (i > 0) ? ", " : "";
-            errorList += key.capitalize();
-            i++;
-          });
-          $('html, body').animate({
-              scrollTop: $(".control-group.error").first().offset().top - 100
-          }, 2000);
-          Messenger().post({
-            message: "You have errors that you must correct. You have issues with the following: "+errorList+".",
-            type: "error"
-          });
-        }
-      },
-
-      showHistory: function(e) {
-        e.stopImmediatePropagation();
-        var test = this;
-      },
-
-      onBeforeDestroy: function(){
-        console.log("clearing timeout");
-        clearTimeout(this.timeout);
+          }
+        );
+      } else {
+        var errorList = "",
+            i = 0;
+        _.each(errors, function(value, key, list) {
+          errorList += (i > 0) ? ", " : "";
+          errorList += key.capitalize();
+          i++;
+        });
+        $('html, body').animate({
+            scrollTop: $(".control-group.error").first().offset().top - 100
+        }, 2000);
+        Messenger().post({
+          message: "You have errors that you must correct. You have issues with the following: "+errorList+".",
+          type: "error"
+        });
       }
+    },
+
+    showHistory: function(e) {
+      e.stopImmediatePropagation();
+      var test = this;
+    },
+
+    onBeforeDestroy: function(){
+      console.log("clearing timeout");
+      clearTimeout(this.timeout);
+    }
   });
 
   Views.SearchesView = Marionette.CompositeView.extend({
-      template: Templates.searchesView,
-      childView : Views.SearchView,
-      childViewContainer: "#searches",
-      className: "row",
-      events: {
-        "click .btn-add"    : "showAddSearch",
-        "keyup #search"     : "filterSearches",
-        "click .clearer"    : "clearerOnClick",
-        "keyup .hasclear"   : "hasClearKeyUp"
-      },
-      collectionEvents: {
-        "add": "modelAdded"
-      },
-      initialize: function() {
-        var test = $(this.el),
-            view = this;
-        Dining.vent.on('refreshModel', function (data) {
-          //view.refreshModel(data);
-        });
-      },
+    template: Templates.searchesView,
+    childView : Views.SearchView,
+    childViewContainer: "#searches",
+    className: "row",
+    events: {
+      "click .btn-add"    : "showAddSearch",
+      "keyup #search"     : "filterSearches",
+      "click .clearer"    : "clearerOnClick",
+      "keyup .hasclear"   : "hasClearKeyUp"
+    },
+    collectionEvents: {
+      "add": "modelAdded"
+    },
+    initialize: function() {
+      var test = $(this.el),
+          view = this;
+      App.vent.on('searches:showAlert', function (model) {
+        view.showAlert(model);
+      });
+    },
 
-      onRender: function() {
+    onRender: function() {
 
-      },
+    },
 
-      onShow: function(e) {
-        $(".clearer").hide();
-      },
+    onShow: function(e) {
+      $(".clearer").hide();
+    },
 
-      clearerOnClick: function(e) {
-        $(".hasclear", this.$el).val('').focus();
-        $(".clearer", this.$el).hide();
-        this.filterSearches(e);
-      },
+    clearerOnClick: function(e) {
+      $(".hasclear", this.$el).val('').focus();
+      $(".clearer", this.$el).hide();
+      this.filterSearches(e);
+    },
 
-      hasClearKeyUp: function(e) {
-        var t = $(".clearer", this.$el);
-        t.toggle(Boolean($(".hasclear", this.$el).val()));
-      },
+    hasClearKeyUp: function(e) {
+      var t = $(".clearer", this.$el);
+      t.toggle(Boolean($(".hasclear", this.$el).val()));
+    },
 
-      showAddSearch: function(e) {
-        this.newSearch = new App.Models.Search();
-        var searchModal = new Views.SearchModal({model: this.newSearch, collection: this.collection});
-        App.layoutView.modal.show(searchModal);
-        //searches.add(search);
-      },
+    showAddSearch: function(e) {
+      this.newSearch = new App.Models.Search();
+      var searchModal = new Views.SearchModal({model: this.newSearch, collection: this.collection});
+      App.layoutView.modal.show(searchModal);
+      //searches.add(search);
+    },
 
-      filterSearches: function(e) {
-        var qry = $("#search", this.$el).val().toLowerCase(),
-            filterSearchFn = function(search) {
-              return search.get('restaurant').get('name').toLowerCase().indexOf(qry) > -1;
-            },
-            filtered = (qry === "") ? App.user.get('searches').models : filteredCollection(App.user.get('searches'), filterSearchFn);
-        this.collection.reset(filtered);
-      },
+    filterSearches: function(e) {
+      var qry = $("#search", this.$el).val().toLowerCase(),
+          filterSearchFn = function(search) {
+            return search.get('restaurant').get('name').toLowerCase().indexOf(qry) > -1;
+          },
+          filtered = (qry === "") ? App.user.get('searches').models : filteredCollection(App.user.get('searches'), filterSearchFn);
+      this.collection.reset(filtered);
+    },
 
-      modelAdded: function(e) {
-        var test = e;
-      },
+    modelAdded: function(e) {
+      var test = e;
+    },
 
-      refreshModel: function(data) {
-        var results = this.collection.findWhere({uid: data.uid});
-        results.fetch({
-          success: function(model, response, options)  {
-            Dining.fixTime(model);
-          }
-        });
+    refreshModel: function(data) {
+      var results = this.collection.findWhere({uid: data.uid});
+      results.fetch({
+        success: function(model, response, options)  {
+          Dining.fixTime(model);
+        }
+      });
+    },
+
+    showAlert: function(model) {
+      var alert = new App.Public.Views.AlertView({model: model});
+      $(".alert", this.$el).remove();
+      alert.render();
+      if ("error" in model) {
+        $("input", this.$el).removeClass(model.get("class"));
+        $("#"+model.get("error"), this.$el).addClass(model.get("class"));
       }
+      $(alert.$el).prependTo(".bootcards-list", this.$el);
+      $('html, body').animate({
+        scrollTop: $(".alert").offset().top-70
+      }, 2000);
+    }
 
   });
 
