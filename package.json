@@ -1,6 +1,6 @@
 {
   "name": "disney-dining-server",
-  "version": "0.1.9",
+  "version": "0.1.9.1",
   "dependencies": {
     "underscore": "latest",
     "express.io": "latest",
