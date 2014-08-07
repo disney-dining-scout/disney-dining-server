@@ -12,8 +12,8 @@
   </div>
   <div class="col-sm-7">
     <h4 class="list-group-item-heading">{{restaurant.name}} <i class="fa fa-history" style="text-align: left;"></i></h4>
-    <p class="list-group-item-text"><i class="fa fa-calendar"></i>{{{dateFormat date format="ddd. MMM. DD, YYYY"}}}</p>
-    <p class="list-group-item-text"><i class="fa fa-clock-o"></i>{{{dateFormat date format="h:mm A"}}}</p>
+    <p class="list-group-item-text"><i class="fa fa-calendar"></i>{{{momentFormat date format="ddd. MMM. DD, YYYY"}}}</p>
+    <p class="list-group-item-text"><i class="fa fa-clock-o"></i>{{{momentFormat date format="h:mm A"}}}</p>
     <p class="list-group-item-text"><i class="fa fa-users"></i><strong>{{partySize}}</strong> </p>
   </div>
   <div class="col-sm-4">

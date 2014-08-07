@@ -271,13 +271,12 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           success: function(model, response, options) {
             if (isThisNew) {
               var searches = App.user.get('searches');
+              Dining.fixTime(model);
               searches.add(model);
               if (modal.collection) {
                 modal.collection.add(model);
               }
             }
-            Dining.fixTime(model);
-
           },
           error: function(error) {
             var test = error;
