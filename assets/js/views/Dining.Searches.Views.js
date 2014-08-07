@@ -258,12 +258,15 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       var dateTime = $("#date", this.$el).val() + " " + $("#time", this.$el).val(),
           isThisNew = (this.model.get("uid") === "") ? true : false,
           modal = this,
-          offset = 240 - moment().zone();
+          changedAttributes = this.model.changedAttributes(),
+          offset = (moment().isDST()) ? 240 - moment().zone() : 180 - moment().zone();
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
-        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
         "partySize": $("#partySize", this.$el).val(),
         "user": App.user.get("id")
+      });
+      this.model.set({
+        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DDTHH:mm:ss.SSSZZ")
       });
       this.model.save(
         {},

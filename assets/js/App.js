@@ -138,7 +138,7 @@ Dining.fixTime = function(model, attr) {
   } else {
     var offset = moment().zone() - 240;
     newDate = moment(model.get(attr)).utc().add("minutes", offset);
-    model.set(attr, newDate);
+    //model.set(attr, newDate);
     if (attr === "date") {
       var date = moment(model.get("date"));
       model.set("past", date.isBefore(moment()));
