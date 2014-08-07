@@ -8,25 +8,18 @@ module.exports = function(grunt) {
         'lib/underscore/underscore.js',
         'lib/bootstrap/bootstrap.js',
         'lib/he/he.js',
-        'bower_components/bootstrap-jasny/dist/extend/js/jasny-bootstrap.js',
         'lib/backbone/backbone.js',
         'lib/backbone.wreqr/backbone.wreqr.js',
         'lib/backbone.babysitter/backbone.babysitter.js',
         'lib/backbone.supermodel/backbone.supermodel.js',
         'bower_components/marionette/lib/core/backbone.marionette.js',
         'lib/backbone.marionette.handlebars/backbone.marionette.handlebars.js',
-        'lib/backbone-forms/distribution/backbone-forms.js',
-        'lib/backbone-forms/distribution/editors/list.js',
-        'lib/backbone-forms/distribution/templates/bootstrap.js',
         'lib/microplugin/microplugin.js',
         'lib/sifter/sifter.js',
         'lib/selectize/selectize.js',
-        'lib/spin.js/spin.js',
-        'lib/ladda-bootstrap/ladda.js',
         'lib/moment/moment.js',
         'lib/jQuery-Mask-Plugin/jquery.mask.min.js',
         'lib/placeholders/build/placeholders.js',
-        'bower_components/ie-alert/theplugin/iealert.js',
         'lib/messenger/messenger.js',
         'lib/messenger/messenger-theme-future.js',
         'lib/pickadate/picker.js',
@@ -39,10 +32,8 @@ module.exports = function(grunt) {
       ],
       cssSrc = [
         'lib/bootstrap/bootstrap.css',
-        'bower_components/bootstrap-jasny/dist/extend/css/jasny-bootstrap.css',
         'lib/font-awesome/font-awesome.css',
         'lib/selectize/selectize.css',
-        'lib/ladda-bootstrap/ladda-themeless.css',
         'lib/messenger/messenger.css',
         'lib/messenger/messenger-theme-future.css',
         'lib/messenger/messenger-theme-air.css',
@@ -77,21 +68,15 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
-        beautify: true,
-        mangle: false
+        beautify: false,
+        mangle: true
       },
       vendors: {
-        options: {
-          sourceMap: 'public/js/vendors.min.map'
-        },
         files: {
           'public/js/vendors.min.js': jsSrc
         }
       },
       app: {
-        options: {
-          sourceMap: 'public/js/app.min.map'
-        },
         files: {
           'public/js/app.min.js': [
             'assets/js/**/*.js'
