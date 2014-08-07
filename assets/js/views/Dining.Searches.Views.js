@@ -263,23 +263,27 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
         "partySize": $("#partySize", this.$el).val(),
+        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
         "user": App.user.get("id")
-      });
-      this.model.set({
-        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DDTHH:mm:ss.SSSZZ")
       });
       this.model.save(
         {},
         {
           success: function(model, response, options) {
+            var restaurant = model.get("restaurant"),
+                message = "Dining Search for " + restaurant + " has been";
             Dining.fixTime(model);
             if (isThisNew) {
               var searches = App.user.get('searches');
+              message += " created.";
               searches.add(model);
               if (modal.collection) {
                 modal.collection.add(model);
               }
+            } else {
+              message += " updated.";
             }
+            Messenger().post(message);
           },
           error: function(error) {
             var test = error;

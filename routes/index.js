@@ -177,7 +177,11 @@ exports.index = function(req, res){
           if (error) { console.log(error); }
           var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
           var pageBuilder = handlebars.compile(content),
-              html = pageBuilder({'init':init, 'prefix':prefix});
+              html = pageBuilder({
+                'init': init,
+                'prefix':prefix,
+                'cacheBuster': cacheBuster
+              });
 
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.write(html, 'utf-8');

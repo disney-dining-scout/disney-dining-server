@@ -82,6 +82,7 @@ Dining.addInitializer(function(options){
 });
 
 Dining.on('before:start', function() {
+  this.ioId = "";
   Dining.layoutView = null;
   this.collections = {};
   Messenger.options = {
@@ -93,6 +94,18 @@ Dining.on('before:start', function() {
   this.Io = io.connect();
   // Listen for the talk event.
   this.Io.on('talk', this.ioEvent);
+  this.Io.on('connect', function() {
+    Dining.ioId = this.socket.sessionid;
+  });
+  this.Io.on('reconnect', function() {
+    if (Dining.ioId !== this.socket.sessionid) {
+      Dining.ioId = this.socket.sessionid;
+      var searches = Dining.user.get("searches");
+      searches.each(function(search) {
+        Dining.updateRoom(search);
+      });
+    }
+  });
 });
 
 Dining.on('start', function() {
