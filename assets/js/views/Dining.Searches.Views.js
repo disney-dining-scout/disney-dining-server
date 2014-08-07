@@ -60,7 +60,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           {
             success: function(model, response, options) {
               var restaurant = model.get("restaurant");
-
+              Dining.fixTime(model);
               Messenger().post("Dining Search for "+restaurant+" has been updated.");
               $(".update", view.$el).removeAttr("disabled");
             },
@@ -261,7 +261,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           offset = 240 - moment().zone();
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
-        "date": moment(dateTime, "dddd, MMMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DD HH:mm:ss +0000"),
+        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
         "partySize": $("#partySize", this.$el).val(),
         "user": App.user.get("id")
       });
@@ -269,9 +269,9 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         {},
         {
           success: function(model, response, options) {
+            Dining.fixTime(model);
             if (isThisNew) {
               var searches = App.user.get('searches');
-              Dining.fixTime(model);
               searches.add(model);
               if (modal.collection) {
                 modal.collection.add(model);

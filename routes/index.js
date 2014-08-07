@@ -562,7 +562,7 @@ exports.updateSearch = function(req, res) {
               });
             });
           } else {
-            sendBack({}, 200, res);
+            sendBack(search, 200, res);
           }
         });
       });
