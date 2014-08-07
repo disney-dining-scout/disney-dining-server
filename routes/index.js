@@ -171,21 +171,31 @@ exports.initialize = function() {
 *************/
 
 exports.index = function(req, res){
-  var init = "$(document).ready(function() { Dining.start(); });";
+  var init = "$(document).ready(function() { Dining.start(); });",
+      send = function() {
+        fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
+          if (error) { console.log(error); }
+          var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
+          var pageBuilder = handlebars.compile(content),
+              html = pageBuilder({'init':init, 'prefix':prefix});
+
+          res.writeHead(200, { 'Content-Type': 'text/html' });
+          res.write(html, 'utf-8');
+          res.end('\n');
+        });
+      };
   if (typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') {
-    init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+    console.log(req.session.user);
+    getUser(req.session.user.id, true, function(user) {
+      createUserModel(user, function(user) {
+        req.session.user = user;
+        init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+        send();
+      });
+    });
+  } else {
+    send();
   }
-  fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
-    if (error) { console.log(error); }
-    var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
-    var pageBuilder = handlebars.compile(content),
-        html = pageBuilder({'init':init, 'prefix':prefix, 'cacheBuster': cacheBuster});
-
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write(html, 'utf-8');
-    res.end('\n');
-  });
-
 };
 
 //Log in an existing user, starting a session
