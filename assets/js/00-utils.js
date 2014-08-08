@@ -87,7 +87,7 @@ Handlebars.registerHelper('momentFormat', function(context, block) {
 Handlebars.registerHelper('momentTZFormat', function(context, block) {
   if (window.moment) {
     var f = block.hash.format || "MMM DD, YYYY hh:mm:ss A",
-        offset = (moment().isDST()) ? 240 : 180;
+        offset = (moment(context).isDST()) ? 240 : 300;
     return moment(context).zone(offset).format(f); //had to remove Date(context)
   }else{
     return context;   //  moment plugin not available. return data as is.

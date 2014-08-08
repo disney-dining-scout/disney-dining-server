@@ -183,9 +183,12 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         $("#"+model.get("error"), this.$el).addClass(model.get("class"));
       }
       $(alert.$el).prependTo(".bootcards-list", this.$el);
-      $('html, body').animate({
-        scrollTop: $(".alert").offset().top-70
-      }, 2000);
+      if ($(window).scrollTop() > 0) {
+        var offset = ($(".alert").offset().top-70 < 0) ? 0 : $(".alert").offset().top-70;
+        $('html, body').animate({
+          scrollTop: offset
+        }, 2000);
+      }
     }
 
   });
@@ -259,7 +262,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           isThisNew = (this.model.get("uid") === "") ? true : false,
           modal = this,
           changedAttributes = this.model.changedAttributes(),
-          offset = (moment().isDST()) ? 240 - moment().zone() : 180 - moment().zone();
+          offset = (moment(dateTime).isDST()) ? 240 - moment(dateTime).zone() : 300 - moment(dateTime).zone();
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
         "partySize": $("#partySize", this.$el).val(),

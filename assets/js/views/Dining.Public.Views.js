@@ -38,9 +38,12 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         $("#"+model.get("error"), this.$el).addClass(model.get("class"));
       }
       $(alert.$el).prependTo("#resetFields", this.$el);
-      $('html, body').animate({
-        scrollTop: $(".alert").offset().top-70
-      }, 2000);
+      if ($(window).scrollTop() > 0) {
+        var offset = ($(".alert").offset().top-70 < 0) ? 0 : $(".alert").offset().top-70;
+        $('html, body').animate({
+          scrollTop: offset
+        }, 2000);
+      };
     },
 
     update: function(e) {
@@ -173,9 +176,12 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         $("#"+model.get("error"), this.$el).addClass(model.get("class"));
       }
       $(alert.$el).prependTo(".tab-content", this.$el);
-      $('html, body').animate({
-        scrollTop: $(".alert").offset().top-70
-      }, 2000);
+      if ($(window).scrollTop() > 0) {
+        var offset = ($(".alert").offset().top-70 < 0) ? 0 : $(".alert").offset().top-70;
+        $('html, body').animate({
+          scrollTop: offset
+        }, 2000);
+      }
 },
 
     logIn: function(e) {

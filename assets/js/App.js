@@ -135,6 +135,15 @@ Dining.on('start', function() {
   }
 });
 
+Dining.vent.on('loggedin', function() {
+  if (typeof Dining.user !== 'undefined' && "id" in Dining.user) {
+    var searches = Dining.user.get("searches");
+    searches.each(function(search) {
+      Dining.updateRoom(search);
+    });
+  }
+});
+
 Dining.fixTime = function(model, attr) {
   attr = attr || "date";
   var newDate = null;
@@ -149,7 +158,7 @@ Dining.fixTime = function(model, attr) {
     newDate = day.toString() + h.toString() + ":" + m.toString() + ":00";
     model.set(attr, newDate);
   } else {
-    var offset = moment().zone() - 240;
+    var offset = (moment(model.get(attr)).isDST()) ? 240 - moment(model.get(attr)).zone() : 300 - moment(model.get(attr)).zone();
     newDate = moment(model.get(attr)).utc().add("minutes", offset);
     //model.set(attr, newDate);
     if (attr === "date") {
