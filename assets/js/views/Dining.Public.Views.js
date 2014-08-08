@@ -43,7 +43,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         $('html, body').animate({
           scrollTop: offset
         }, 2000);
-      };
+      }
     },
 
     update: function(e) {
