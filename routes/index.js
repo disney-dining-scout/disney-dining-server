@@ -27,7 +27,7 @@ var fs = require('fs'),
     opts = {},
     config = {},
     reconnectTries = 0, cacheBuster = moment().format("X"),
-    hmac, signature, connection, client,
+    hmac, signature, connection, client, key,
     transport, acl, subClient,
     CheckinMemberFieldValues, RegMemberFieldValues, CheckinGroupMembers,
     RegGroupMembers, CheckinEventFields, CheckinBiller, RegBiller,
@@ -61,6 +61,8 @@ exports.initialize = function() {
     port: opts.configs.get("mail:port"),
     ignoreTLS: true
   }));
+
+  key = opts.configs.get("key");
 
   console.log(opts.configs.get("redis"));
   subClient = redis.createClient(
@@ -172,6 +174,7 @@ exports.initialize = function() {
 
 exports.index = function(req, res){
   var init = "$(document).ready(function() { Dining.start(); });",
+
       send = function() {
         fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
           if (error) { console.log(error); }
@@ -188,9 +191,17 @@ exports.index = function(req, res){
           res.end('\n');
         });
       };
-  if (typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') {
-    console.log(req.session.user);
-    getUser(req.session.user.id, true, function(user) {
+  if ((typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') || "remember" in req.cookies) {
+    var userId;
+    if ("remember" in req.cookies) {
+      var decipher = crypto.createDecipher('aes-256-cbc', key);
+      decipher.update(req.cookies.remember, 'base64', 'utf8');
+      userId = decipher.final('utf8');
+    } else {
+      userId = req.session.user.id;
+    }
+
+    getUser(userId, true, function(user) {
       createUserModel(user, function(user) {
         req.session.user = user;
         init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
@@ -309,6 +320,16 @@ exports.authUser = function(req, res) {
       processUser = function(user) {
         user = user.toJSON();
         createUserModel(user, function(user) {
+          if (req.body.remember) {
+            var day = 60 * 24 * 1000,
+                cipher = crypto.createCipher('aes-256-cbc', key);
+            cipher.update(user.id.toString(), 'utf8', 'base64');
+            var token = cipher.final('base64');
+            res.cookie('remember', token, { maxAge: day });
+          } else {
+            console.log("Delete cookie");
+            res.clearCookie('remember');
+          }
           request.session.user = user;
           sendBack(user, 200, res);
         });

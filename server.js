@@ -3,6 +3,7 @@
 =============================================================== */
 
 var express = require('express.io'),
+    session = require('express-session'),
     fs = require('fs'),
     nconf = require('nconf'),
     path = require('path'),
@@ -96,10 +97,13 @@ app.configure(function(){
         app.use(express.logger({stream: access_logfile }));
     }
     app.use(cookieParser);
-    app.use(express.session({
+    app.use(express.session(
+      {
         store: new RedisStore(redisConfig),
         secret: salt
-    }));
+      }
+    ));
+    app.use(express.favicon(path.join(__dirname, 'assets','images','favicon.ico')));
     app.use(express.json());
     app.use(express.urlencoded());
     app.use(express.methodOverride());

@@ -107,7 +107,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       zipCode: '#zipCode',
       sendEmail: '#sendEmail',
       sendTxt: '#sendTxt',
-      activationCode: '#activationCode'
+      activationCode: '#activationCode',
+      remember: '#remember'
     },
 
     initialize: function() {
@@ -188,7 +189,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       var view = this;
       App.user.set({
         password: this.ui.password.val().trim(),
-        email: this.ui.username.val().trim()
+        email: this.ui.username.val().trim(),
+        remember: this.ui.remember.prop("checked")
       });
       if (App.user.isValid()) {
         App.user.urlRoot = "/api/user/authenticate";

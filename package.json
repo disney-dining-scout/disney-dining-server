@@ -4,6 +4,7 @@
   "dependencies": {
     "underscore": "latest",
     "express.io": "latest",
+    "express-session": "latest",
     "nodemailer": "latest",
     "nodemailer-smtp-transport": "latest",
     "async": "latest",

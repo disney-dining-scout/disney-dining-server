@@ -15,5 +15,6 @@
     "host": "mail:hostname",
     "port": 25
   },
-  "port": 3001
+  "port": 3001,
+  "key": "key goes here"
 }
