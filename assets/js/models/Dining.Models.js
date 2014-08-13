@@ -86,7 +86,7 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       user: '',
       enabled: true,
       deleted: false,
-      created: moment().format("YYYY-MM-DD HH:m:ss")
+      created: moment.utc().format("YYYY-MM-DD HH:m:ssZ")
     },
     relations: {
       'restaurant': Models.Restaurant,

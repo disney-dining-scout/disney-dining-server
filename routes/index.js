@@ -105,18 +105,50 @@ exports.initialize = function() {
   models.UserSearches = db.dining.define('userSearches', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     restaurant:           { type: Sequelize.STRING(255) },
-    created:              { type: Sequelize.DATE },
-    date:                 { type: Sequelize.DATE },
+    created:              {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
+    date:                 {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
     partySize:            { type: Sequelize.INTEGER },
     uid:                  { type: Sequelize.STRING(255) },
     user:                 { type: Sequelize.STRING(255) },
     enabled:              { type: Sequelize.BOOLEAN, defaultValue: 1 },
-    deleted:              { type: Sequelize.BOOLEAN, defaultValue: 0 }
+    deleted:              { type: Sequelize.BOOLEAN, defaultValue: 0 },
+    lastEmailNotification:{
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
+    lastSMSNotification:  {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    }
   });
 
   models.GlobalSearches = db.dining.define('globalSearches', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-    lastChecked:          { type: Sequelize.DATE },
+    lastChecked:          {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
     uid:                  { type: Sequelize.STRING(255) }
   });
 
@@ -124,7 +156,13 @@ exports.initialize = function() {
     {
       id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       uid:                  { type: Sequelize.STRING(255) },
-      dateSearched:         { type: Sequelize.DATE },
+      dateSearched:         {
+        type: Sequelize.DATE,
+        defaultValue: '1969-01-01 00:00:00',
+        get: function(name) {
+          return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+        }
+      },
       message:              { type: Sequelize.STRING(255) },
       foundSeats:           { type: Sequelize.BOOLEAN, defaultValue: 0 },
       times:                { type: Sequelize.STRING }
@@ -133,7 +171,13 @@ exports.initialize = function() {
 
   models.Users = db.dining.define('users', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-    created:              { type: Sequelize.DATE },
+    created:              {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
     email :               { type: Sequelize.STRING(255) },
     password :            { type: Sequelize.STRING(255) },
     firstName :           { type: Sequelize.STRING(255) },
@@ -142,7 +186,9 @@ exports.initialize = function() {
     phone :               { type: Sequelize.STRING(25) },
     carrier:              { type: Sequelize.STRING(100) },
     sendTxt :             { type: Sequelize.BOOLEAN, defaultValue: 0 },
-    sendEmail :           { type: Sequelize.BOOLEAN, defaultValue: 1 }
+    sendEmail :           { type: Sequelize.BOOLEAN, defaultValue: 1 },
+    emailTimeout:         { type: Sequelize.INTEGER, defaultValue: 14400 },
+    smsTimeout:           { type: Sequelize.INTEGER, defaultValue: 14400 }
   });
 
   models.SmsGateways = db.dining.define('smsGateways', {
@@ -156,7 +202,13 @@ exports.initialize = function() {
     id:                   { type: Sequelize.INTEGER(11), primaryKey: true },
     user :                { type: Sequelize.INTEGER(11) },
     token :               { type: Sequelize.STRING(255) },
-    expire :              { type: Sequelize.DATE },
+    expire :              {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
     used :                { type: Sequelize.BOOLEAN, defaultValue: 0 }
   });
 
@@ -321,7 +373,7 @@ exports.authUser = function(req, res) {
         user = user.toJSON();
         createUserModel(user, function(user) {
           if (req.body.remember) {
-            var day = 60 * 24 * 1000,
+            var day = 3600000 * 24,
                 cipher = crypto.createCipher('aes-256-cbc', key);
             cipher.update(user.id.toString(), 'utf8', 'base64');
             var token = cipher.final('base64');
@@ -372,7 +424,7 @@ exports.resetPassword = function(req, res) {
       var passToken = {
             user: user.id,
             token: uuid.v4(),
-            expire: moment().utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
+            expire: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
           };
       user = user.toJSON();
       models.PasswordReset.create(passToken).success(function(result) {
@@ -433,7 +485,7 @@ exports.checkResetToken = function(req, res) {
       token: req.body.token,
       used: 0,
       expire: {
-        gt: moment().utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
+        gt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
       }
     }
   }).success(function(token) {
@@ -461,7 +513,7 @@ exports.updatePassword = function(req, res) {
         token: req.body.token,
         used: 0,
         expire: {
-          gt: moment().utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
+          gt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
         }
       }
     }).success(function(token) {
@@ -627,7 +679,11 @@ exports.deleteUserSearch = function(req, res) {
   )
   .success(function(search) {
     if (search) {
-      search.destroy().success(function() {
+      var attributes = {
+            "deleted": 1,
+            "enabled": 0
+          };
+      search.updateAttributes(attributes).success(function() {
         checkUids(search.uid, null, function() {
           createUserModel(req.session.user, function(user) {
             req.session.user = user;
@@ -778,7 +834,9 @@ var checkUids = function(oldUid, newUid, callback) {
       if (oldUid !== null) {
         models.UserSearches.findAndCountAll({
           where: {
-            uid: oldUid
+            uid: oldUid,
+            deleted: 0,
+            enabled: 1
           }
         })
         .success(function(result) {
@@ -849,8 +907,11 @@ var createUserModel = function(user, cb) {
 var getUserSearches = function(user, callback) {
   models.UserSearches.findAll({
     where: {
-      user: user.id
-    }
+      user: user.id,
+      deleted: 0,
+      enabled: 1
+    },
+    order: [Sequelize.literal('(CASE WHEN date < UTC_TIMESTAMP() THEN 0 ELSE 1 END) DESC'), Sequelize.literal('date ASC')]
   }).success(function(searches) {
     var convertToJson = function(item, cback) {
           getUserSearch(item.id, function(search) {
@@ -866,7 +927,12 @@ var getUserSearches = function(user, callback) {
 var getUserSearch = function(id, callback) {
   async.waterfall([
     function(cb){
-      models.UserSearches.find(id).success(function(search) {
+      models.UserSearches.find({
+        where: {
+          id: id,
+          deleted: 0,
+          enabled: 1
+      }}).success(function(search) {
         search = search.toJSON();
         cb(null, search);
       });

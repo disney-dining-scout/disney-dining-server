@@ -266,14 +266,14 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
         "partySize": $("#partySize", this.$el).val(),
-        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DD HH:mm:ssZ"),
         "user": App.user.get("id")
       });
       this.model.save(
         {},
         {
           success: function(model, response, options) {
-            var restaurant = model.get("restaurant"),
+            var restaurant = model.get("restaurant").name,
                 message = "Dining Search for " + restaurant + " has been";
             Dining.fixTime(model);
             if (isThisNew) {
