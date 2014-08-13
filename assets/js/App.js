@@ -25,7 +25,7 @@ Dining.ioEvent = function(data) {
         }
         //Dining.vent.trigger("refreshModel", data);
         if ($(".last-update")) {
-          var lastUpdate = moment(data.time).format("dddd MMMM Do, YYYY h:mm:ss A");
+          var lastUpdate = moment(data.time, "YYYY-MM-DDTHH:mm:ss.SSSZZ").format("dddd MMMM Do, YYYY h:mm:ss A");
           $(".last-update").text(lastUpdate);
         }
         results.fetch({
