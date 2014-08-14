@@ -21,10 +21,10 @@
       {{#any logs}}
         {{#if logs.0.foundSeats}}
           Table(s) available <br />
-          {{#any logs}}<span class="text-muted">{{timeago logs.0.dateSearched}}</span>{{/any}}
+          {{#any logs}}<span class="text-muted">{{fromNow logs.0.dateSearched}}</span>{{/any}}
         {{else}}
           No table(s) available <br />
-          {{#any logs}}<span class="text-muted">{{timeago logs.0.dateSearched}}</span>{{/any}}
+          {{#any logs}}<span class="text-muted">{{fromNow logs.0.dateSearched}}</span>{{/any}}
         {{/if}}
       {{else}}
         No searches available yet
