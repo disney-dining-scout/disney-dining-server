@@ -2,193 +2,348 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Responsive Email Template</title>
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;">
+  <title>Password Reset Notification</title>
+
   <style type="text/css">
-    .ReadMsgBody {width: 100%; background-color: #ffffff;}
-    .ExternalClass {width: 100%; background-color: #ffffff;}
-    body     {width: 100%; background-color: #ffffff; margin:0; padding:0; -webkit-font-smoothing: antialiased;font-family: Georgia, Times, serif}
-    table {border-collapse: collapse;}
-    p {
-      color: #777;
-      font-size: 1.25em;
-    }
 
-    .pure-button {
-        /* Structure */
-        display: inline-block;
-        *display: inline; /*IE 6/7*/
-        zoom: 1;
-        line-height: normal;
-        white-space: nowrap;
-        vertical-align: baseline;
-        text-align: center;
-        cursor: pointer;
-        -webkit-user-drag: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
+  div, p, a, li, td { -webkit-text-size-adjust:none; }
 
-    /* Firefox: Get rid of the inner focus border */
-    .pure-button::-moz-focus-inner {
-        padding: 0;
-        border: 0;
-    }
+  .ReadMsgBody
+  {width: 100%; background-color: #ffffff;}
+  .ExternalClass
+  {width: 100%; background-color: #ffffff;}
+  body{width: 100%; height: 100%; background-color: #ffffff; margin:0; padding:0; -webkit-font-smoothing: antialiased;}
+  html{width: 100%;}
 
-    .pure-button {
-        font-family: inherit;
-        font-size: 100%;
-        *font-size: 90%; /*IE 6/7 - To reduce IE's oversized button text*/
-        *overflow: visible; /*IE 6/7 - Because of IE's overly large left/right padding on buttons */
-        padding: 0.5em 1em;
-        color: #444; /* rgba not supported (IE 8) */
-        color: rgba(0, 0, 0, 0.80); /* rgba supported */
-        *color: #444; /* IE 6 & 7 */
-        border: 1px solid #999;  /*IE 6/7/8*/
-        border: none rgba(0, 0, 0, 0);  /*IE9 + everything else*/
-        background-color: #E6E6E6;
-        text-decoration: none;
-        border-radius: 2px;
-    }
+  @font-face {
+      font-family: 'proxima_novalight';src: url('http://assets1.disneydining.io/fonts/proximanova-light-webfont.eot');src: url('http://assets1.disneydining.io/fonts/proximanova-light-webfont.eot?#iefix') format('embedded-opentype'),url('http://assets1.disneydining.io/fonts/proximanova-light-webfont.woff') format('woff'),url('http://assets1.disneydining.io/fonts/proximanova-light-webfont.ttf') format('truetype');font-weight: normal;font-style: normal;}
 
-    .pure-button-hover,
-    .pure-button:hover,
-    .pure-button:focus {
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#1a000000',GradientType=0);
-        background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), color-stop(40%, rgba(0,0,0, 0.05)), to(rgba(0,0,0, 0.10)));
-        background-image: -webkit-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
-        background-image: -moz-linear-gradient(top, rgba(0,0,0, 0.05) 0%, rgba(0,0,0, 0.10));
-        background-image: -o-linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
-        background-image: linear-gradient(transparent, rgba(0,0,0, 0.05) 40%, rgba(0,0,0, 0.10));
-    }
-    .pure-button:focus {
-        outline: 0;
-    }
-    .pure-button-active,
-    .pure-button:active {
-        box-shadow: 0 0 0 1px rgba(0,0,0, 0.15) inset, 0 0 6px rgba(0,0,0, 0.20) inset;
-    }
+  @font-face {
+      font-family: 'proxima_nova_rgregular'; src: url('http://assets1.disneydining.io/fonts/proximanova-regular-webfont.eot');src: url('http://assets1.disneydining.io/fonts/proximanova-regular-webfont.eot?#iefix') format('embedded-opentype'),url('http://assets1.disneydining.io/fonts/proximanova-regular-webfont.woff') format('woff'),url('http://assets1.disneydining.io/fonts/proximanova-regular-webfont.ttf') format('truetype');font-weight: normal;font-style: normal;}
 
-    .pure-button[disabled],
-    .pure-button-disabled,
-    .pure-button-disabled:hover,
-    .pure-button-disabled:focus,
-    .pure-button-disabled:active {
-        border: none;
-        background-image: none;
-        filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
-        filter: alpha(opacity=40);
-        -khtml-opacity: 0.40;
-        -moz-opacity: 0.40;
-        opacity: 0.40;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
+  @font-face {
+      font-family: 'proxima_novasemibold';src: url('http://assets1.disneydining.io/fonts/proximanova-semibold-webfont.eot');src: url('http://assets1.disneydining.io/fonts/proximanova-semibold-webfont.eot?#iefix') format('embedded-opentype'),url('http://assets1.disneydining.io/fonts/proximanova-semibold-webfont.woff') format('woff'),url('http://assets1.disneydining.io/fonts/proximanova-semibold-webfont.ttf') format('truetype');font-weight: normal;font-style: normal;}
 
-    .pure-button-hidden {
-        display: none;
-    }
+  @font-face {
+    font-family: 'proxima_nova_rgbold';src: url('http://assets1.disneydining.io/fonts/proximanova-bold-webfont.eot');src: url('http://assets1.disneydining.io/fonts/proximanova-bold-webfont.eot?#iefix') format('embedded-opentype'),url('http://assets1.disneydining.io/fonts/proximanova-bold-webfont.woff') format('woff'),url('http://assets1.disneydining.io/fonts/proximanova-bold-webfont.ttf') format('truetype');font-weight: normal;font-style: normal;}
 
-    /* Firefox: Get rid of the inner focus border */
-    .pure-button::-moz-focus-inner{
-        padding: 0;
-        border: 0;
-    }
+  @font-face {
+      font-family: 'proxima_novablack';src: url('http://assets1.disneydining.io/fonts/proximanova-black-webfont.eot');src: url('http://assets1.disneydining.io/fonts/proximanova-black-webfont.eot?#iefix') format('embedded-opentype'),url('http://assets1.disneydining.io/fonts/proximanova-black-webfont.woff') format('woff'),url('http://assets1.disneydining.io/fonts/proximanova-black-webfont.ttf') format('truetype');font-weight: normal;font-style: normal;}
 
-    .pure-button-primary,
-    .pure-button-selected,
-    a.pure-button-primary,
-    a.pure-button-selected {
-        background-color: rgb(0, 120, 231);
-        color: #fff;
-    }
+  @font-face {font-family: 'proxima_novathin';src: url('http://assets1.disneydining.io/fonts/proximanova-thin-webfont.eot');src: url('http://assets1.disneydining.io/fonts/proximanova-thin-webfont.eot?#iefix') format('embedded-opentype'),url('http://assets1.disneydining.io/fonts/proximanova-thin-webfont.woff') format('woff'),url('http://assets1.disneydining.io/fonts/proximanova-thin-webfont.ttf') format('truetype');font-weight: normal;font-style: normal;}
 
-    .button-success,
-    .button-error,
-    .button-warning,
-    .button-secondary {
-        color: white;
-        border-radius: 4px;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    }
+  p {padding: 0!important; margin-top: 0!important; margin-right: 0!important; margin-bottom: 0!important; margin-left: 0!important; }
 
-    .button-success {
-        background: rgb(28, 184, 65); /* this is a green */
-    }
+  .hover:hover {opacity:0.85;filter:alpha(opacity=85);}
 
-    .button-error {
-        background: rgb(202, 60, 60); /* this is a maroon */
-    }
-
-    .button-warning {
-        background: rgb(223, 117, 20); /* this is an orange */
-    }
-
-    .button-secondary {
-        background: rgb(66, 184, 221); /* this is a light blue */
-    }
-
-    @media only screen and (max-width: 640px)  {
-      body[yahoo] .deviceWidth {width:440px!important; padding:0;}
-      body[yahoo] .center {text-align: center!important;}
-    }
-
-    @media only screen and (max-width: 479px) {
-      body[yahoo] .deviceWidth {width:280px!important; padding:0;}
-      body[yahoo] .center {text-align: center!important;}
-    }
+  .image77 img {width: 77px; height: auto;}
+  .avatar125 img {width: 125px; height: auto;}
+  .icon61 img {width: 61px; height: auto;}
+  .image75 img {width: 75px; height: auto;}
+  .icon18 img {width: 18px; height: auto;}
 
   </style>
+
+  <!-- @media only screen and (max-width: 640px)
+         {*/
+         -->
+  <style type="text/css"> @media only screen and (max-width: 640px){
+      body{width:auto!important;}
+      table[class=full2] {width: 100%!important; clear: both; }
+      table[class=mobile2] {width: 100%!important; padding-left: 20px; padding-right: 20px; clear: both; }
+      table[class=fullCenter2] {width: 100%!important; text-align: center!important; clear: both; }
+      td[class=fullCenter2] {width: 100%!important; text-align: center!important; clear: both; }
+      td[class=pad15] {width: 100%!important; padding-left: 15px; padding-right: 15px; clear: both;}
+
+  } </style>
+  <!--
+
+  @media only screen and (max-width: 479px)
+         {
+         -->
+  <style type="text/css"> @media only screen and (max-width: 479px){
+      body{width:auto!important;}
+      table[class=full2] {width: 100%!important; clear: both; }
+      table[class=mobile2] {width: 100%!important; padding-left: 20px; padding-right: 20px; clear: both; }
+      table[class=fullCenter2] {width: 100%!important; text-align: center!important; clear: both; }
+      td[class=fullCenter2] {width: 100%!important; text-align: center!important; clear: both; }
+      table[class=full] {width: 100%!important; clear: both; }
+      table[class=mobile] {width: 100%!important; padding-left: 20px; padding-right: 20px; clear: both; }
+      table[class=fullCenter] {width: 100%!important; text-align: center!important; clear: both; }
+      td[class=fullCenter] {width: 100%!important; text-align: center!important; clear: both; }
+      td[class=pad15] {width: 100%!important; padding-left: 15px; padding-right: 15px; clear: both;}
+      .erase {display: none;}
+
+      }
+  } </style>
+
 </head>
-<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" yahoo="fix" style="font-family: Georgia, Times, serif">
-  <!-- Wrapper -->
-  <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
-    <tr>
-      <td width="100%" valign="top" bgcolor="#ffffff" style="padding-top:20px">
-        <!-- Start Header-->
-        <table width="580" border="0" cellpadding="0" cellspacing="0" align="center" class="deviceWidth">
-          <tr>
-            <td valign="top" style="padding:0" bgcolor="#ffffff">
-                <a href="#"><img  class="deviceWidth" src="http://ny.politkz.io/appimages/disney-dining-email-logo.png" alt="" border="0" style="display: block; border-radius: 4px;" /></a>
-            </td>
-          </tr>
-        </table><!-- End Nav -->
-      </td>
-    </tr>
-  </table><!-- End Header -->
-
-  <!-- One Column -->
-  <table width="580"  class="deviceWidth" border="0" cellpadding="0" cellspacing="0" align="center" bgcolor="#fafafa">
-
-    <tr>
-      <td style="font-size: 13px; color: #959595; font-weight: normal; text-align: left; font-family: Georgia, Times, serif; line-height: 24px; vertical-align: top; padding:10px 8px 10px 8px" bgcolor="#eeeeed">
-
-        <p>Hi {{firstName}},</p>
-        <p>We got a request to reset your Disney Dining Scout password.</p>
-        <p style="text-align: center;">
-          <div><!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://" style="height:53px;v-text-anchor:middle;width:200px;" arcsize="8%" stroke="f" fillcolor="#49a9ce">
-              <w:anchorlock/>
-              <center>
-            <![endif]-->
-                <a href="https://disneydining.io/reset/password/{{token}}"
-          style="background-color:#49a9ce;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:13px;font-weight:bold;line-height:53px;text-align:center;text-decoration:none;width:200px;-webkit-text-size-adjust:none;">Reset Password</a>
-            <!--[if mso]>
-              </center>
-            </v:roundrect>
-          <![endif]--></div>
-        </p>
-        <p>If you ignore this message, your password will not be changed.</p>
-        <p>If you did not request your password be reset please <a href="http://app.disneydining.io/support">let us know</a>.</p>
-      </td>
-    </tr>
-  </table><!-- End One Column -->
+<body>
+<!-- Notification 2  -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" class="full" >
+  <tr>
+    <td bgcolor="#2a2a2a"style="background-color: rgb(42, 42, 42);">
 
 
-  <!-- Begin Footer -->
-  <div style="height:35px">&nbsp;</div><!-- spacer -->
+      <!-- Mobile Wrapper -->
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile">
+        <tr>
+          <td width="100%" height="100">
+
+            <div class="sortable_inner ui-sortable">
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="30"></td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="50"></td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <!-- Header Text -->
+                  <table width="300" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:300px;" class="fullCenter">
+                    <tr>
+                      <td valign="middle" width="100%" style="text-align: center; font-family: Helvetica, Arial, sans-serif; font-size: 22px; color: rgb(255, 255, 255); line-height: 32px; font-weight: 100;"class="fullCenter" >
+                        <!--[if !mso]><!--><span style="font-family: 'proxima_nova_rgregular', Helvetica; font-weight: normal;"><!--<![endif]-->Hi {{firstName}}, here’s your<!--[if !mso]><!--></span><!--<![endif]-->
 
 
+      <!--[if !mso]><!--><span style="font-family: 'proxima_nova_rgbold', Helvetica; font-weight: normal;"><!--<![endif]-->PASSWORD CHANGE REQUEST<!--[if !mso]><!--></span><!--<![endif]-->
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="50"></td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140" style="border-top-right-radius: 5px; border-top-left-radius: 5px; background-color: rgb(232, 81, 64); min-width:352px;"object="drag-module-small">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="300" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:300px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="50"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle" class="image77">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%"><span ><img src="http://assets1.disneydining.io/images/image_77px_not2.png" width="77" alt="" border="0" ></span></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+
+                    <tr>
+                      <td width="100%" height="30"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td valign="middle" width="100%" style="text-align: center; font-family: Helvetica, Arial, sans-serif; font-size: 15px; color: rgb(255, 255, 255); line-height: 24px;"class="fullCenter" >
+                        <!--[if !mso]><!--><span style="font-family: 'proxima_nova_rgregular', Helvetica; font-weight: normal;"><!--<![endif]-->We got a request to reset your Disney Dining Scout password. If you ignore this message, your password will not be changed. <!--[if !mso]><!--></span><!--<![endif]-->
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="40"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <!----------------- Button Center ----------------->
+                    <tr>
+                      <td>
+                        <table border="0" cellpadding="0" cellspacing="0" align="center">
+                          <tr>
+                            <td align="center" height="45"bgcolor="#ffffff" style="border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; padding-left: 30px; padding-right: 30px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; color: rgb(42, 42, 42); text-transform: uppercase; background-color: rgb(255, 255, 255);">
+                              <!--[if !mso]><!--><span style="font-family: 'proxima_nova_rgbold', Helvetica; font-weight: normal;"><!--<![endif]-->
+                                <a href="https://disneydining.io/reset/password/{{token}}" style="color: rgb(42, 42, 42); font-size: 15px; text-decoration: none; line-height: 34px; width: 100%;">Change password</a>
+                              <!--[if !mso]><!--></span><!--<![endif]-->
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <!----------------- End Button Center ----------------->
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="35"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"object="drag-module-small" style="background-color: rgb(232, 81, 64); min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td valign="middle" width="100%" style="text-align: center; font-family: Helvetica, Arial, sans-serif; font-size: 14px; color: rgb(255, 255, 255); line-height: 24px;"class="fullCenter" >
+                        <span ><!--[if !mso]><!--><span style="font-family: 'proxima_nova_rgregular', Helvetica; font-weight: normal;"><!--<![endif]-->If you did not request your password be reset please <!--[if !mso]><!--></span><!--<![endif]--></span>
+                        <!--[if !mso]><!--><span style="font-family: 'proxima_novasemibold', Helvetica; font-weight: normal;"><!--<![endif]--><a href="http://www.disneydining.io/support" style="color: rgb(255, 255, 255);">let us know</a>.<!--[if !mso]><!--></span><!--<![endif]-->
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" bgcolor="#e85140"style="border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; background-color: rgb(232, 81, 64); min-width:352px;" object="drag-module-small">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="50"></td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="30"></td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:352px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" style="text-align: center; font-family: Helvetica, Arial, sans-serif; font-size: 14px; color: rgb(232, 81, 64); line-height: 24px;"class="fullCenter" ><!--[if !mso]><!--><span style="font-family: 'proxima_nova_rgregular', Helvetica;"><!--<![endif]--><!--subscribe-->You are receiving this message because <br />you are user @ <a href="https://app.disneydining.io" style="text-decoration: none; color: rgb(232, 81, 64);">DisneyDiningScount</a><!--unsub--><!--[if !mso]><!--></span><!--<![endif]-->
+
+                      </td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+            <table width="352" border="0" cellpadding="0" cellspacing="0" align="center" class="mobile" object="drag-module-small" style="min-width:352px;">
+              <tr>
+                <td width="100%" valign="middle">
+
+                  <table width="265" border="0" cellpadding="0" cellspacing="0" align="center" style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; min-width:265px;" class="fullCenter">
+                    <tr>
+                      <td width="100%" height="50"></td>
+                    </tr>
+                    <tr>
+                      <td width="100%" height="1"></td>
+                    </tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+            </div>
+
+          </td>
+        </tr>
+      </table>
+
+    </div>
+    </td>
+  </tr>
+</table><!-- End Notification 2 -->
+
+
+</div>  <style>body{ background: none !important; } </style>
 </body>
 </html>

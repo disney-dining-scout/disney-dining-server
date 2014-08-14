@@ -191,6 +191,12 @@ a {
   //height:56px;
 }
 
+.form-group .slider {
+  display: block;
+  margin-top: 25px;
+}
+
+
 /* -------------------------------------------------------- */
 /*                                                          */
 /* A media query that captures:                             */

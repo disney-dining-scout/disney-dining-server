@@ -3,6 +3,7 @@ module.exports = function(grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
   var jsSrc = [
         'lib/jquery/jquery.js',
+        'lib/modernizr/modernizr.js',
         'lib/handlebars/handlebars.js',
         'lib/swag/swag.js',
         'lib/underscore/underscore.js',
@@ -14,6 +15,7 @@ module.exports = function(grunt) {
         'lib/backbone.supermodel/backbone.supermodel.js',
         'bower_components/marionette/lib/core/backbone.marionette.js',
         'lib/backbone.marionette.handlebars/backbone.marionette.handlebars.js',
+        'lib/backbone.analytics/backbone.analytics.js',
         'lib/microplugin/microplugin.js',
         'lib/sifter/sifter.js',
         'lib/selectize/selectize.js',
@@ -28,6 +30,7 @@ module.exports = function(grunt) {
         'lib/backbone.modal/backbone.modal-bundled.js',
         'lib/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.js',
         'bower_components/switchery/dist/switchery.js',
+        'lib/seiyria-bootstrap-slider/bootstrap-slider.js',
         'lib/bootcards/bootcards.js'
       ],
       cssSrc = [
@@ -45,6 +48,7 @@ module.exports = function(grunt) {
         'bower_components/pickadate/lib/themes/default.time.css',
         'lib/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.css',
         'bower_components/switchery/dist/switchery.css',
+        'lib/seiyria-bootstrap-slider/bootstrap-slider.css',
         'assets/css/custom.css'
       ];
   // Project configuration.

@@ -116,7 +116,9 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       App.vent.on('resetPasswordInfo', function (model) {
         view.showAlert(model);
       });
-
+      App.vent.on('showNewUser', function (e) {
+        $('.nav-tabs a[href="#new"]').tab('show');
+      });
     },
 
     onRender: function() {

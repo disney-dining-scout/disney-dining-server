@@ -7,9 +7,10 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
 
   Public.Router = Marionette.AppRouter.extend({
     appRoutes: {
-      'start':    'start',
-      'reset/password/:token': 'resetPassword',
-      'logout':   'logout'
+      'start'                 : 'start',
+      'new'                   : 'newUser',
+      'reset/password/:token' : 'resetPassword',
+      'logout'                : 'logout'
     }
   });
 
@@ -32,6 +33,13 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
       this.showPublic();
     },
 
+    newUser: function() {
+      App.user = new App.Models.User();
+      App.vent.trigger("initBody", {reset: "header"});
+      //this.showHeader();
+      this.showPublic('new');
+    },
+
     showHeader: function(options) {
       options = options || {};
       var header = new App.Layout.Header(options);
@@ -43,10 +51,14 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
       App.layout.footer.show(footer);
     },
 
-    showPublic: function() {
+    showPublic: function(display) {
+      display = display || null;
       var view = new Public.Views.PublicView();
       App.layoutView.main.show(view);
       App.vent.trigger("showLogin", App.layout);
+      if (display === "new") {
+        App.vent.trigger("showNewUser", App.layout);
+      }
       //this.appBody.login.$el.show();
     },
 

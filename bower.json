@@ -1,6 +1,6 @@
 {
   "name": "exhibitor-bower",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "dependencies": {
     "handlebars": "*",
     "bootstrap": "*",
@@ -26,6 +26,8 @@
     "bootstrap-touchspin": "*",
     "backbone.modal": "https://github.com/mattvoss/backbone.modal.git",
     "he": "*",
-    "switchery": "*"
+    "switchery": "*",
+    "seiyria-bootstrap-slider": "*",
+    "backbone.analytics": "https://github.com/kendagriff/backbone.analytics.git"
   }
 }

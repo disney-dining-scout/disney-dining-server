@@ -101,7 +101,10 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
   });
 
   Models.Searches = Backbone.Collection.extend({
-    model: Models.Search
+    model: Models.Search,
+    comparator: function(item) {
+      return [item.get("past"), item.get("date")];
+    }
   });
 
   Models.Logs = Backbone.Collection.extend({
@@ -124,7 +127,9 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       sendEmail: true,
       sendTxt: false,
       checkAttrs: false,
-      existing: false
+      existing: false,
+      emailTimeout: 14400,
+      smsTimeout: 14400
     },
     relations: {
       'searches': Models.Searches

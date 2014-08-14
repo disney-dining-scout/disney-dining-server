@@ -4,6 +4,7 @@
 var fs = require('fs'),
     path = require('path'),
     nodemailer = require('nodemailer'),
+    htmlToText = require('nodemailer-html-to-text').htmlToText,
     smtpTransport = require('nodemailer-smtp-transport'),
     crypto = require('crypto'),
     spawn = require('child_process').spawn,
@@ -28,7 +29,7 @@ var fs = require('fs'),
     config = {},
     reconnectTries = 0, cacheBuster = moment().format("X"),
     hmac, signature, connection, client, key,
-    transport, acl, subClient,
+    transport, acl, subClient, analytics = "",
     CheckinMemberFieldValues, RegMemberFieldValues, CheckinGroupMembers,
     RegGroupMembers, CheckinEventFields, CheckinBiller, RegBiller,
     CheckinBillerFieldValues, RegBillerFieldValues, RegEventFees,
@@ -41,6 +42,15 @@ Swag.registerHelpers(handlebars);
 exports.setKey = function(key, value) {
   opts[key] = value;
 };
+
+fs.exists(__dirname + '/../config/analytics.txt', function(exists) {
+  if (exists) {
+    fs.readFile(__dirname + '/../config/analytics.txt', 'utf8', function(error, content) {
+      analytics = content;
+    });
+  }
+});
+
 
 exports.initialize = function() {
   //Initialize PGsql
@@ -61,6 +71,7 @@ exports.initialize = function() {
     port: opts.configs.get("mail:port"),
     ignoreTLS: true
   }));
+  transport.use('compile', htmlToText());
 
   key = opts.configs.get("key");
 
@@ -231,6 +242,7 @@ exports.index = function(req, res){
         fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
           if (error) { console.log(error); }
           var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
+          init += (analytics.length > 0) ? analytics : "";
           var pageBuilder = handlebars.compile(content),
               html = pageBuilder({
                 'init': init,
@@ -291,7 +303,9 @@ exports.addUser = function(req, res) {
               phone: req.body.phone,
               carrier: req.body.carrier,
               sendTxt: req.body.sendTxt,
-              sendEmail: req.body.sendEmail
+              sendEmail: req.body.sendEmail,
+              emailTimeout: req.body.emailTimeout,
+              smsTimeout: req.body.smsTimeout
             };
         bcrypt.hash(req.body.password, 8, function(err, hash) {
           user.password = hash;
@@ -351,7 +365,9 @@ exports.updateUser = function(req, res) {
         sendTxt: req.body.sendTxt,
         sendEmail: req.body.sendEmail,
         phone: req.body.phone,
-        zipCode: req.body.zipCode
+        zipCode: req.body.zipCode,
+        emailTimeout: req.body.emailTimeout,
+        smsTimeout: req.body.smsTimeout
       };
   models.Users.find(req.params.userId).success(function(user) {
     user.updateAttributes(userAttributes).success(function(user) {
@@ -730,12 +746,13 @@ var getUser = function(userId, toJson, callback) {
       if (user.carrier !== "") {
         models.SmsGateways.find(user.carrier).success(function(carrier) {
           user.sms = carrier.toJSON();
-          cb(null, search);
+          cb(null, user);
         });
       } else {
         user.sms = {};
+        cb(null, user);
       }
-      cb(null, user);
+
     }
   ], function (err, user) {
    callback(user);

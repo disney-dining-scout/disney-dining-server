@@ -7,8 +7,9 @@ Dining.module('Settings', function(Settings, App, Backbone, Marionette, $, _) {
 
   Settings.Router = Marionette.AppRouter.extend({
     appRoutes: {
-      'user-profile'      : 'showUserProfile',
-      'change-password'   : 'showChangePassword'
+      'user-profile'            : 'showUserProfile',
+      'change-password'         : 'showChangePassword',
+      'update-notifications'    : 'showNotifications'
     }
   });
 
@@ -40,6 +41,11 @@ Dining.module('Settings', function(Settings, App, Backbone, Marionette, $, _) {
     showChangePassword: function() {
       var resetModel = new App.Models.PasswordReset(),
           view = new Settings.Views.ChangePasswordView({model: resetModel});
+      App.layoutView.main.show(view);
+    },
+
+    showNotifications: function() {
+      var view = new Settings.Views.NotificationsView({model: App.user});
       App.layoutView.main.show(view);
     }
 
