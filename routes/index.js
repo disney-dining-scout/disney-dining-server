@@ -717,7 +717,7 @@ exports.getSearch = function(req, res) {
     req.params.searchId,
     function(search) {
       createUserModel(req.session.user, function(user) {
-        req.session.user = user;
+        if (user !== null) req.session.user = user;
         sendBack(search, 200, res);
       });
     }
@@ -908,17 +908,22 @@ var checkUids = function(oldUid, newUid, callback) {
 };
 
 var createUserModel = function(user, cb) {
-  async.waterfall([
-    function(callback){
-      getUserSearches(user, function(searches) {
-        console.log("searches", searches);
-        user.searches = searches;
-        callback(null, user);
-      });
-    }
-  ],function(err, results) {
-      cb(results);
-  });
+  if ("id" in user) {
+    async.waterfall([
+      function(callback){
+        getUserSearches(user, function(searches) {
+          console.log("searches", searches);
+          user.searches = searches;
+          callback(null, user);
+        });
+      }
+    ],function(err, results) {
+        cb(results);
+    });
+  } else {
+    console.log("Missing user!");
+    cb(null);
+  }
 };
 
 var getUserSearches = function(user, callback) {
