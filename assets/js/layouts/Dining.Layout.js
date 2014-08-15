@@ -9,9 +9,6 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
       App.vent.on('showLogin', function (view) {
         App.layoutView.main.$el.addClass("loginContainer");
       });
-      App.vent.on('loggedin', function (view) {
-        App.layoutView.main.$el.removeClass("loginContainer");
-      });
     },
 
     // UI bindings create cached attributes that

@@ -113,7 +113,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
 
     initialize: function() {
       var view = this;
-      App.vent.on('resetPasswordInfo', function (model) {
+      App.vent.on('public:showAlert', function (model) {
         view.showAlert(model);
       });
       App.vent.on('showNewUser', function (e) {
@@ -250,6 +250,11 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
               App.vent.trigger("loggedin", App.layoutView);
               //App.user.urlRoot = "/api/user";
               Backbone.history.navigate("searches", { trigger: true });
+              var alertModel = new App.Models.AlertModel({
+                'message': 'A welcome message has been sent to your email address. If that email does not arrive in your inbox please check your spam folder and add noreply@disneydining.io to your address book.',
+                'class': 'alert-info'
+              });
+              App.vent.trigger("searches:showAlert", alertModel);
             },
             error: function(model, xhr, options) {
               var err = xhr.responseJSON,

@@ -129,7 +129,8 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       checkAttrs: false,
       existing: false,
       emailTimeout: 14400,
-      smsTimeout: 14400
+      smsTimeout: 14400,
+      activated: false
     },
     relations: {
       'searches': Models.Searches

@@ -159,6 +159,8 @@ app.post('/api/user/authenticate', routes.authUser);
 app.post('/api/user', routes.addUser);
 app.put('/api/user/:userId', routes.updateUser);
 app.get('/api/user/authenticate/logout', routes.logoutUser);
+app.get('/api/user/activation/send', routes.sendUserActivation);
+app.put('/api/user/activation/:token', routes.activateUser);
 app.del('/api/user/:userId', routes.logoutUser);
 app.post('/api/user/password/reset', routes.resetPassword);
 app.put('/api/user/password/update/:userId', routes.updatePassword);

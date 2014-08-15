@@ -199,7 +199,8 @@ exports.initialize = function() {
     sendTxt :             { type: Sequelize.BOOLEAN, defaultValue: 0 },
     sendEmail :           { type: Sequelize.BOOLEAN, defaultValue: 1 },
     emailTimeout:         { type: Sequelize.INTEGER, defaultValue: 14400 },
-    smsTimeout:           { type: Sequelize.INTEGER, defaultValue: 14400 }
+    smsTimeout:           { type: Sequelize.INTEGER, defaultValue: 14400 },
+    activated :           { type: Sequelize.BOOLEAN, defaultValue: 0 }
   });
 
   models.SmsGateways = db.dining.define('smsGateways', {
@@ -317,7 +318,9 @@ exports.addUser = function(req, res) {
                 console.log("Sending back new user");
                 request.session.user = user;
                 delete user.password;
-                sendBack(user, 200, res);
+                sendActivationEmail(user, function() {
+                  sendBack(user, 200, res);
+                });
               });
             });
           }).error(function(error) {
@@ -367,7 +370,8 @@ exports.updateUser = function(req, res) {
         phone: req.body.phone,
         zipCode: req.body.zipCode,
         emailTimeout: req.body.emailTimeout,
-        smsTimeout: req.body.smsTimeout
+        smsTimeout: req.body.smsTimeout,
+        activated: req.body.activated
       };
   models.Users.find(req.params.userId).success(function(user) {
     user.updateAttributes(userAttributes).success(function(user) {
@@ -724,6 +728,45 @@ exports.getSearch = function(req, res) {
   );
 };
 
+exports.sendUserActivation = function(req, res) {
+  if ("session" in req && "user" in req.session) {
+    sendActivationEmail(req.session.user, function() {
+      sendBack({}, 200, res);
+    });
+  } else {
+    var errorMsg = {
+          status: "error",
+          messsage: {
+            response: "Unable to activate user"
+          }
+        };
+    sendBack(errorMsg, 401, res);
+  }
+};
+
+exports.activateUser = function(req, res) {
+  console.log("Begin user activation:", req.params.token);
+  var decipher = crypto.createDecipher('aes-256-cbc', key);
+      decipher.update(req.params.token, 'base64', 'utf8');
+  var userId = decipher.final('utf8'),
+      userAttributes = {
+        activated: true
+      };
+
+  models.Users.find(userId).success(function(user) {
+    user.updateAttributes(userAttributes).success(function(user) {
+      user = user.toJSON();
+      getUser(user.id, true, function(user) {
+        createUserModel(user, function(user) {
+          req.session.user = user;
+          sendBack(user, 200, res);
+        });
+      });
+    });
+  });
+
+};
+
 var sendBack = function(data, status, res) {
   res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
   res.writeHead(status, { 'Content-type': 'application/json' });
@@ -996,6 +1039,42 @@ var expireActivationCode = function(code, callback) {
     token.updateAttributes(tokenAttributes).success(function(token) {
       callback(token);
     });
+  });
+};
+
+var sendActivationEmail = function(user, callback) {
+  emailTemplates(emailTemplatesDir, function(err, template) {
+    if (err) {
+      console.log(err);
+    } else {
+      // Send a single email
+      // An example users object with formatted email function
+      var cipher = crypto.createCipher('aes-256-cbc', key);
+      cipher.update(user.id.toString(), 'utf8', 'base64');
+      user.token = cipher.final('base64');
+      // Send a single email
+      template('activation', user, function(err, html, text) {
+        if (err) {
+          console.log(err);
+        } else {
+          transport.sendMail({
+            from: 'Disney Dining Scout <noreply@disneydining.io>',
+            to: user.email,
+            subject: 'Account Activation',
+            html: html,
+            generateTextFromHTML: true
+          }, function(err, responseStatus) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(responseStatus.message);
+            }
+
+            callback();
+          });
+        }
+      });
+    }
   });
 };
 

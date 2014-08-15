@@ -119,6 +119,8 @@ Dining.on('start', function() {
     searches.on('change:uid', this.updateRooms, this);
     if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
+    } else if (Backbone.history.fragment.indexOf("activation/") > -1) {
+      console.log(Backbone.history.fragment);
     } else if (Backbone.history.fragment !== "searches") {
       Backbone.history.navigate("searches", { trigger: true });
     } else {
@@ -129,6 +131,8 @@ Dining.on('start', function() {
     var newFragment = Backbone.history.getFragment($(this).attr('href'));
     if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
+    } else if (Backbone.history.fragment.indexOf("activation/") > -1) {
+      console.log(Backbone.history.fragment);
     } else {
       Backbone.history.navigate("start", { trigger: true });
     }

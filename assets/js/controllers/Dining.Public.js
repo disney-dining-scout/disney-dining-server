@@ -10,6 +10,7 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
       'start'                 : 'start',
       'new'                   : 'newUser',
       'reset/password/:token' : 'resetPassword',
+      'activation/:token'     : 'activate',
       'logout'                : 'logout'
     }
   });
@@ -82,7 +83,7 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
                   'message': 'Password has been updated',
                   'class': 'alert-info'
                 });
-            App.vent.trigger("resetPasswordInfo", alertModel);
+            App.vent.trigger("public:showAlert", alertModel);
           },
           error: function(model, xhr, options) {
             controller.start();
@@ -90,15 +91,44 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
                   'message': 'No valid reset token found',
                   'class': 'alert-danger'
                 });
-            App.vent.trigger("resetPasswordInfo", alertModel);
+            App.vent.trigger("public:showAlert", alertModel);
           }
         }
       );
 
     },
 
+    activate: function(token) {
+      var view = this;
+      $.ajax({
+        url: '/api/user/activation/'+token,
+        type: 'PUT',
+        error: function() {
+          view.start();
+          var alertModel = new App.Models.AlertModel({
+                  'message': 'There has been an issue activating this account.',
+                  'class': 'alert-danger'
+                });
+          App.vent.trigger("public:showAlert", alertModel);
+        },
+        success: function(res) {
+          var alertModel = new App.Models.AlertModel({
+                'message': 'Your account has been activated.',
+                'class': 'alert-success'
+              });
+          Backbone.history.navigate("searches", { trigger: true });
+          if ("id" in Dining.user) {
+            App.vent.trigger("searches:showAlert", alertModel);
+          } else {
+            App.vent.trigger("public:showAlert", alertModel);
+          }
+        }
+      });
+    },
+
     logout: function() {
         App.user.destroy();
+        App.Io.disconnect();
         Backbone.history.navigate("start", { trigger: true });
     }
 

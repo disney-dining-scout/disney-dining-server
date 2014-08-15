@@ -110,10 +110,11 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     childViewContainer: "#searches",
     className: "row",
     events: {
-      "click .btn-add"    : "showAddSearch",
-      "keyup #search"     : "filterSearches",
-      "click .clearer"    : "clearerOnClick",
-      "keyup .hasclear"   : "hasClearKeyUp"
+      "click .btn-add"          : "showAddSearch",
+      "keyup #search"           : "filterSearches",
+      "click .clearer"          : "clearerOnClick",
+      "keyup .hasclear"         : "hasClearKeyUp",
+      "click .activationEmail"  : "sendActivationEmail"
     },
     collectionEvents: {
       "add": "modelAdded"
@@ -132,6 +133,13 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
 
     onShow: function(e) {
       $(".clearer").hide();
+      if (!this.model.get("activated")) {
+        var alertModel = new App.Models.AlertModel({
+              'message': 'Please finalize your account activation by clicking on the "Complete Activation" button in your account activation email. If that email does not arrive in your inbox please check your spam folder and add noreply@disneydining.io to your address book. <a href="#" class="alert-link activationEmail">Click to resend message.</a>',
+              'class': 'alert-danger'
+            });
+        this.showAlert(alertModel);
+      }
     },
 
     clearerOnClick: function(e) {
@@ -189,6 +197,25 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           scrollTop: offset
         }, 2000);
       }
+    },
+
+    sendActivationEmail: function(e) {
+      var view = this;
+      $.ajax({
+        url: '/api/user/activation/send',
+        type: 'GET',
+        error: function() {
+            callback();
+        },
+        success: function(res) {
+          var alertModel = new App.Models.AlertModel({
+                'message': 'An activation email has been sent to your email address. If that email does not arrive in your inbox please check your spam folder and add noreply@disneydining.io to your address book.',
+                'class': 'alert-info'
+              });
+          view.showAlert(alertModel);
+        }
+      });
+
     }
 
   });
