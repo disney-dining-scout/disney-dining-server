@@ -128,6 +128,7 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
 
     logout: function() {
         App.user.destroy();
+        $.removeCookie('remember');
         App.Io.disconnect();
         Backbone.history.navigate("start", { trigger: true });
     }

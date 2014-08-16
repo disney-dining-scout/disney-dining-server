@@ -28,6 +28,7 @@
     "he": "*",
     "switchery": "*",
     "seiyria-bootstrap-slider": "*",
-    "backbone.analytics": "https://github.com/kendagriff/backbone.analytics.git"
+    "backbone.analytics": "https://github.com/kendagriff/backbone.analytics.git",
+    "jquery.cookie": "*"
   }
 }

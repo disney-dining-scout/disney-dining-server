@@ -256,10 +256,11 @@ exports.index = function(req, res){
           res.end('\n');
         });
       };
+  var userId, decipher;
   if ((typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') || "remember" in req.cookies) {
-    var userId;
+
     if ("remember" in req.cookies) {
-      var decipher = crypto.createDecipher('aes-256-cbc', key);
+      decipher = crypto.createDecipher('aes-256-cbc', key);
       decipher.update(req.cookies.remember, 'base64', 'utf8');
       userId = decipher.final('utf8');
     } else {
@@ -274,7 +275,22 @@ exports.index = function(req, res){
       });
     });
   } else {
-    send();
+    console.log(req.cookies);
+    if ("remember" in req.cookies) {
+      decipher = crypto.createDecipher('aes-256-cbc', key);
+      decipher.update(req.cookies.remember, 'base64', 'utf8');
+      userId = decipher.final('utf8');
+      getUser(userId, true, function(user) {
+        createUserModel(user, function(user) {
+          req.session.user = user;
+          init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+          send();
+        });
+      });
+    } else {
+      send();
+    }
+
   }
 };
 

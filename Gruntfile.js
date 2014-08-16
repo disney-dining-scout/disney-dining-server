@@ -31,6 +31,7 @@ module.exports = function(grunt) {
         'lib/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.js',
         'bower_components/switchery/dist/switchery.js',
         'lib/seiyria-bootstrap-slider/bootstrap-slider.js',
+        'lib/jquery.cookie/jquery.cookie.js',
         'lib/bootcards/bootcards.js'
       ],
       cssSrc = [
