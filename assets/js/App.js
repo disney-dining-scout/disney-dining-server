@@ -140,6 +140,7 @@ Dining.on('start', function() {
 });
 
 Dining.vent.on('loggedin', function() {
+  Dining.layoutView.main.$el.removeClass("loginContainer");
   if (typeof Dining.user !== 'undefined' && "id" in Dining.user) {
     var searches = Dining.user.get("searches");
     searches.each(function(search) {
