@@ -50,8 +50,8 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
     },
 
     handleLink: function(e) {
-        e.preventDefault();
-        Backbone.history.navigate($(e.currentTarget).data().url, { trigger: true });
+      e.preventDefault();
+      Backbone.history.navigate($(e.currentTarget).data().url, { trigger: true });
 
     }
   });

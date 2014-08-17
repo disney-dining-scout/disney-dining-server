@@ -36,17 +36,20 @@ Dining.module('Settings', function(Settings, App, Backbone, Marionette, $, _) {
     showUserProfile: function() {
       var view = new Settings.Views.UserProfileView({model: App.user});
       App.layoutView.main.show(view);
+      App.vent.trigger("hideMenu");
     },
 
     showChangePassword: function() {
       var resetModel = new App.Models.PasswordReset(),
           view = new Settings.Views.ChangePasswordView({model: resetModel});
       App.layoutView.main.show(view);
+      App.vent.trigger("hideMenu");
     },
 
     showNotifications: function() {
       var view = new Settings.Views.NotificationsView({model: App.user});
       App.layoutView.main.show(view);
+      App.vent.trigger("hideMenu");
     }
 
   });

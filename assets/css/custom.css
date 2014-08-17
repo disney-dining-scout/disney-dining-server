@@ -196,6 +196,10 @@ a {
   margin-top: 25px;
 }
 
+.picker__select--month, .picker__select--year {
+  padding: 0px;
+}
+
 
 /* -------------------------------------------------------- */
 /*                                                          */

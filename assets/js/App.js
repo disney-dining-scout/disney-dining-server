@@ -149,6 +149,10 @@ Dining.vent.on('loggedin', function() {
   }
 });
 
+Dining.vent.on('hideMenu', function() {
+  $('.navbar-collapse').collapse('hide');
+});
+
 Dining.fixTime = function(model, attr) {
   attr = attr || "date";
   var newDate = null;
