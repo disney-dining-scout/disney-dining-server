@@ -200,6 +200,18 @@ a {
   padding: 0px;
 }
 
+@media (min-width: 480px) {
+  .settingsUserName {
+    display: inline-block;
+  }
+}
+
+@media (max-width: 480px) {
+  .settingsUserName {
+    display: none;
+  }
+}
+
 
 /* -------------------------------------------------------- */
 /*                                                          */

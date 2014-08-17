@@ -1,10 +1,10 @@
-<div class="navbar-header">
+<div class="navbar-header pull-left">
   <a class="navbar-brand" href="searches"><i class="fa pull-left fa-cutlery"></i> Disney Dining Scout</a>
 </div>
 {{#if id}}
-<div class="collapse navbar-collapse">
-  <button type="button" class="btn btn-default navbar-btn pull-right" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
-    <i class="fa fa-user fa-fw"></i> {{firstName}} {{lastName}}
+<div class="pull-right">
+  <button type="button" class="btn btn-default navbar-btn" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
+    <i class="fa fa-user fa-fw"></i> <span class="settingsUserName">{{firstName}} {{lastName}}</span>
   </button>
 </div>
 
