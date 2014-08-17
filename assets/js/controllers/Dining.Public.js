@@ -130,6 +130,7 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
         App.user.destroy();
         $.removeCookie('remember');
         App.Io.disconnect();
+        App.vent.trigger("hideMenu");
         Backbone.history.navigate("start", { trigger: true });
     }
 

@@ -8,6 +8,7 @@ module.exports = function(grunt) {
         'lib/swag/swag.js',
         'lib/underscore/underscore.js',
         'lib/bootstrap/bootstrap.js',
+        'lib/bootstrap-jasny/jasny-bootstrap.js',
         'lib/he/he.js',
         'lib/backbone/backbone.js',
         'lib/backbone.wreqr/backbone.wreqr.js',
@@ -36,6 +37,7 @@ module.exports = function(grunt) {
       ],
       cssSrc = [
         'lib/bootstrap/bootstrap.css',
+        'lib/bootstrap-jasny/jasny-bootstrap.css',
         'lib/font-awesome/font-awesome.css',
         'lib/selectize/selectize.css',
         'lib/messenger/messenger.css',

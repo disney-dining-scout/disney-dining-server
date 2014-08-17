@@ -150,7 +150,7 @@ Dining.vent.on('loggedin', function() {
 });
 
 Dining.vent.on('hideMenu', function() {
-  $('.navbar-collapse').collapse('hide');
+  $('#navMenu').offcanvas('hide');
 });
 
 Dining.fixTime = function(model, attr) {
