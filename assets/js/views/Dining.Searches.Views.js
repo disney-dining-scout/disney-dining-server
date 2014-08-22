@@ -22,10 +22,14 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     },
 
     fieldsChanged: function() {
-      console.log("clearing timeout");
-      clearTimeout(this.timeout);
+      this.clearTimeout();
       this.justUpdated = true;
       this.render();
+    },
+
+    clearTimeout: function() {
+      console.log("clearing timeout");
+      clearTimeout(this.timeout);
     },
 
     onRender: function(e) {
@@ -99,8 +103,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     },
 
     onBeforeDestroy: function(){
-      console.log("clearing timeout");
-      clearTimeout(this.timeout);
+      this.clearTimeout();
     }
   });
 
@@ -122,16 +125,28 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     initialize: function() {
       var test = $(this.el),
           view = this;
+
       App.vent.on('searches:showAlert', function (model) {
         view.showAlert(model);
       });
     },
 
     onRender: function() {
+      var view = this;
+
+      this.timeout = setTimeout(
+        function() {
+          view.collection.sort();
+          console.log("Refreshing sort order");
+        },
+        60000
+      );
+
 
     },
 
     onShow: function(e) {
+      var view = this;
       $(".clearer").hide();
       if (!this.model.get("activated")) {
         var alertModel = new App.Models.AlertModel({
@@ -216,6 +231,15 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         }
       });
 
+    },
+
+    clearTimeout: function() {
+      console.log("clearing timeout");
+      clearTimeout(this.timeout);
+    },
+
+    onBeforeDestroy: function(){
+      this.clearTimeout();
     }
 
   });
@@ -300,7 +324,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         {},
         {
           success: function(model, response, options) {
-            var restaurant = model.get("restaurant").name,
+            var restaurant = model.get("restaurant").get("name"),
                 message = "Dining Search for " + restaurant + " has been";
             Dining.fixTime(model);
             if (isThisNew) {

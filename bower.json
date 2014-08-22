@@ -29,6 +29,7 @@
     "switchery": "*",
     "seiyria-bootstrap-slider": "*",
     "backbone.analytics": "https://github.com/kendagriff/backbone.analytics.git",
-    "jquery.cookie": "*"
+    "jquery.cookie": "*",
+    "hook.js": "https://github.com/jordansinger/Hook.js.git"
   }
 }

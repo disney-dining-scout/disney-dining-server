@@ -270,8 +270,10 @@ exports.index = function(req, res){
     getUser(userId, true, function(user) {
       createUserModel(user, function(user) {
         req.session.user = user;
-        init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
-        send();
+        addUserToSession(user, req, function() {
+          init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+          send();
+        });
       });
     });
   } else {
@@ -282,9 +284,10 @@ exports.index = function(req, res){
       userId = decipher.final('utf8');
       getUser(userId, true, function(user) {
         createUserModel(user, function(user) {
-          req.session.user = user;
-          init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
-          send();
+          addUserToSession(user, req, function() {
+            init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+            send();
+          });
         });
       });
     } else {
@@ -332,10 +335,11 @@ exports.addUser = function(req, res) {
             createUserModel(userRec, function(user) {
               expireActivationCode(code, function(code) {
                 console.log("Sending back new user");
-                request.session.user = user;
-                delete user.password;
-                sendActivationEmail(user, function() {
-                  sendBack(user, 200, res);
+                addUserToSession(user, request, function() {
+                  delete user.password;
+                  sendActivationEmail(user, function() {
+                    sendBack(user, 200, res);
+                  });
                 });
               });
             });
@@ -394,8 +398,9 @@ exports.updateUser = function(req, res) {
       user = user.toJSON();
       getUser(user.id, true, function(user) {
         createUserModel(user, function(user) {
-          req.session.user = user;
-          sendBack(user, 200, res);
+          addUserToSession(user, req, function() {
+            sendBack(user, 200, res);
+          });
         });
       });
     });
@@ -418,8 +423,9 @@ exports.authUser = function(req, res) {
             console.log("Delete cookie");
             res.clearCookie('remember');
           }
-          request.session.user = user;
-          sendBack(user, 200, res);
+          addUserToSession(user, request, function() {
+            sendBack(user, 200, res);
+          });
         });
       };
   models.Users.find({ where: { email: req.body.email } }).success(function(user) {
@@ -670,8 +676,9 @@ exports.updateSearch = function(req, res) {
           if (oldUid !== uid) {
             checkUids(oldUid, uid, function() {
               createUserModel(req.session.user, function(user) {
-                req.session.user = user;
-                sendBack(search, 200, res);
+                addUserToSession(user, req, function() {
+                  sendBack(search, 200, res);
+                });
               });
             });
           } else {
@@ -722,8 +729,9 @@ exports.deleteUserSearch = function(req, res) {
       search.updateAttributes(attributes).success(function() {
         checkUids(search.uid, null, function() {
           createUserModel(req.session.user, function(user) {
-            req.session.user = user;
-             sendBack({}, 200, res);
+            addUserToSession(user, req, function() {
+              sendBack({}, 200, res);
+            });
           });
         });
       });
@@ -737,8 +745,9 @@ exports.getSearch = function(req, res) {
     req.params.searchId,
     function(search) {
       createUserModel(req.session.user, function(user) {
-        if (user !== null) req.session.user = user;
-        sendBack(search, 200, res);
+        addUserToSession(user, req, function() {
+          sendBack(search, 200, res);
+        });
       });
     }
   );
@@ -774,8 +783,9 @@ exports.activateUser = function(req, res) {
       user = user.toJSON();
       getUser(user.id, true, function(user) {
         createUserModel(user, function(user) {
-          req.session.user = user;
-          sendBack(user, 200, res);
+          addUserToSession(user, req, function() {
+            sendBack(user, 200, res);
+          });
         });
       });
     });
@@ -1092,6 +1102,18 @@ var sendActivationEmail = function(user, callback) {
       });
     }
   });
+};
+
+var addUserToSession = function(user, request, cb) {
+  if ("session" in request) {
+    if (user !== null) request.session.user = user;
+    cb();
+  } else {
+    req.session.regenerate(function(err) {
+      if (user !== null) request.session.user = user;
+      cb();
+    });
+  }
 };
 
 function pad(num, size) {

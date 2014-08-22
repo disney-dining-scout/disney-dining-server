@@ -195,6 +195,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         remember: this.ui.remember.prop("checked")
       });
       if (App.user.isValid()) {
+        $(".sign-in", this.$el).prepend("<i class=\"fa fa-circle-o-notch fa-spin\"></i> ").attr("disabled","disabled");
         App.user.urlRoot = "/api/user/authenticate";
 
         App.user.save(
@@ -213,6 +214,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
                     'class': 'alert-danger'
                   });
               view.showAlert(alertModel);
+              $(".sign-in", this.$el).removeAttr("disabled").find(".fa-circle-o-notch").remove();
             }
           }
         );

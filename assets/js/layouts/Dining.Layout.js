@@ -56,5 +56,4 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
     }
   });
 
-
 });

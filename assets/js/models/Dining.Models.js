@@ -103,7 +103,11 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
   Models.Searches = Backbone.Collection.extend({
     model: Models.Search,
     comparator: function(item) {
-      return [item.get("past"), item.get("date")];
+      var now = moment.utc(),
+          date = moment.utc(item.get("date")),
+          before = date.isBefore(now) ? "01" : "00",
+          diff = Math.abs(now.diff(date, "minutes"));
+      return before + "-" + pad(diff, 50);
     }
   });
 

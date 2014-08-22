@@ -41,17 +41,6 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
       this.showPublic('new');
     },
 
-    showHeader: function(options) {
-      options = options || {};
-      var header = new App.Layout.Header(options);
-      App.layout.header.show(header);
-    },
-
-    showFooter: function() {
-      var footer = new App.Layout.Footer();
-      App.layout.footer.show(footer);
-    },
-
     showPublic: function(display) {
       display = display || null;
       var view = new Public.Views.PublicView();

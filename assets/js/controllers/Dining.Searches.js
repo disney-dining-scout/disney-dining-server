@@ -43,11 +43,6 @@ Dining.module('Searches', function(Searches, App, Backbone, Marionette, $, _) {
       //$("body").removeClass();
 
       //$("#dash-container").show();
-    },
-
-    showHeader: function() {
-      var header = new App.Layout.Header({model: App.user});
-      App.layout.header.show(header);
     }
 
   });
