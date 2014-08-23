@@ -146,24 +146,6 @@ module.exports = function(grunt) {
             expand: true,
             flatten: true,
             src: [
-              'lib/leaflet/dist/*.css'
-            ],
-            dest: 'public/css/',
-            filter: 'isFile'
-          },
-          {
-            expand: true,
-            flatten: true,
-            src: [
-              'lib/leaflet/dist/images/*.*'
-            ],
-            dest: 'public/images/',
-            filter: 'isFile'
-          },
-          {
-            expand: true,
-            flatten: true,
-            src: [
               'assets/images/*.*'
             ],
             dest: 'public/images/',
@@ -178,25 +160,7 @@ module.exports = function(grunt) {
             ],
             dest: 'public/css/',
             filter: 'isFile'
-          },
-          {
-            expand: true,
-            flatten: true,
-            src: [
-              'lib/cartodb.js/dist/*.css'
-            ],
-            dest: 'public/css/',
-            filter: 'isFile'
-          },
-          {
-            expand: true,
-            flatten: true,
-            src: [
-              'lib/ion.rangeSlider/img/*.png'
-            ],
-            dest: 'public/images/',
-            filter: 'isFile'
-          },
+          }
 
         ]
       }

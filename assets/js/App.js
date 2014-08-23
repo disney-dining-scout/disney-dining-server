@@ -120,7 +120,7 @@ Dining.on('start', function() {
     if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
     } else if (Backbone.history.fragment.indexOf("activation/") > -1) {
-      console.log(Backbone.history.fragment);
+      Backbone.history.loadUrl();
     } else if (Backbone.history.fragment !== "searches") {
       Backbone.history.navigate("searches", { trigger: true });
     } else {
@@ -132,7 +132,7 @@ Dining.on('start', function() {
     if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
     } else if (Backbone.history.fragment.indexOf("activation/") > -1) {
-      console.log(Backbone.history.fragment);
+      Backbone.history.loadUrl();
     } else {
       Backbone.history.navigate("start", { trigger: true });
     }

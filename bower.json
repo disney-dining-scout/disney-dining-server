@@ -1,6 +1,6 @@
 {
-  "name": "exhibitor-bower",
-  "version": "0.2.2",
+  "name": "disney-dining-server",
+  "version": "0.2.6",
   "dependencies": {
     "handlebars": "*",
     "bootstrap": "*",
