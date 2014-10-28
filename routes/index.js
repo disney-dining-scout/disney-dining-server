@@ -744,11 +744,21 @@ exports.getSearch = function(req, res) {
   getUserSearch(
     req.params.searchId,
     function(search) {
-      createUserModel(req.session.user, function(user) {
-        addUserToSession(user, req, function() {
-          sendBack(search, 200, res);
+      if ("session" in req && "user" in req.session) {
+        createUserModel(req.session.user, function(user) {
+          addUserToSession(user, req, function() {
+            sendBack(search, 200, res);
+          });
         });
-      });
+      } else {
+        var errorMsg = {
+          status: "error",
+          messsage: {
+            response: "You are not logged in. Please login."
+          }
+        };
+        sendBack(errorMsg, 401, res);
+      }
     }
   );
 };

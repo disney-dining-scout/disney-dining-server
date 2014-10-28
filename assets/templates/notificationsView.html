@@ -5,6 +5,7 @@
       <button type="submit" class="btn btn-default btn-primary pull-right btn-update">Update Notifications</button>
     </div>
     <div class="panel-body">
+      <p>Notifications are sent immediately on finding an open reservation slot. However to prevent the system from flooding you with notifications every 5-10 minutes when the same reservation slot is found you can set the repeat interval here.</p>
       <form role="form">
         <div class="form-group">
           <label for="email">Email</label>
@@ -18,9 +19,9 @@
           </label>
         </div>
         <div class="form-group">
-          <label for="emailTimeout">How Often To Send Email Notifications</label>
+          <label for="emailTimeout">How Often To Repeat Email Notifications</label>
           <input class="form-control input-lg" placeholder="hours" type="text" id="emailTimeout" value="{{divide emailTimeout 3600}}" data-slider-value="{{divide emailTimeout 3600}}" />
-          <span class="help-block">This determines how often you will receive email message notifications if there is a table found,</span>
+          <span class="help-block">This determines how often you will receive subsequent email message notifications if the same reservation slot is found.</span>
         </div>
         <div class="form-group">
           <label for="phone">Mobile Phone Number</label>
@@ -43,9 +44,9 @@
           </label>
         </div>
         <div class="form-group">
-          <label for="smsTimeout">How Often To send Text Message Notifications</label>
+          <label for="smsTimeout">How Often To Repeat Text Message Notifications</label>
           <input class="form-control input-lg" placeholder="hours" type="text" id="smsTimeout" value="{{divide smsTimeout 3600}}" data-slider-value="{{divide smsTimeout 3600}}" />
-          <span class="help-block">This determines how often you will receive text message notifications if there is a table found.</span>
+          <span class="help-block">This determines how often you will receive text message notifications if the same reservation slot is found.</span>
         </div>
       </form>
     </div>

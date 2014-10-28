@@ -97,6 +97,14 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     },
     update: function () {
       Dining.fixTime(this);
+    },
+    validate: function(attrs, options) {
+      if (attrs.restaurantId === "") {
+        return {
+          "error": "restaurant",
+          "message": "A valid restaurant must be selected"
+        };
+      }
     }
   });
 

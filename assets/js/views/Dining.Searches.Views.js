@@ -277,7 +277,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           maxboostedstep: 5,
       });
 
-      $('#restaurant', this.$el).selectize({
+      this.selectize = $('#restaurant', this.$el).selectize({
         valueField: 'id',
         labelField: 'name',
         searchField: 'name',
@@ -307,8 +307,26 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         }
       });
     },
+    showAlert: function(model) {
+      var alert = new App.Public.Views.AlertView({model: model});
+      $(".alert", this.$el).remove();
+      alert.render();
+      if ("error" in model.attributes) {
+        $("#"+model.get("error"), this.$el).parent().removeClass("has-error");
+        $("#"+model.get("error"), this.$el).parent().addClass("has-error");
+      }
+      $(alert.$el).prependTo(".modal-body", this.$el);
+      /**
 
-    submit: function(e) {
+      if ($(window).scrollTop() > 0) {
+        var offset = ($(".alert").offset().top-70 < 0) ? 0 : $(".alert").offset().top-70;
+        $('html, body').animate({
+          scrollTop: offset
+        }, 2000);
+      }
+      **/
+    },
+    beforeSubmit: function(e) {
       var dateTime = $("#date", this.$el).val() + " " + $("#time", this.$el).val(),
           isThisNew = (this.model.get("uid") === "") ? true : false,
           modal = this,
@@ -320,6 +338,15 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DD HH:mm:ssZ"),
         "user": App.user.get("id")
       });
+      if (this.model.isValid()) {
+        return true;
+      } else {
+        var model = new App.Models.AlertModel(this.model.validationError);
+        this.showAlert(model);
+        return false;
+      }
+    },
+    submit: function(e) {
       this.model.save(
         {},
         {
