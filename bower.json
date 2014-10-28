@@ -2,7 +2,7 @@
   "name": "disney-dining-server",
   "version": "0.2.6",
   "dependencies": {
-    "handlebars": "*",
+    "handlebars": "~2.0.0",
     "bootstrap": "*",
     "underscore": "*",
     "marionette": "*",
@@ -31,5 +31,8 @@
     "backbone.analytics": "https://github.com/kendagriff/backbone.analytics.git",
     "jquery.cookie": "*",
     "hook.js": "https://github.com/jordansinger/Hook.js.git"
+  },
+  "resolutions": {
+    "handlebars": "~2.0.0"
   }
 }

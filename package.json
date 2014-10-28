@@ -9,7 +9,7 @@
     "nodemailer-smtp-transport": "latest",
     "async": "latest",
     "node-uuid": "latest",
-    "handlebars": "latest",
+    "handlebars": "^2.0.0",
     "redis": "latest",
     "connect-redis": "~1.4.7",
     "sequelize": "sequelize/sequelize",
