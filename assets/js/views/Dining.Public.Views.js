@@ -157,7 +157,9 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
             });
         }
       });
-      $('#phone').mask('(000) 000-0000');
+      $('#phone').inputmask({
+        mask: '(999) 999-9999'
+      });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
     },

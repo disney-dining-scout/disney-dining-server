@@ -61,7 +61,9 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
           });
         }
       });
-      $('#phone').mask('(000) 000-0000');
+      $('#phone').inputmask({
+        mask: '(999) 999-9999'
+      });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
     },
@@ -208,7 +210,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       smsTimeout: '#smsTimeout'
     },
     initialize: function() {
-      if ("sms" in this.model.attributes && this.model.get("sms").id.length > 0) {
+      if ("sms" in this.model.attributes && typeof this.model.get("sms").id !== "undefined") {
         var entities = JSON.stringify({
               "name": this.model.get("sms").get("name"),
               "id": this.model.get("sms").get("id")
@@ -249,7 +251,9 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
           });
         }
       });
-      $('#phone').mask('(000) 000-0000');
+      $('#phone').inputmask({
+        mask: '(999) 999-9999'
+      });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
       this.ui.emailTimeout.slider({
@@ -257,7 +261,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
         min: 0.5,
         step: 0.5,
         tooltip: 'always',
-        formater: function(value) {
+        formatter: function(value) {
           return value + " hour(s)";
         }
       });
@@ -267,7 +271,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
         min: 0.5,
         step: 0.5,
         tooltip: 'always',
-        formater: function(value) {
+        formatter: function(value) {
           return value + " hour(s)";
         }
       });

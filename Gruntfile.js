@@ -21,7 +21,6 @@ module.exports = function(grunt) {
         'lib/sifter/sifter.js',
         'lib/selectize/selectize.js',
         'lib/moment/moment.js',
-        'lib/jQuery-Mask-Plugin/jquery.mask.min.js',
         'lib/placeholders/build/placeholders.js',
         'lib/messenger/messenger.js',
         'lib/messenger/messenger-theme-future.js',
