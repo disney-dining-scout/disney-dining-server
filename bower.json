@@ -29,7 +29,9 @@
     "seiyria-bootstrap-slider": "*",
     "backbone.analytics": "https://github.com/kendagriff/backbone.analytics.git",
     "jquery.cookie": "*",
-    "hook.js": "https://github.com/jordansinger/Hook.js.git"
+    "hook.js": "https://github.com/jordansinger/Hook.js.git",
+    "jquery.dfp.js":"*",
+    "card": "*"
   },
   "resolutions": {
     "handlebars": "~2.0.0"

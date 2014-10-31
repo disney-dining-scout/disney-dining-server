@@ -200,6 +200,10 @@ a {
   padding: 0px;
 }
 
+.adunit {
+  margin-bottom: 10px;
+}
+
 
 .scrollable {
   /*overflow-y: auto;*/

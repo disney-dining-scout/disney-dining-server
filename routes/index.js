@@ -18,6 +18,7 @@ var fs = require('fs'),
     Swag = require('swag'),
     moment = require('moment'),
     redis = require("redis"),
+    git = require('git-rev-sync'),
     emailTemplatesDir = path.resolve(__dirname, '..', 'email', 'templates'),
     emailTemplates = require('email-templates'),
     db = {},
@@ -29,7 +30,7 @@ var fs = require('fs'),
     config = {},
     reconnectTries = 0, cacheBuster = moment().format("X"),
     hmac, signature, connection, client, key,
-    transport, acl, subClient, analytics = "",
+    transport, acl, subClient, analytics = "", appInfo = {},
     CheckinMemberFieldValues, RegMemberFieldValues, CheckinGroupMembers,
     RegGroupMembers, CheckinEventFields, CheckinBiller, RegBiller,
     CheckinBillerFieldValues, RegBillerFieldValues, RegEventFees,
@@ -73,6 +74,10 @@ exports.initialize = function() {
   }));
   transport.use('compile', htmlToText());
 
+  appInfo = {
+    rev: git.short(),
+    tag: git.tag()
+  };
   key = opts.configs.get("key");
 
   console.log(opts.configs.get("redis"));
@@ -200,7 +205,14 @@ exports.initialize = function() {
     sendEmail :           { type: Sequelize.BOOLEAN, defaultValue: 1 },
     emailTimeout:         { type: Sequelize.INTEGER, defaultValue: 14400 },
     smsTimeout:           { type: Sequelize.INTEGER, defaultValue: 14400 },
-    activated :           { type: Sequelize.BOOLEAN, defaultValue: 0 }
+    activated :           { type: Sequelize.BOOLEAN, defaultValue: 0 },
+    subExpires:           {
+      type: Sequelize.DATE,
+      defaultValue: '1969-01-01 00:00:00',
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    }
   });
 
   models.SmsGateways = db.dining.define('smsGateways', {
@@ -237,7 +249,7 @@ exports.initialize = function() {
 *************/
 
 exports.index = function(req, res){
-  var init = "$(document).ready(function() { Dining.start(); });",
+  var init = "$(document).ready(function() { Dining.appInfo = new Dining.Models.AppInfoModel(" + JSON.stringify(appInfo) + ");Dining.start(); });",
 
       send = function() {
         fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
@@ -271,7 +283,7 @@ exports.index = function(req, res){
       createUserModel(user, function(user) {
         req.session.user = user;
         addUserToSession(user, req, function() {
-          init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+          init = "$(document).ready(function() { Dining.appInfo = new Dining.Models.AppInfoModel(" + JSON.stringify(appInfo) + ");Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
           send();
         });
       });
@@ -285,7 +297,7 @@ exports.index = function(req, res){
       getUser(userId, true, function(user) {
         createUserModel(user, function(user) {
           addUserToSession(user, req, function() {
-            init = "$(document).ready(function() { Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+            init = "$(document).ready(function() { Dining.appInfo = new Dining.Models.AppInfoModel(" + JSON.stringify(appInfo) + ");Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
             send();
           });
         });
@@ -783,7 +795,7 @@ exports.activateUser = function(req, res) {
   console.log("Begin user activation:", req.params.token);
   var decipher = crypto.createDecipher('aes-256-cbc', key);
       decipher.update(req.params.token, 'base64', 'utf8');
-  var userId = decipher.final('utf8'),
+  var userId = decodeURIComponent(decipher.final('utf8')),
       userAttributes = {
         activated: true
       };
@@ -1087,7 +1099,7 @@ var sendActivationEmail = function(user, callback) {
       // An example users object with formatted email function
       var cipher = crypto.createCipher('aes-256-cbc', key);
       cipher.update(user.id.toString(), 'utf8', 'base64');
-      user.token = cipher.final('base64');
+      user.token = encodeURIComponent(cipher.final('base64'));
       // Send a single email
       template('activation', user, function(err, html, text) {
         if (err) {

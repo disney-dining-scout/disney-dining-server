@@ -9,7 +9,8 @@ Dining.module('Settings', function(Settings, App, Backbone, Marionette, $, _) {
     appRoutes: {
       'user-profile'            : 'showUserProfile',
       'change-password'         : 'showChangePassword',
-      'update-notifications'    : 'showNotifications'
+      'update-notifications'    : 'showNotifications',
+      'payments'                : 'showPayments'
     }
   });
 
@@ -48,6 +49,12 @@ Dining.module('Settings', function(Settings, App, Backbone, Marionette, $, _) {
 
     showNotifications: function() {
       var view = new Settings.Views.NotificationsView({model: App.user});
+      App.layoutView.main.show(view);
+      App.vent.trigger("hideMenu");
+    },
+
+    showPayments: function() {
+      var view = new Settings.Views.PaymentsView({model: App.user});
       App.layoutView.main.show(view);
       App.vent.trigger("hideMenu");
     }

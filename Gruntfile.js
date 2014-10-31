@@ -32,6 +32,8 @@ module.exports = function(grunt) {
         'bower_components/switchery/dist/switchery.js',
         'lib/seiyria-bootstrap-slider/bootstrap-slider.js',
         'lib/jquery.cookie/jquery.cookie.js',
+        'lib/jquery.dfp.js/jquery.dfp.js',
+        'lib/card/card.js',
         'lib/bootcards/bootcards.js'
       ],
       cssSrc = [
@@ -51,6 +53,7 @@ module.exports = function(grunt) {
         'lib/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.css',
         'bower_components/switchery/dist/switchery.css',
         'lib/seiyria-bootstrap-slider/bootstrap-slider.css',
+        'lib/card/card.css',
         'assets/css/custom.css'
       ];
   // Project configuration.

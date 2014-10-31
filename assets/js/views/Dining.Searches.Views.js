@@ -142,6 +142,23 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         60000
       );
 
+      if (moment(App.user.get("subExpires")).isBefore()) {
+        $('.adunit', this.$el).dfp({
+          dfpID:'177812472',
+          enableSingleRequest: true,
+          sizeMapping: {
+            'my-default': [
+              {browser: [1024, 768], ad_sizes: [728, 90]},
+              {browser: [800, 600], ad_sizes: [468, 90]},
+              {browser: [640, 480], ad_sizes: [320, 50]},
+              {browser: [   0,   0], ad_sizes: [120, 60]}
+            ],
+          }
+        });
+      } else {
+        $('.adunit', this.$el).hide();
+      }
+
 
     },
 

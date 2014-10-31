@@ -334,6 +334,40 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
 
   });
 
+  Views.PaymentsView = Marionette.ItemView.extend({
+    template: Templates.paymentsView,
+    className: "row",
+    events: {
+      "click .btn-update"    : "updateAccount"
+    },
+    ui: {
+      name: "#name"
+    },
+    initialize: function() {
+
+    },
+    onRender: function() {
+
+    },
+    onShow: function(e) {
+      var name = this.model.get("firstName") + " " + this.model.get("lastName");
+      this.ui.name.val(name);
+      $('#cardForm').card({
+        container: '.card-wrapper',
+
+        // passing in a messages object is another way to
+        // override the default card values
+        values: {
+          name: name,
+        }
+      });
+    },
+    makePayment: function(e) {
+
+    }
+
+  });
+
   // Application Event Handlers
   // --------------------------
 

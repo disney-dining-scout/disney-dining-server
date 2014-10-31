@@ -5,6 +5,14 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
 
   //Models.states = _.extend({'false': 'Please select a state'}, Data.states);
 
+  Models.AppInfoModel = Backbone.Model.extend({
+    urlRoot:'',
+    defaults: {
+      rev: "00000",
+      tag: "0.0.1"
+    }
+  });
+
   Models.AlertModel = Backbone.Model.extend({
     urlRoot:'',
     idAttribute: "id",
@@ -142,7 +150,8 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       existing: false,
       emailTimeout: 14400,
       smsTimeout: 14400,
-      activated: false
+      activated: false,
+      subExpires: ''
     },
     relations: {
       'searches': Models.Searches

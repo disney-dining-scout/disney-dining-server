@@ -55,7 +55,7 @@ Dining.vent.on('initBody', function (action) {
   action = action  || {};
 
   if (Dining.layoutView === null) {
-    Dining.layoutView = new Dining.Layout.Body();
+    Dining.layoutView = new Dining.Layout.Body({model: Dining.appInfo});
     Dining.layoutView.render();
     Dining.body.show(Dining.layoutView);
     Dining.layoutView.addRegions({

@@ -1,6 +1,6 @@
 {
   "name": "disney-dining-server",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "dependencies": {
     "underscore": "latest",
     "express.io": "latest",
@@ -22,7 +22,8 @@
     "mariasql": "latest",
     "bcrypt": "latest",
     "email-templates": "latest",
-    "nodemailer-html-to-text": "latest"
+    "nodemailer-html-to-text": "latest",
+    "git-rev-sync": "latest"
   },
   "devDependencies": {
     "grunt": "latest",
