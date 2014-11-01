@@ -794,12 +794,12 @@ exports.sendUserActivation = function(req, res) {
 exports.activateUser = function(req, res) {
   console.log("Begin user activation:", req.params.token);
   var decipher = crypto.createDecipher('aes-256-cbc', key);
-      decipher.update(req.params.token, 'base64', 'utf8');
-  var userId = decodeURIComponent(decipher.final('utf8')),
+      decipher.update(req.params.token, 'hex', 'utf8');
+  var userId = decipher.final('utf8'),
       userAttributes = {
         activated: true
       };
-
+  console.log("userId:", userId);
   models.Users.find(userId).success(function(user) {
     user.updateAttributes(userAttributes).success(function(user) {
       user = user.toJSON();
@@ -1098,8 +1098,8 @@ var sendActivationEmail = function(user, callback) {
       // Send a single email
       // An example users object with formatted email function
       var cipher = crypto.createCipher('aes-256-cbc', key);
-      cipher.update(user.id.toString(), 'utf8', 'base64');
-      user.token = encodeURIComponent(cipher.final('base64'));
+      cipher.update(user.id.toString(), 'utf8', 'hex');
+      user.token = cipher.final('hex');
       // Send a single email
       template('activation', user, function(err, html, text) {
         if (err) {
