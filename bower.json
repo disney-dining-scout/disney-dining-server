@@ -1,6 +1,6 @@
 {
   "name": "disney-dining-server",
-  "version": "0.2.6",
+  "version": "1.0.0",
   "dependencies": {
     "handlebars": "~2.0.0",
     "bootstrap": "*",
@@ -16,6 +16,7 @@
     "selectize": "*",
     "ladda-bootstrap": "*",
     "moment": "*",
+    "moment-timezone": "*",
     "bootcards": "0.1.0",
     "bootstrap-jasny": "*",
     "backbone.supermodel": "https://github.com/laoshanlung/backbone.supermodel.git",
@@ -31,7 +32,10 @@
     "jquery.cookie": "*",
     "hook.js": "https://github.com/jordansinger/Hook.js.git",
     "jquery.dfp.js":"*",
-    "card": "*"
+    "jquery.payment": "*",
+    "card": "*",
+    "bootstrap-select": "*",
+    "jwt-decode": "*"
   },
   "resolutions": {
     "handlebars": "~2.0.0"

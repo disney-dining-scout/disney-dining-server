@@ -35,9 +35,14 @@ Dining.module('Searches', function(Searches, App, Backbone, Marionette, $, _) {
 
     showSearches: function() {
       var models = (App.user.get('searches').length > 0) ? App.user.get('searches').models : null,
+          HeaderModel = Backbone.Model.extend(),
+          headerModel = new HeaderModel({
+            user: Dining.user.toJSON(),
+            appInfo: Dining.appInfo.toJSON()
+          }),
           searches = new App.Models.Searches(models),
           view = new Searches.Views.SearchesView({model: App.user, collection: searches}),
-          header = new App.Layout.Header({model: Dining.user});
+          header = new App.Layout.Header({model: headerModel});
       App.layoutView.header.show(header);
       App.layoutView.main.show(view);
       //$("body").removeClass();

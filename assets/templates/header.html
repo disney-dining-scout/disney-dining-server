@@ -1,15 +1,15 @@
 <div class="navbar-header pull-left">
   <a class="navbar-brand" href="searches"><i class="fa pull-left fa-cutlery"></i> Disney Dining Scout</a>
 </div>
-{{#if id}}
+{{#if user.id}}
 <div class="pull-right">
   <button type="button" class="btn btn-default navbar-btn" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
-    <i class="fa fa-user fa-fw"></i> <span class="settingsUserName">{{firstName}} {{lastName}}</span>
+    <i class="fa fa-user fa-fw"></i> <span class="settingsUserName">{{user.firstName}} {{user.lastName}}</span>
   </button>
 </div>
 
 <nav id="navMenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation">
-  <h3><i class="fa fa-user fa-fw"></i> {{firstName}} {{lastName}}</h3>
+  <h3><i class="fa fa-user fa-fw"></i> {{user.firstName}} {{user.lastName}}</h3>
   <ul class="nav navmenu-nav">
     <li>
       <a href="user-profile"><i class="fa fa-user fa-fw"></i> User Profile</a>
@@ -21,13 +21,16 @@
       <a href="update-notifications"><i class="fa fa-envelope fa-fw"></i> Notification Settings</a>
     </li>
     <li>
-      <a href="payments"><i class="fa fa-credit-card fa-fw"></i> Payments</a>
+      <a href="payments"><i class="fa fa-credit-card fa-fw"></i> Subscription and Payments</a>
     </li>
     <li class="divider"></li>
     <li class="logout">
       <a href="logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
     </li>
   </ul>
+  <div class="col-md-12 pull-right">
+    <div class="pull-right text-muted"><small>{{appInfo.tag}}.{{appInfo.rev}}</small></div>
+  </div>
 </nav>
 
 

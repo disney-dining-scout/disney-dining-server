@@ -1,0 +1,69 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <div class="btn-group pull-left">
+      <button class="btn btn-danger btn-close" data-dismiss="modal">
+        Cancel
+      </button>
+    </div>
+    <h3 class="modal-title">
+      Make Payment
+    </h3>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+    <div class="col-md-12">
+        <strong>Select a service level</strong>
+    </div>
+    <div class="btn-group-vertical col-md-12" role="group">
+      <button type="button" class="btn btn-default btn-standard btn-service">Standard (6 months)<span class="badge pull-right"><span class="glyphicon glyphicon-usd"></span>3.99</span></button>
+      <button type="button" class="btn btn-default btn-plus btn-service">Plus (12 months)<span class="badge pull-right"><span class="glyphicon glyphicon-usd"></span>5.99</span></button>
+    </div>
+    <div class="card-wrapper col-md-12" style="margin: 10px 0 10px;"></div>
+    <div class="col-md-12">
+      <form id="cardForm" role="form">
+
+        <div class="form-group">
+          <label for="cardNumber">Card Number</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="number" name="number" placeholder="Valid Card Number"
+                required autofocus />
+            <span class="input-group-addon"><span class="fa fa-credit-card"></span></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cardNumber">Name</label>
+          <input type="text" class="form-control" id="name" name="name" placeholder="Cardholder name" required autofocus />
+        </div>
+
+        <div class="form-group">
+          <label for="expiry">Expiration Date</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="expiry" name="expiry" placeholder="MM/YY" required />
+            <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cvc">Security Code</label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="cvc" name="cvc" placeholder="Security Code" required />
+            <span class="input-group-addon"><span class="fa fa-key"></span></span>
+          </div>
+        </div>
+      </form>
+      <br />
+
+      <ul class="nav nav-pills nav-stacked">
+        <li class="active">
+          <a href="#"><span class="badge pull-right"><span class="glyphicon glyphicon-usd"></span><span class="amount">0.00</span></span> Final Payment</a>
+        </li>
+      </ul>
+      <br/>
+      <button class="btn btn-success btn-lg btn-block btn-pay" role="button" disabled="disabled">Pay</button>
+    </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <small class="pull-left"></small>
+  </div>
+</div>

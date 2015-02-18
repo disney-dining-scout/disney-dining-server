@@ -116,11 +116,12 @@ Dining.module('Public', function(Public, App, Backbone, Marionette, $, _) {
     },
 
     logout: function() {
-        App.user.destroy();
-        $.removeCookie('remember');
-        App.Io.disconnect();
-        App.vent.trigger("hideMenu");
-        Backbone.history.navigate("start", { trigger: true });
+      App.Io.emit('room:leave', "user:"+App.user.get("id"));
+      App.user.destroy();
+      $.removeCookie('remember');
+      App.Io.disconnect();
+      App.vent.trigger("hideMenu");
+      Backbone.history.navigate("start", { trigger: true });
     }
 
   });

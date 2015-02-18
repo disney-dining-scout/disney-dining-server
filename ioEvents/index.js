@@ -1,23 +1,36 @@
-var app = null;
+var config,
+    jwt = require('jsonwebtoken');
 
-exports.connection = function (req) {
-    req.io.emit('talk', {
-        message: 'io event from an io route on the server',
-        user: req.session
-    });
-    console.log("socket.id:", req.session.id, "-", req.socket.id);
+exports.connection = function (socket, data) {
+  var token = null;
+  if ("user" in socket.session) {
+    token = jwt.sign({ user: socket.session.user.id, mobile: false }, config.get("privateKey"), { expiresInMinutes: 60, algorithm: 'RS256' });
+  }
+  socket.emit('talk', {
+    message: 'io event from an io route on the server',
+    objectType: "user-info",
+    user: socket.session,
+    token: token
+  });
 };
 
-exports.onJoinRoom = function(req) {
+exports.onJoinRoom = function(socket, data) {
+  console.log("Join Room", data);
+  socket.join(data);
+};
+
+exports.onLeaveRoom = function(socket, data) {
   //console.log("Join Room", req.data, ":", req.session.id, "-", req.socket.id);
-  req.io.join(req.data);
+  socket.leave(data);
 };
 
-exports.onLeaveRoom = function(req) {
-  //console.log("Join Room", req.data, ":", req.session.id, "-", req.socket.id);
-  req.io.leave(req.data);
+exports.refreshToken = function (socket, data) {
+  var token = jwt.sign({ user: socket.session.user.id }, config.get("privateKey"), { expiresInMinutes: 60, algorithm: 'RS256' });
+  socket.emit('talk', {
+    token: token
+  });
 };
 
-exports.initialize = function(opts) {
-    app = opts.app;
+exports.initialize = function(options) {
+    config = options;
 };

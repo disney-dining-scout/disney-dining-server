@@ -91,7 +91,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       'keypress #password'    :   'onInputKeypress',
       'click .sign-in'        :   'logIn',
       'click .create'         :   'createAccount',
-      'click .forgotPassword' :   'forgotPassword'
+      'click .forgotPassword' :   'forgotPassword',
+      'click .terms'          :   'showTerms'
     },
 
     ui: {
@@ -107,7 +108,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       zipCode: '#zipCode',
       sendEmail: '#sendEmail',
       sendTxt: '#sendTxt',
-      activationCode: '#activationCode',
+      eula: '#eula',
       remember: '#remember'
     },
 
@@ -157,11 +158,27 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
             });
         }
       });
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if (e.target.hash === "#new") {
+          $(".btn-primary").attr("disabled", "disabled");
+        } else {
+          $(".btn-primary").removeAttr("disabled");
+        }
+      });
+
       $('#phone').inputmask({
         mask: '(999) 999-9999'
       });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
+      this.switcheryEula = new Switchery($("#eula")[0]);
+      document.querySelector('#eula').onchange = function(state) {
+        if (this.checked) {
+          $(".btn-primary").removeAttr("disabled");
+        } else {
+          $(".btn-primary").attr("disabled", "disabled");
+        }
+      };
     },
 
     onInputKeypress: function(evt) {
@@ -207,6 +224,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
               //App.login.$el.hide();
               App.vent.trigger("loggedin", App.layoutView);
               App.user.urlRoot = "/api/user";
+              App.Io.emit('room:join', "user:"+App.user.get("id"));
               Backbone.history.navigate("searches", { trigger: true });
             },
             error: function(model, xhr, options) {
@@ -242,7 +260,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         carrier: this.ui.carrier.val().trim(),
         sendTxt: this.ui.sendTxt[0].checked,
         sendEmail: this.ui.sendEmail[0].checked,
-        activationCode: this.ui.activationCode.val().trim()
+        eula: moment.utc().format("YYYY-MM-DD HH:m:ssZ")
       });
       if (user.isValid()) {
 
@@ -280,8 +298,13 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
 
     forgotPassword: function(e) {
       var resetPasswordModel = new App.Models.PasswordReset(),
-          restPasswordModal = new Views.RetrievePasswordModal({model: resetPasswordModel});
+          restPasswordModal =new Views.RetrievePasswordModal({model: resetPasswordModel});
       App.layoutView.modal.show(restPasswordModal);
+    },
+
+    showTerms: function(e) {
+      var termsModal = new Views.TermsModal({model: this.model});
+      App.layoutView.modal.show(termsModal);
     }
   });
 
@@ -348,6 +371,17 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       $("#"+model.get("error"), this.$el).addClass(alert.get("class"));
       $(alert.$el).prependTo(".modal-body", this.$el);
 
+    }
+  });
+
+  Views.TermsModal = Backbone.Modal.extend({
+    template: Templates.terms,
+    cancelEl: '.btn-close',
+    initialize: function(options) {
+      _.extend(this, _.pick(options, "collection"));
+      this.ui = {};
+    },
+    onShow: function() {
     }
   });
 

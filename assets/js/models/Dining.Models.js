@@ -94,7 +94,7 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       user: '',
       enabled: true,
       deleted: false,
-      created: moment.utc().format("YYYY-MM-DD HH:m:ssZ")
+      createdAt: moment.utc().format("YYYY-MM-DD HH:m:ssZ")
     },
     relations: {
       'restaurant': Models.Restaurant,
@@ -127,6 +127,29 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     }
   });
 
+  Models.Payment = Backbone.SuperModel.extend({
+    urlRoot:'/api/payment',
+    idAttribute: "id",
+    defaults: {
+      date: moment.utc().format("YYYY-MM-DD HH:m:ssZ"),
+      userId: 0,
+      amount: 0.00,
+      subscription: 'standard',
+      expires: moment.utc().format("YYYY-MM-DD HH:m:ssZ"),
+      transId: '',
+      discountCode: 0,
+      discount: 0.00,
+      cardType: "",
+      last4: 0,
+      failureCode: "",
+      failureMess: ""
+    }
+  });
+
+  Models.Payments = Backbone.Collection.extend({
+    model: Models.Payment
+  });
+
   Models.Logs = Backbone.Collection.extend({
     model: Models.Log
   });
@@ -143,9 +166,9 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       firstName: '',
       lastName: '',
       carrier: 0,
-      activationCode: '',
       sendEmail: true,
       sendTxt: false,
+      eula: moment.utc().format("YYYY-MM-DD HH:m:ssZ"),
       checkAttrs: false,
       existing: false,
       emailTimeout: 14400,
@@ -154,7 +177,8 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       subExpires: ''
     },
     relations: {
-      'searches': Models.Searches
+      'searches': Models.Searches,
+      'payments': Models.Payments
     },
     validate: function(attrs, options) {
       if (attrs.checkAttrs) {
@@ -189,13 +213,6 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
             "message": "Zip code must be entered"
           };
         }
-
-        if (this.isNew() && attrs.activationCode.length === 0) {
-          return {
-            "error": "activationCode",
-            "message": "Your invitation code must be entered"
-          };
-        }
       } else {
         if (attrs.email.length === 0) {
           return {
@@ -214,5 +231,54 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       //if (this.isNew()) this.set('created', Date.now());
     }
   });
+
+  Models.Charge = Backbone.SuperModel.extend({
+    urlRoot:'/api/charge',
+    idAttribute: "id",
+    defaults: {
+      userId: 0,
+      number: "",
+      expiration: "",
+      name: "",
+      security: "",
+      amount: null,
+      subscription: null,
+      discount: 0.00,
+      dicountCode: null,
+      cardType: ''
+    },
+    validate: function(attrs, options) {
+      var type = $.payment.cardType(attrs.number),
+          expiry = $.payment.cardExpiryVal(attrs.expiration);
+
+      if ($.payment.validateCardNumber(attrs.number) === false) {
+        return {
+          "error": "number",
+          "message": "Your credit card number is invalid"
+        };
+      } else if ($.payment.validateCardExpiry(expiry.month, expiry.year) === false) {
+        return {
+          "error": "expiry",
+          "message": "Your credit card expiration date is invalid"
+        };
+      } else if ($.payment.validateCardCVC(attrs.security, type) === false) {
+        return {
+          "error": "cvc",
+          "message": "Your credit card security code is invalid"
+        };
+      } else if (attrs.name.length < 1) {
+        return {
+          "error": "name",
+          "message": "Your missing the credit card's biller full name"
+        };
+      } else if (attrs.amount === null) {
+        return {
+          "error": "amount",
+          "message": "A service level must be selected"
+        };
+      }
+    }
+  });
+
 
 });

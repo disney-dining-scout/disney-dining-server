@@ -129,6 +129,14 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       App.vent.on('searches:showAlert', function (model) {
         view.showAlert(model);
       });
+      
+      App.vent.on('searches:add', function (model) {
+        view.modelAdded(model);
+      });
+      
+      App.vent.on('searches:delete', function (model) {
+        view.modelDeleted(model);
+      });
     },
 
     onRender: function() {
@@ -201,8 +209,12 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       this.collection.reset(filtered);
     },
 
-    modelAdded: function(e) {
-      var test = e;
+    modelAdded: function(model) {
+      this.collection.add(model);
+    },
+    
+    modelDeleted: function(model) {
+      this.collection.remove(model);
     },
 
     refreshModel: function(data) {
@@ -344,15 +356,15 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       **/
     },
     beforeSubmit: function(e) {
-      var dateTime = $("#date", this.$el).val() + " " + $("#time", this.$el).val(),
+      var offset = moment($("#date", this.$el).val(), "dddd, MMMM DD YYYY").tz("America/New_York").format("Z"),
+          dateTime = $("#date", this.$el).val() + " " + $("#time", this.$el).val() + " " + offset,
           isThisNew = (this.model.get("uid") === "") ? true : false,
           modal = this,
-          changedAttributes = this.model.changedAttributes(),
-          offset = (moment(dateTime).isDST()) ? 240 - moment(dateTime).zone() : 300 - moment(dateTime).zone();
+          changedAttributes = this.model.changedAttributes();
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
         "partySize": $("#partySize", this.$el).val(),
-        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A").utc().add("minutes", offset).format("YYYY-MM-DD HH:mm:ssZ"),
+        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A Z").tz("UTC").format("YYYY-MM-DD HH:mm:ssZ"),
         "user": App.user.get("id")
       });
       if (this.model.isValid()) {
@@ -371,13 +383,15 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
             var restaurant = model.get("restaurant").get("name"),
                 message = "Dining Search for " + restaurant + " has been";
             Dining.fixTime(model);
-            if (isThisNew) {
-              var searches = App.user.get('searches');
+            var searches = App.user.get('searches'),
+                s = searches.findWhere({id: model.id});
+            if (typeof s === "undefined") {
               message += " created.";
               searches.add(model);
               if (modal.collection) {
                 modal.collection.add(model);
               }
+              App.vent.trigger("searches:add", model);
             } else {
               message += " updated.";
             }

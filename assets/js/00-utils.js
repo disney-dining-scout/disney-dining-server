@@ -73,6 +73,39 @@ $(document).on('click', 'a:not([data-bypass],[target])', function(evt) {
     }
 });
 
+// Store "old" sync function
+var backboneSync = Backbone.sync;
+
+// Now override
+Backbone.sync = function (method, model, options) {
+
+  /*
+   * "options" represents the options passed to the underlying $.ajax call
+   */
+  var token = window.localStorage.getItem('token');
+
+  if (token) {
+    options.headers = {
+      'Authorization': "Bearer " + token
+    };
+  }
+
+  // call the original function
+  backboneSync(method, model, options);
+};
+
+$.ajaxPrefilter(function( options ) {
+  if ( !options.beforeSend) {
+    options.beforeSend = function (xhr) { 
+      var token = window.localStorage.getItem('token');
+
+      if (token) {
+        xhr.setRequestHeader('Authorization', "Bearer " + token);
+      }
+    };
+  }
+}); 
+
 //  format an ISO date using Moment.js
 //  http://momentjs.com/
 //  moment syntax example: moment(Date("2011-07-18T15:50:52")).format("MMMM YYYY")

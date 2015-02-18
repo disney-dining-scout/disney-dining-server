@@ -16,11 +16,14 @@ var fs = require('fs'),
     Sequelize = require("sequelize"),
     bcrypt = require('bcrypt'),
     Swag = require('swag'),
-    moment = require('moment'),
+    moment = require('moment-timezone'),
     redis = require("redis"),
+    jwt = require('jsonwebtoken'),
     git = require('git-rev-sync'),
     emailTemplatesDir = path.resolve(__dirname, '..', 'email', 'templates'),
     emailTemplates = require('email-templates'),
+    Push = require('node-pushnotifications'),
+    stripe, push,
     db = {},
     Schemas = {},
     models = {},
@@ -29,8 +32,8 @@ var fs = require('fs'),
     opts = {},
     config = {},
     reconnectTries = 0, cacheBuster = moment().format("X"),
-    hmac, signature, connection, client, key,
-    transport, acl, subClient, analytics = "", appInfo = {},
+    hmac, signature, connection, client, key, cert,
+    transport, acl, subClient, analytics = "", appInfo = {}, pubClient,
     CheckinMemberFieldValues, RegMemberFieldValues, CheckinGroupMembers,
     RegGroupMembers, CheckinEventFields, CheckinBiller, RegBiller,
     CheckinBillerFieldValues, RegBillerFieldValues, RegEventFees,
@@ -59,12 +62,15 @@ exports.initialize = function() {
 
   //Initialize Email Client
   var setSubscription = function() {
-        subClient.subscribe("disneydining");
-        subClient.on("message", function (channel, message) {
+        subClient.psubscribe("disneydining:*");
+        subClient.on("pmessage", function (pattern, channel, message) {
           console.log("channel ", channel, ": ", message);
-          message = JSON.parse(message);
-          message.objectType = "search-update";
-          opts.io.room(message.uid).broadcast('talk', message);
+          if (channel === "disneydining:searchupdate") {
+            message = JSON.parse(message);
+            message.objectType = "search-update";
+            opts.io.to(message.uid).emit('talk', message);
+            //opts.io.room(message.uid).broadcast('talk', message);
+          }
         });
       };
   transport = nodemailer.createTransport(smtpTransport({
@@ -76,12 +82,20 @@ exports.initialize = function() {
 
   appInfo = {
     rev: git.short(),
-    tag: git.tag()
+    tag: "0.2.8"
   };
   key = opts.configs.get("key");
 
+  stripe = require("stripe")(
+    opts.configs.get("stripe:key")
+  );
+
   console.log(opts.configs.get("redis"));
   subClient = redis.createClient(
+    opts.configs.get("redis:port"),
+    opts.configs.get("redis:host")
+  );
+  pubClient = redis.createClient(
     opts.configs.get("redis:port"),
     opts.configs.get("redis:host")
   );
@@ -93,8 +107,18 @@ exports.initialize = function() {
         setSubscription();
       }
     );
+    pubClient.select(
+      opts.configs.get("redis:db"),
+      function() {
+        //console.log("Redis DB set to:", config.get("redis:db"));
+      }
+    );
   } else {
     setSubscription();
+  }
+
+  if (opts.configs.get("push")) {
+    push = new Push(opts.configs.get("push"));
   }
 
   db.dining = new Sequelize(
@@ -109,7 +133,8 @@ exports.initialize = function() {
         pool: { maxConnections: 5, maxIdleTime: 30},
         define: {
           freezeTableName: true,
-          timestamps: false
+          timestamps: true,
+          paranoid: true
         }
   });
 
@@ -121,16 +146,9 @@ exports.initialize = function() {
   models.UserSearches = db.dining.define('userSearches', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     restaurant:           { type: Sequelize.STRING(255) },
-    created:              {
-      type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
-      get: function(name) {
-        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
-      }
-    },
     date:                 {
       type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
+      defaultValue: null,
       get: function(name) {
         return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
       }
@@ -142,14 +160,14 @@ exports.initialize = function() {
     deleted:              { type: Sequelize.BOOLEAN, defaultValue: 0 },
     lastEmailNotification:{
       type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
+      defaultValue: null,
       get: function(name) {
         return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
       }
     },
     lastSMSNotification:  {
       type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
+      defaultValue: null,
       get: function(name) {
         return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
       }
@@ -160,7 +178,7 @@ exports.initialize = function() {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     lastChecked:          {
       type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
+      defaultValue: null,
       get: function(name) {
         return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
       }
@@ -174,7 +192,7 @@ exports.initialize = function() {
       uid:                  { type: Sequelize.STRING(255) },
       dateSearched:         {
         type: Sequelize.DATE,
-        defaultValue: '1969-01-01 00:00:00',
+        defaultValue: null,
         get: function(name) {
           return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
         }
@@ -187,13 +205,6 @@ exports.initialize = function() {
 
   models.Users = db.dining.define('users', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-    created:              {
-      type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
-      get: function(name) {
-        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
-      }
-    },
     email :               { type: Sequelize.STRING(255) },
     password :            { type: Sequelize.STRING(255) },
     firstName :           { type: Sequelize.STRING(255) },
@@ -206,9 +217,17 @@ exports.initialize = function() {
     emailTimeout:         { type: Sequelize.INTEGER, defaultValue: 14400 },
     smsTimeout:           { type: Sequelize.INTEGER, defaultValue: 14400 },
     activated :           { type: Sequelize.BOOLEAN, defaultValue: 0 },
+    admin :               { type: Sequelize.BOOLEAN, defaultValue: 0 },
     subExpires:           {
       type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
+      defaultValue: null,
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
+    eula:           {
+      type: Sequelize.DATE,
+      defaultValue: null,
       get: function(name) {
         return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
       }
@@ -222,13 +241,21 @@ exports.initialize = function() {
     gateway :             { type: Sequelize.STRING(255) }
   });
 
+  models.DeviceTokens = db.dining.define('deviceTokens', {
+    id:                   { type: Sequelize.INTEGER(11), primaryKey: true },
+    userId :              { type: Sequelize.INTEGER(11) },
+    type :                { type: Sequelize.ENUM('android','ios','win') },
+    token :               { type: Sequelize.STRING(255) },
+    uuid:                 { type: Sequelize.STRING(255) }
+  });
+
   models.PasswordReset = db.dining.define('passwordReset', {
     id:                   { type: Sequelize.INTEGER(11), primaryKey: true },
     user :                { type: Sequelize.INTEGER(11) },
     token :               { type: Sequelize.STRING(255) },
     expire :              {
       type: Sequelize.DATE,
-      defaultValue: '1969-01-01 00:00:00',
+      defaultValue: null,
       get: function(name) {
         return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
       }
@@ -242,6 +269,33 @@ exports.initialize = function() {
     used :                { type: Sequelize.BOOLEAN, defaultValue: 0 }
   });
 
+  models.Payments = db.dining.define('payments', {
+    id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    date:                 {
+      type: Sequelize.DATE,
+      defaultValue: null,
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
+    userId :              { type: Sequelize.INTEGER },
+    amount   :            { type: Sequelize.DECIMAL(10,2) },
+    subscription :        { type: Sequelize.ENUM('standard', 'plus') },
+    expires:              {
+      type: Sequelize.DATE,
+      defaultValue: null,
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    },
+    transId :             { type: Sequelize.STRING },
+    cardType :            { type: Sequelize.STRING(255) },
+    last4 :               { type: Sequelize.STRING(4) },
+    discountCode:         { type: Sequelize.INTEGER },
+    discount :            { type: Sequelize.DECIMAL(10,2) },
+    failureCode:          { type: Sequelize.STRING(255) },
+    failureMess:          { type: Sequelize.STRING }
+  });
 };
 
 /************
@@ -309,85 +363,49 @@ exports.index = function(req, res){
   }
 };
 
-//Log in an existing user, starting a session
-
-
 //Add a user
 exports.addUser = function(req, res) {
   console.log("adding user");
-  var code = req.body.activationCode;
-  if ("activationCode" in req.body) {
-    models.ActivationCodes.find({
-      where: {
-        token: code,
-        used: 0
-      }
-    }).success(function(token) {
-      if (token) {
-        var request = req,
-            user = {
-              created: moment().format("YYYY-MM-DD HH:m:ss"),
-              email: req.body.email,
-              password: null,
-              firstName: req.body.firstName,
-              lastName: req.body.lastName,
-              zipCode: req.body.zipCode,
-              phone: req.body.phone,
-              carrier: req.body.carrier,
-              sendTxt: req.body.sendTxt,
-              sendEmail: req.body.sendEmail,
-              emailTimeout: req.body.emailTimeout,
-              smsTimeout: req.body.smsTimeout
-            };
-        bcrypt.hash(req.body.password, 8, function(err, hash) {
-          user.password = hash;
-          models.Users.create(user).success(function(userRec) {
-            //console.log(userRec);
-            userRec = userRec.toJSON();
-            createUserModel(userRec, function(user) {
-              expireActivationCode(code, function(code) {
-                console.log("Sending back new user");
-                addUserToSession(user, request, function() {
-                  delete user.password;
-                  sendActivationEmail(user, function() {
-                    sendBack(user, 200, res);
-                  });
-                });
-              });
-            });
-          }).error(function(error) {
-            var errorMsg = {
-                  success: false,
-                  data: {
-                    message: "This email is already in use. Please use another. Do you already have an account?",
-                    code: error.code,
-                    error: "email"
-                  }
-                };
-            sendBack(errorMsg, 500, res);
+  var request = req,
+      user = {
+        email: req.body.email,
+        password: null,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        zipCode: req.body.zipCode,
+        phone: req.body.phone,
+        carrier: req.body.carrier,
+        sendTxt: req.body.sendTxt,
+        sendEmail: req.body.sendEmail,
+        emailTimeout: req.body.emailTimeout,
+        smsTimeout: req.body.smsTimeout
+      };
+  bcrypt.hash(req.body.password, 8, function(err, hash) {
+    user.password = hash;
+    models.Users.create(user).success(function(userRec) {
+      //console.log(userRec);
+      userRec = userRec.toJSON();
+      createUserModel(userRec, function(user) {
+        console.log("Sending back new user");
+        addUserToSession(user, request, function() {
+          delete user.password;
+          sendActivationEmail(user, function() {
+            sendBack(user, 200, res);
           });
         });
-      } else {
-        var errorMsg = {
+      });
+    }).error(function(error) {
+      var errorMsg = {
             success: false,
             data: {
-              message: "Invalid invitation code",
-              code: "ERR_INVALID_INVITE_CODE"
+              message: "This email is already in use. Please use another. Do you already have an account?",
+              code: error.code,
+              error: "email"
             }
           };
-        sendBack(errorMsg, 401, res);
-      }
+      sendBack(errorMsg, 500, res);
     });
-  } else {
-    var errorMsg = {
-          success: false,
-          data: {
-            message: "Invalid invitation code",
-            code: "ERR_INVALID_INVITE_CODE"
-          }
-        };
-    sendBack(errorMsg, 401, res);
-  }
+  });
 };
 
 //Update User
@@ -408,12 +426,24 @@ exports.updateUser = function(req, res) {
   models.Users.find(req.params.userId).success(function(user) {
     user.updateAttributes(userAttributes).success(function(user) {
       user = user.toJSON();
+      opts.io.to("user:"+user.id).emit(
+        'talk',
+        {
+          objectType: "user-update",
+          id: user.id
+        }
+      );
+      pubClient.publish("disneydining:userupdate", JSON.stringify(user));
       getUser(user.id, true, function(user) {
-        createUserModel(user, function(user) {
-          addUserToSession(user, req, function() {
-            sendBack(user, 200, res);
+        if (req.user.mobile) {
+          sendBack(user, 200, res);
+        } else {
+          createUserModel(user, function(user) {
+            addUserToSession(user, req, function() {
+              sendBack(user, 200, res);
+            });
           });
-        });
+        }
       });
     });
   });
@@ -465,6 +495,68 @@ exports.authUser = function(req, res) {
       sendBack(errorMsg, 401, res);
     }
   });
+};
+
+exports.mobileAuth = function(req, res) {
+  var request = req,
+      resource = res,
+      processUser = function(user) {
+        user = user.toJSON();
+        createUserModel(user, function(user) {
+          var token = jwt.sign({ user: user.id, mobile: true }, opts.configs.get("privateKey"), { expiresInMinutes: 1440 * 60, algorithm: 'RS256' }),
+              data = {
+                user: user,
+                token: token
+              };
+          sendBack(data, 200, resource);
+        });
+      },
+      now = moment.utc().format("YYYY-MM-DD HH:mm:ss");
+  models.Users.find(
+    { 
+      where: { 
+        email: req.body.email,
+        subExpires: {
+          gte: now
+        }
+      } 
+    }
+  ).success(function(user) {
+    if (user !== null) {
+      bcrypt.compare(req.body.password, user.password, function(err, res) {
+        if (res) {
+          processUser(user);
+        } else {
+          var errorMsg = {
+                status: "error",
+                messsage: {
+                  response: "Unable to authenticate user"
+                }
+              };
+          sendBack(errorMsg, 401, resource);
+        }
+      });
+    } else {
+      var errorMsg = {
+            status: "error",
+            messsage: {
+              response: "Unable to authenticate user"
+            }
+          };
+      sendBack(errorMsg, 401, resource);
+    }
+  });
+};
+
+exports.addUserDeviceToken = function(req, res) {
+  var callback = function(result) {
+        var code = ("success" in result) ? 500 : 200;
+        sendBack(result, code, res);
+      },
+      device = req.body,
+      user = req.user.user;
+  device.userId = user;
+  addUserDeviceToken(device, callback);
 };
 
 exports.resetPassword = function(req, res) {
@@ -625,7 +717,6 @@ exports.addSearch = function(req, res) {
         'date',
         'enabled',
         'deleted',
-        'created',
         'user',
         'partySize'
       ],
@@ -646,10 +737,22 @@ exports.addSearch = function(req, res) {
 
     getUserSearch(search.id, function(search) {
       checkUids(null, uid, function() {
-        createUserModel(req.session.user, function(user) {
-          req.session.user = user;
+        opts.io.to("user:"+req.user.user).emit(
+          'talk',
+          {
+            objectType: "search-add",
+            id: search.id
+          }
+        );
+        pubClient.publish("disneydining:searchadd", JSON.stringify(search));
+        if (req.user.mobile) {
           sendBack(search, 200, res);
-        });
+        } else {
+          createUserModel(req.session.user, function(user) {
+            req.session.user = user;
+            sendBack(search, 200, res);
+          });
+        }
       });
     });
   });
@@ -665,7 +768,6 @@ exports.updateSearch = function(req, res) {
           'date',
           'enabled',
           'deleted',
-          'created',
           'user',
           'partySize'
         ],
@@ -675,7 +777,8 @@ exports.updateSearch = function(req, res) {
         results[key] = req.body[key];
       }
     });
-    results.restaurant = req.body.restaurantId;
+    console.log(results);
+    results.restaurant = req.body.restaurantId || req.body.restaurant;
     results.id = req.params.searchId;
     var oldUid = results.uid,
         uid = generateUid(results);
@@ -687,13 +790,33 @@ exports.updateSearch = function(req, res) {
         getUserSearch(search.id, function(search) {
           if (oldUid !== uid) {
             checkUids(oldUid, uid, function() {
-              createUserModel(req.session.user, function(user) {
-                addUserToSession(user, req, function() {
-                  sendBack(search, 200, res);
+              opts.io.to("user:"+req.user.user).emit(
+                'talk',
+                {
+                  objectType: "search-edit",
+                  id: search.id
+                }
+              );
+              pubClient.publish("disneydining:searchedit", JSON.stringify(search));
+              if (req.user.mobile === false) {
+                createUserModel(req.session.user, function(user) {
+                  addUserToSession(user, req, function() {
+                    sendBack(search, 200, res);
+                  });
                 });
-              });
+              } else {
+                sendBack(search, 200, res);
+              }
             });
           } else {
+            opts.io.to("user:"+req.user.user).emit(
+              'talk',
+              {
+                objectType: "search-edit",
+                id: search.id
+              }
+            );
+            pubClient.publish("disneydining:searchedit", JSON.stringify(search));
             sendBack(search, 200, res);
           }
         });
@@ -702,8 +825,17 @@ exports.updateSearch = function(req, res) {
   });
 };
 
+exports.getUserSearches = function(req, res) {
+  var user = {id: req.user.user};
+  getUserSearches(user, function(searches) {
+    sendBack(searches, 200, res);
+  });
+};
+
+
 exports.getRestaurants = function(req, res) {
-  getRestaurants(function(restaurants) {
+  var lastUpdated = ("lastUpdated" in req.params) ? req.params.lastUpdated : 31536000;
+  getRestaurants(lastUpdated, function(restaurants) {
     sendBack(restaurants, 200, res);
   });
 };
@@ -736,15 +868,28 @@ exports.deleteUserSearch = function(req, res) {
     if (search) {
       var attributes = {
             "deleted": 1,
-            "enabled": 0
+            "enabled": 0,
+            "deletedAt": moment.utc().format("YYYY-MM-DD HH:mm:ss")
           };
       search.updateAttributes(attributes).success(function() {
         checkUids(search.uid, null, function() {
-          createUserModel(req.session.user, function(user) {
-            addUserToSession(user, req, function() {
-              sendBack({}, 200, res);
+          opts.io.to("user:"+req.user.user).emit(
+            'talk',
+            {
+              objectType: "search-delete",
+              id: search.id
+            }
+          );
+          pubClient.publish("disneydining:searchdelete", JSON.stringify({id: search.id}));
+          if (req.user.mobile) {
+            sendBack({}, 200, res);
+          } else {
+            createUserModel(req.session.user, function(user) {
+              addUserToSession(user, req, function() {
+                sendBack({}, 200, res);
+              });
             });
-          });
+          }
         });
       });
     }
@@ -756,12 +901,16 @@ exports.getSearch = function(req, res) {
   getUserSearch(
     req.params.searchId,
     function(search) {
-      if ("session" in req && "user" in req.session) {
-        createUserModel(req.session.user, function(user) {
-          addUserToSession(user, req, function() {
-            sendBack(search, 200, res);
+      if (("session" in req && "user" in req.session) || ("user" in req)) {
+        if (req.user.mobile) {
+          sendBack([search], 200, res);
+        } else {
+          createUserModel(req.session.user, function(user) {
+            addUserToSession(user, req, function() {
+              sendBack(search, 200, res);
+            });
           });
-        });
+        }
       } else {
         var errorMsg = {
           status: "error",
@@ -815,6 +964,87 @@ exports.activateUser = function(req, res) {
 
 };
 
+exports.makePayment = function(req, res) {
+  var payment = req.body;
+  payment.number = payment.number.replace(/\s+/g, '');
+  payment.expiration = payment.expiration.replace(/\s+/g, '');
+  console.log("payment: ", payment);
+  stripe.charges.create({
+    amount: payment.amount * 100,
+    currency: "usd",
+    card: {
+      number: payment.number,
+      exp_month: payment.expiration.split("/")[0],
+      exp_year: payment.expiration.split("/")[1],
+      cvc: payment.security,
+      name: payment.name,
+      address_zip: req.session.user.zipCode
+    },
+    receipt_email: req.session.user.email,
+    description: "Disney Dining charge for " + payment.name
+  }, function(err, charge) {
+    var paid = {};
+    if (err) {
+      console.log("error: ", err);
+      paid = {
+        userId: payment.userId,
+        amount: payment.amount,
+        subscription: payment.subscription,
+        transId: err.raw.charge,
+        date: moment.utc().format("YYYY-MM-DD HH:m:ssZ"),
+        discountCode: payment.discountCode,
+        discount: payment.discount,
+        expires: null,
+        cardType: payment.cardType,
+        last4: payment.number.slice(-4),
+        failureCode: err.code,
+        failureMess: err.message
+      };
+    } else {
+      console.log("charge: ", charge);
+      var expirationDate = expires(payment.subscription, req.session.user);
+      paid = {
+        userId: payment.userId,
+        amount: payment.amount,
+        subscription: payment.subscription,
+        transId: charge.id,
+        date: moment.utc(charge.created, "X").format("YYYY-MM-DD HH:m:ssZ"),
+        discountCode: payment.discountCode,
+        discount: payment.discount,
+        expires: expirationDate,
+        cardType: payment.cardType,
+        last4: charge.card.last4,
+        failureCode: null,
+        failureMess: null
+      };
+    }
+    models.Payments.create(paid).success(function(paymentRec) {
+      if (paid.expires !== null) {
+        updateUserExpires(req.session.user.id, expirationDate, function(user) {
+          req.session.user = user;
+          sendBack(paymentRec, 200, res);
+        });
+      } else {
+        createUserModel(req.session.user, function(user) {
+          req.session.user = user;
+          sendBack(paymentRec, 200, res);
+        });
+      }
+    });
+  });
+};
+
+exports.getUser = function(req, res) {
+  getUser(req.params.userId,true, function(user) {
+    createUserModel(user, function(user) {
+      if (req.user.mobile) {
+        user = [user];
+      }
+      sendBack(user, 200, res);
+    });
+  });
+};
+
 var sendBack = function(data, status, res) {
   res.setHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store');
   res.writeHead(status, { 'Content-type': 'application/json' });
@@ -865,8 +1095,28 @@ var updateUserPassword = function(user, password, cb) {
   });
 };
 
-var getRestaurants = function(callback) {
+var updateUserExpires = function(userId, expires, cb) {
+  var userAttributes = {
+    subExpires: expires
+  };
+  models.Users.find(userId).success(function(user) {
+    user.updateAttributes(userAttributes).success(function(user) {
+      user = user.toJSON();
+      createUserModel(user, function(user) {
+        cb(user);
+      });
+    });
+  });
+};
+
+var getRestaurants = function(updatedAt, callback) {
+  updatedAt = updatedAt || 31536000;
   models.Restaurants.findAll({
+    where: {
+      updatedAt: {
+        gte: moment.utc(updatedAt, "X").format("YYYY-MM-DD HH:m:ssZ")
+      }
+    },
     order: "name ASC"
   }).success(function(restaurants) {
     var convertToJson = function(item, cback) {
@@ -927,7 +1177,7 @@ var searchCarriers = function(name, callback) {
 
 var generateUid = function(search) {
   var md5 = crypto.createHash('md5'),
-      timestamp = moment(search.date, "YYYY-MM-DD HH:m:ss").format("X"),
+      timestamp = moment(search.date, "YYYY-MM-DD HH:mm:ssZ").format("X"),
       uid = md5.update(search.restaurant + timestamp + search.partySize).digest("base64");
 
   return uid;
@@ -983,7 +1233,7 @@ var checkUids = function(oldUid, newUid, callback) {
           } else {
             models.GlobalSearches.create({
               "uid": newUid,
-              "lastChecked": "1969-01-01 00:00:00"
+              "lastChecked": "1970-01-01 00:00:00"
             }).success(function(search) {
               cb(null, search);
             });
@@ -1005,6 +1255,13 @@ var createUserModel = function(user, cb) {
         getUserSearches(user, function(searches) {
           console.log("searches", searches);
           user.searches = searches;
+          callback(null, user);
+        });
+      },
+      function(user, callback) {
+        getUserPayments(user.id, function(payments) {
+          console.log("payments", payments);
+          user.payments = payments;
           callback(null, user);
         });
       }
@@ -1032,6 +1289,23 @@ var getUserSearches = function(user, callback) {
           });
         };
     async.map(searches, convertToJson, function(err, results){
+      callback(results);
+    });
+  });
+};
+
+var getUserPayments = function(userId, callback) {
+  models.Payments.findAll({
+    where: {
+      userId: userId,
+      failureCode: {eq: null}
+    },
+    order: [Sequelize.literal('date DESC')]
+  }).success(function(payments) {
+    var convertToJson = function(item, cback) {
+          cback(null, item.toJSON());
+        };
+    async.map(payments, convertToJson, function(err, results){
       callback(results);
     });
   });
@@ -1126,6 +1400,17 @@ var sendActivationEmail = function(user, callback) {
   });
 };
 
+var expires = function(sub, user) {
+  var expires = moment.utc(user.subExpires, "YYYY-MM-DD HH:mm:ssZ"),
+      subLength = (sub === "standard") ? 6 : 12,
+      subExpires = moment.utc().add(subLength, "M");
+  if (moment(expires).isAfter()) {
+    subExpires = expires.add(subLength, "M");
+  }
+
+  return subExpires.format("YYYY-MM-DD 00:00:00+0:00");
+};
+
 var addUserToSession = function(user, request, cb) {
   if ("session" in request) {
     if (user !== null) request.session.user = user;
@@ -1136,6 +1421,67 @@ var addUserToSession = function(user, request, cb) {
       cb();
     });
   }
+};
+
+var addUserDeviceToken = function(device, callback) {
+  models.DeviceTokens.findAll(
+    {
+      where: {
+        token: device.token
+      }
+    }
+  ).success(
+    function(records) {
+      if (records.length === 0) {
+        models.DeviceTokens.create(device).success(
+          function(record) {
+            models.DeviceTokens.destroy(
+              { 
+                where: {
+                  uuid: device.uuid,
+                  token: {
+                    ne: device.token
+                  }
+                }
+              },
+              {}
+            ).success(
+              function(affectedRows) {
+                callback(record);
+              }
+            );
+          }
+        ).error(
+          function(error) {
+            var errorMsg = {
+                  success: false,
+                  data: {
+                    message: "Failed to save device token.",
+                    code: error.code,
+                    error: "deviceToken"
+                  }
+                };
+            callback(errorMsg);
+          }
+        );
+      } else {
+        callback(records[0]);
+      }
+    }
+  ).error(
+    function(error) {
+      var errorMsg = {
+            success: false,
+            data: {
+              message: "Failed to save device token.",
+              code: error.code,
+              error: "deviceToken"
+            }
+          };
+      callback(errorMsg);
+    }
+  );
+
 };
 
 function pad(num, size) {

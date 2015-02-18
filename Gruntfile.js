@@ -3,6 +3,7 @@ module.exports = function(grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
   var jsSrc = [
         'lib/jquery/jquery.js',
+        'lib/jwt-decode/jwt-decode.js',
         'lib/modernizr/modernizr.js',
         'lib/handlebars/handlebars.js',
         'lib/swag/swag.js',
@@ -21,6 +22,7 @@ module.exports = function(grunt) {
         'lib/sifter/sifter.js',
         'lib/selectize/selectize.js',
         'lib/moment/moment.js',
+        'lib/moment-timezone/moment-timezone-with-data-2010-2020.js',
         'lib/placeholders/build/placeholders.js',
         'lib/messenger/messenger.js',
         'lib/messenger/messenger-theme-future.js',
@@ -34,7 +36,9 @@ module.exports = function(grunt) {
         'lib/jquery.cookie/jquery.cookie.js',
         'lib/jquery.dfp.js/jquery.dfp.js',
         'lib/card/card.js',
-        'lib/bootcards/bootcards.js'
+        'lib/bootcards/bootcards.js',
+        'lib/bootstrap-select/bootstrap-select.js',
+        'lib/jquery.payment/jquery.payment.js'
       ],
       cssSrc = [
         'lib/bootstrap/bootstrap.css',
@@ -54,6 +58,7 @@ module.exports = function(grunt) {
         'bower_components/switchery/dist/switchery.css',
         'lib/seiyria-bootstrap-slider/bootstrap-slider.css',
         'lib/card/card.css',
+        'lib/bootstrap-select/bootstrap-select.css',
         'assets/css/custom.css'
       ];
   // Project configuration.
@@ -259,6 +264,11 @@ module.exports = function(grunt) {
         src: ['assets/data/**/*.json'],
         dest: 'public/js/json.js'
       }
+    },
+    open : {
+      dev : {
+        path: 'http://127.0.0.1:3001'
+      }
     }
   });
 
@@ -287,7 +297,7 @@ module.exports = function(grunt) {
     grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
   });
 
-  grunt.registerTask('server', [ 'build-dev', 'express:dev', 'watch' ]);
+  grunt.registerTask('server', [ 'build-dev', 'express:dev', 'open:dev', 'watch' ]);
 
   // Default task(s).
   grunt.registerTask('default', ['build']);

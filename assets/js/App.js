@@ -9,9 +9,9 @@ Dining.addRegions({
 
 Dining.ioEvent = function(data) {
   console.log(data);
-  var message = "";
-  if ("user" in Dining && data.objectType == "search-update") {
-    var searches = Dining.user.get("searches");
+  var message = "", searches, s;
+  if ("user" in Dining && data.objectType === "search-update") {
+    searches = Dining.user.get("searches");
 
     if (searches) {
       var results = searches.findWhere({uid: data.uid});
@@ -34,12 +34,52 @@ Dining.ioEvent = function(data) {
           }
         });
       }
-    }
-  } else if (data.objectType == "updates") {
+    } 
+  } else if (data.objectType === "updates") {
     if (data.modType == "checkedIn") {
       message = data.restaurant + ": " + data.objectId;
       $(".checkedInNumber").text(message);
     }
+  } else if (data.objectType === "user-info") {
+    Dining.Io.emit('room:join', "user:"+data.user.user.id);
+  } else if (data.objectType === "user-update") {
+    Dining.user.fetch();
+  } else if (data.objectType === "search-edit") {
+    s = Dining.user.get("searches").findWhere({id: data.id});
+    s.fetch();
+  } else if (data.objectType === "search-add") {
+    var search = new Dining.Models.Search({id: data.id});
+    searches = Dining.user.get("searches");
+    search.fetch({
+      success: function(model, response, options)  {
+        searches.add(model);
+        Dining.vent.trigger("searches:add", model);
+      }
+    });
+  } else if (data.objectType === "search-delete") {
+    s = Dining.user.get("searches").findWhere({id: data.id});
+    searches = Dining.user.get("searches");
+    searches.remove(s);
+    Dining.vent.trigger("searches:delete", s);
+  }
+  if ("token" in data) {
+    var decoded = jwt_decode(data.token);
+    window.localStorage.setItem('token', data.token);
+    window.localStorage.setItem('tokenExpires', parseInt(decoded.exp, 10));
+    var checkToken = function() {
+          console.log(moment.utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"), "Checking token");
+          var expires = moment.utc(window.localStorage.getItem('tokenExpires'), "X"),
+              now = moment.utc(),
+              diff = expires.diff(now, 'seconds');
+          if (diff < 900) {
+            console.log(moment.utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"), "Refreshing Token!");
+            Dining.Io.emit('refreshToken');
+          } else {
+            setTimeout(checkToken, 60000);
+          }
+        };
+    setTimeout(checkToken, 60000);
+
   }
 
   /*
@@ -95,11 +135,12 @@ Dining.on('before:start', function() {
   // Listen for the talk event.
   this.Io.on('talk', this.ioEvent);
   this.Io.on('connect', function() {
-    Dining.ioId = this.socket.sessionid;
+    Dining.ioId = this.io.engine.id;
   });
   this.Io.on('reconnect', function() {
-    if (Dining.ioId !== this.socket.sessionid) {
-      Dining.ioId = this.socket.sessionid;
+    if (Dining.ioId !== this.io.engine.id) {
+      Dining.ioId = this.io.engine.id;
+      Dining.Io.emit('room:join', "user:"+Dining.user.get("id"));
       var searches = Dining.user.get("searches");
       searches.each(function(search) {
         Dining.updateRoom(search);
@@ -110,7 +151,7 @@ Dining.on('before:start', function() {
 
 Dining.on('start', function() {
   if (typeof this.user !== 'undefined' && "id" in this.user) {
-    this.Io.emit('ready', {'user': this.user.get("id")});
+    Dining.Io.emit('ready', {'user': Dining.user.id});
     var searches = Dining.user.get("searches");
     searches.each(function(search) {
       Dining.updateRoom(search);
@@ -142,6 +183,7 @@ Dining.on('start', function() {
 Dining.vent.on('loggedin', function() {
   Dining.layoutView.main.$el.removeClass("loginContainer");
   if (typeof Dining.user !== 'undefined' && "id" in Dining.user) {
+    Dining.Io.emit('ready', {'user': Dining.user.id});
     var searches = Dining.user.get("searches");
     searches.each(function(search) {
       Dining.updateRoom(search);

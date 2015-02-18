@@ -15,6 +15,13 @@
     "host": "mail:hostname",
     "port": 25
   },
+  "stripe": {
+    "key": "stripe:key"
+  },
+  "tokenKey" : {
+    "private": "/path/to/priv.key",
+    "public": "/path/to/public.pem"
+  },
   "port": 3001,
   "key": "key goes here"
 }

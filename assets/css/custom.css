@@ -264,6 +264,10 @@ a {
   left: 0;
 }
 
+.remove-checkbox-padding {
+  padding-left: 0px;
+}
+
 @media (min-width: 480px) {
   .settingsUserName {
     display: inline-block;

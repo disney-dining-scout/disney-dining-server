@@ -20,7 +20,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       sendEmail: '#sendEmail'
     },
     initialize: function() {
-      if ("sms" in this.model.attributes && this.model.get("sms").id.length > 0) {
+      if ("sms" in this.model.attributes && "id" in this.model.get("sms")) {
         var entities = JSON.stringify({
               "name": this.model.get("sms").get("name"),
               "id": this.model.get("sms").get("id")
@@ -334,25 +334,91 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
 
   });
 
-  Views.PaymentsView = Marionette.ItemView.extend({
+  Views.PaymentView = Marionette.ItemView.extend({
+    template: Templates.paymentView,
+    tagName: "tr",
+    events: {
+      "click .fa-history"   : "showHistory",
+      "click"               : "editSearch"
+    }
+  });
+
+  Views.PaymentsView = Marionette.CompositeView.extend({
     template: Templates.paymentsView,
+    childView : Views.PaymentView,
+    childViewContainer: "#payments",
     className: "row",
     events: {
-      "click .btn-update"    : "updateAccount"
-    },
-    ui: {
-      name: "#name"
+      "click .make-payment"    : "showPaymentScreen",
     },
     initialize: function() {
-
+      var view = this;
+      this.collection = this.model.get("payments");
+      App.vent.on('payment:showAlert', function (model) {
+        view.showAlert(model);
+      });
     },
     onRender: function() {
 
     },
     onShow: function(e) {
+
+    },
+    showAlert: function(model) {
+      var alert = new App.Public.Views.AlertView({model: model});
+      $(".alert", this.$el).remove();
+      alert.render();
+      if ("error" in model.attributes) {
+        $("#"+model.get("error"), this.$el).parent().removeClass("has-error");
+        $("#"+model.get("error"), this.$el).parent().addClass("has-error");
+      }
+      $(alert.$el).prependTo(".panel-body", this.$el);
+      /**
+
+      if ($(window).scrollTop() > 0) {
+        var offset = ($(".alert").offset().top-70 < 0) ? 0 : $(".alert").offset().top-70;
+        $('html, body').animate({
+          scrollTop: offset
+        }, 2000);
+      }
+      **/
+    },
+    showPaymentScreen: function(e) {
+      var paymentModal = new Views.PaymentModal({model: this.model});
+      App.layoutView.modal.show(paymentModal);
+    }
+
+  });
+
+  Views.PaymentModal = Backbone.Modal.extend({
+    template: Templates.makePaymentForm,
+    cancelEl: '.btn-close',
+    submitEl: '.btn-pay',
+    events: {
+      "click .btn-delete"     : "deleteSearch",
+      "click .btn-service"    : "selectService",
+      "blur #number"          : "validate",
+      "blur #name"            : "validate",
+      "blur #expiry"          : "validate",
+      "keyup #cvc"             : "validate"
+    },
+    initialize: function(options) {
+      _.extend(this, _.pick(options, "collection"));
+      this.ui = {};
+      this.creditcard = new App.Models.Charge({
+        userId: this.model.get("id"),
+        subscription: "standard"
+      });
+    },
+    onShow: function() {
+      this.ui.name = $('#name', this.$el);
+      this.ui.amount = $('.amount', this.$el);
+      this.ui.number = $('#number', this.$el);
+      this.ui.expiration = $('#expiry', this.$el);
+      this.ui.security = $('#cvc', this.$el);
       var name = this.model.get("firstName") + " " + this.model.get("lastName");
       this.ui.name.val(name);
-      $('#cardForm').card({
+      $('#cardForm', this.$el).card({
         container: '.card-wrapper',
 
         // passing in a messages object is another way to
@@ -362,10 +428,74 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
         }
       });
     },
-    makePayment: function(e) {
+    selectService: function(e) {
+      if (_.indexOf(e.target.classList,"btn-standard") > -1) {
+        this.ui.amount.html("3.99");
+        $(e.target).addClass("active").addClass("btn-primary");
+        this.creditcard.set({subscription: "standard"});
+        $(".btn-plus", this.$el).removeClass("active").removeClass("btn-primary");
+      } else {
+        this.ui.amount.html("5.99");
+        $(e.target).addClass("active").addClass("btn-primary");
+        this.creditcard.set({subscription: "plus"});
+        $(".btn-standard", this.$el).removeClass("active").removeClass("btn-primary");
+      }
+      this.creditcard.set({
+        amount: parseFloat(this.ui.amount.html())
+      });
+    },
+    beforeSubmit: function(e) {
+      if (this.creditcard.isValid()) {
+        return true;
+      } else {
+        var model = new App.Models.AlertModel(this.model.validationError);
+        this.showAlert(model);
+        return false;
+      }
+    },
+    submit: function(e) {
+      this.creditcard.save(
+        {},
+        {
+          success: function(model, response, options) {
+            var message = {
+                  message: "Payment has been made",
+                  type: "success"
+                };
 
+            if (model.get("failureCode") !== null) {
+              var alertModel = new App.Models.AlertModel({
+                    message: model.get("failureMess")
+                  });
+              App.vent.trigger("payment:showAlert", alertModel);
+            } else {
+              var payments = App.user.get('payments');
+              payments.add(model);
+              Messenger().post(message);
+            }
+
+          },
+          error: function(error) {
+            var test = error;
+          }
+        }
+      );
+    },
+    validate: function(e) {
+      this.creditcard.set({
+        "name": this.ui.name.val(),
+        "number": this.ui.number.val(),
+        "expiration": this.ui.expiration.val(),
+        "security": this.ui.security.val(),
+        "cardType": $.payment.cardType(this.ui.number.val())
+      });
+
+      if (this.creditcard.isValid()) {
+        $(".btn-pay").removeAttr("disabled");
+      } else {
+        $(".btn-pay").attr("disabled", "disabled");
+      }
     }
-
   });
 
   // Application Event Handlers

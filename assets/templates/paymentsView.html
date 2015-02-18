@@ -4,50 +4,25 @@
       <h3 class="panel-title pull-left">Payments</h3>
     </div>
     <div class="panel-body">
-      <div class="col-md-7">
-        <h3>Payment History</h3>
-        <hr />
+      <div class="col-md-12">
+        <h3 class="pull-left">Subscription Expires: June 24, 2015</h3>
+        <button type="button" class="btn btn-primary pull-right make-payment"><i class="fa fa-credit-card"></i> Make a Payment</button>
       </div>
-      <div class="col-md-5">
-        <h3>Payment</h3>
-        <hr />
-        <div class="card-wrapper"></div>
-        <div class="col-md-12">
-          <br />
-          <form id="cardForm" role="form">
-
-            <div class="form-group">
-              <label for="cardNumber">CARD NUMBER</label>
-              <div class="input-group">
-                <input type="text" class="form-control" id="number" name="number" placeholder="Valid Card Number"
-                    required autofocus />
-                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="cardNumber">NAME</label>
-              <input type="text" class="form-control" id="name" name="name" placeholder="Cardholder name" required autofocus />
-            </div>
-
-            <div class="form-group">
-              <label for="expiry">EXPIRY DATE</label>
-              <input type="text" class="form-control" id="expiry" name="expiry" placeholder="MM/YY" required />
-            </div>
-            <div class="form-group">
-              <label for="cvc">CV CODE</label>
-              <input type="password" class="form-control" id="cvc" name="cvc" placeholder="CVC" required />
-            </div>
-          </form>
-          <br />
-          <ul class="nav nav-pills nav-stacked">
-            <li class="active">
-              <a href="#"><span class="badge pull-right"><span class="glyphicon glyphicon-usd"></span>0.00</span> Final Payment</a>
-            </li>
-          </ul>
-          <br/>
-          <button class="btn btn-success btn-lg btn-block" role="button">Pay</button>
-        </div>
+      <div class="col-md-12">
+        <br />
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Date</th>
+              <th>Subscription</th>
+              <th>Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="payments">
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
