@@ -131,56 +131,7 @@ app.use(bodyParser.json()); // parse application/json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
 app.use(methodOverride('X-HTTP-Method-Override')); // override with the X-HTTP-Method-Override header in the request
 app.use(cors());
-
-var routes = require('./routes'),
-    ioEvents = require('./ioEvents');
-
-routes.setKey("configs", config);
-routes.initialize();
-ioEvents.initialize(config);
-
-/*  ==============================================================
-    Routes
-=============================================================== */
-
-//Standard Routes
-router.get('/', routes.index);
-router.get('/searches', routes.index);
-router.get('/payments', routes.index);
-router.get('/user-profile', routes.index);
-router.get('/change-password', routes.index);
-router.get('/update-notifications', routes.index);
-router.get('/payments', routes.index);
-router.get('/start', routes.index);
-router.get('/activation/:token', routes.index);
-app.use('/', router);
-
-//API
-apiRouter.post('/user/authenticate', routes.authUser);
-apiRouter.post('/user', routes.addUser);
-apiRouter.get('/user/:userId', routes.getUser);
-apiRouter.put('/user/:userId', routes.updateUser);
-apiRouter.get('/user/searches/all', routes.getUserSearches);
-apiRouter.get('/user/authenticate/logout', routes.logoutUser);
-apiRouter.get('/user/activation/send', routes.sendUserActivation);
-apiRouter.put('/user/activation/:token', routes.activateUser);
-apiRouter.delete('/user/:userId', routes.logoutUser);
-apiRouter.post('/user/password/reset', routes.resetPassword);
-apiRouter.put('/user/password/update/:userId', routes.updatePassword);
-apiRouter.post('/user/password/update', routes.updatePassword);
-apiRouter.get('/restaurants', routes.getRestaurants);
-apiRouter.get('/restaurants/:lastUpdated', routes.getRestaurants);
-apiRouter.get('/search/restaurants/:name', routes.searchRestaurants);
-apiRouter.get('/search/carriers/:name', routes.searchCarriers);
-apiRouter.post('/search', routes.addSearch);
-apiRouter.get('/search/:searchId', routes.getSearch);
-apiRouter.put('/search/:searchId', routes.updateSearch);
-apiRouter.delete('/search/:searchId', routes.deleteUserSearch);
-apiRouter.post('/token/check', routes.checkResetToken);
-apiRouter.post('/charge', routes.makePayment);
-apiRouter.post('/mobile/login', routes.mobileAuth);
-apiRouter.post('/mobile/messaging/token', routes.addUserDeviceToken);
-apiRouter.use(
+app.use(
   eJwt(
     {
       secret: publicKey
@@ -223,6 +174,54 @@ apiRouter.use(
     }
   )
 );
+
+var routes = require('./routes'),
+    ioEvents = require('./ioEvents');
+
+routes.setKey("configs", config);
+routes.initialize();
+ioEvents.initialize(config);
+
+/*  ==============================================================
+    Routes
+=============================================================== */
+
+//Standard Routes
+router.get('/', routes.index);
+router.get('/searches', routes.index);
+router.get('/payments', routes.index);
+router.get('/user-profile', routes.index);
+router.get('/change-password', routes.index);
+router.get('/update-notifications', routes.index);
+router.get('/start', routes.index);
+router.get('/activation/:token', routes.index);
+app.use('/', router);
+
+//API
+apiRouter.post('/user/authenticate', routes.authUser);
+apiRouter.post('/user', routes.addUser);
+apiRouter.get('/user/:userId', routes.getUser);
+apiRouter.put('/user/:userId', routes.updateUser);
+apiRouter.get('/user/searches/all', routes.getUserSearches);
+apiRouter.get('/user/authenticate/logout', routes.logoutUser);
+apiRouter.get('/user/activation/send', routes.sendUserActivation);
+apiRouter.put('/user/activation/:token', routes.activateUser);
+apiRouter.delete('/user/:userId', routes.logoutUser);
+apiRouter.post('/user/password/reset', routes.resetPassword);
+apiRouter.put('/user/password/update/:userId', routes.updatePassword);
+apiRouter.post('/user/password/update', routes.updatePassword);
+apiRouter.get('/restaurants', routes.getRestaurants);
+apiRouter.get('/restaurants/:lastUpdated', routes.getRestaurants);
+apiRouter.get('/search/restaurants/:name', routes.searchRestaurants);
+apiRouter.get('/search/carriers/:name', routes.searchCarriers);
+apiRouter.post('/search', routes.addSearch);
+apiRouter.get('/search/:searchId', routes.getSearch);
+apiRouter.put('/search/:searchId', routes.updateSearch);
+apiRouter.delete('/search/:searchId', routes.deleteUserSearch);
+apiRouter.post('/token/check', routes.checkResetToken);
+apiRouter.post('/charge', routes.makePayment);
+apiRouter.post('/mobile/login', routes.mobileAuth);
+apiRouter.post('/mobile/messaging/token', routes.addUserDeviceToken);
 app.use('/api', apiRouter);
 
 /*  ==============================================================
