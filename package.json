@@ -1,6 +1,6 @@
 {
   "name": "disney-dining-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "async": "latest",
     "bcrypt": "latest",

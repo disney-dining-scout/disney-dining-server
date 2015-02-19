@@ -2,6 +2,7 @@
   "use strict";
 
 var fs = require('fs'),
+    pjson = require('../package.json'),
     path = require('path'),
     nodemailer = require('nodemailer'),
     htmlToText = require('nodemailer-html-to-text').htmlToText,
@@ -82,7 +83,7 @@ exports.initialize = function() {
 
   appInfo = {
     rev: git.short(),
-    tag: "0.2.8"
+    tag: pjson.version
   };
   key = opts.configs.get("key");
 
@@ -469,29 +470,30 @@ exports.authUser = function(req, res) {
             sendBack(user, 200, res);
           });
         });
-      };
+      },
+      errorMsg;
   models.Users.find({ where: { email: req.body.email } }).success(function(user) {
     if (user !== null) {
       bcrypt.compare(req.body.password, user.password, function(err, res) {
         if (res) {
           processUser(user);
         } else {
-          var errorMsg = {
-                status: "error",
-                messsage: {
-                  response: "Unable to authenticate user"
-                }
-              };
+          errorMsg = {
+            status: "error",
+            message: {
+              response: "Invalid email and/or password."
+            }
+          };
           sendBack(errorMsg, 401, res);
         }
       });
     } else {
-      var errorMsg = {
-            status: "error",
-            messsage: {
-              response: "Unable to authenticate user"
-            }
-          };
+      errorMsg = {
+        status: "error",
+        message: {
+          response: "Invalid email and/or password."
+        }
+      };
       sendBack(errorMsg, 401, res);
     }
   });
@@ -511,38 +513,47 @@ exports.mobileAuth = function(req, res) {
           sendBack(data, 200, resource);
         });
       },
-      now = moment.utc().format("YYYY-MM-DD HH:mm:ss");
+      now = moment.utc(),
+      errorMsg;
   models.Users.find(
     { 
       where: { 
-        email: req.body.email,
-        subExpires: {
-          gte: now
-        }
+        email: req.body.email
       } 
     }
   ).success(function(user) {
     if (user !== null) {
-      bcrypt.compare(req.body.password, user.password, function(err, res) {
-        if (res) {
-          processUser(user);
-        } else {
-          var errorMsg = {
-                status: "error",
-                messsage: {
-                  response: "Unable to authenticate user"
-                }
-              };
-          sendBack(errorMsg, 401, resource);
-        }
-      });
+      var subExpires = moment.tz(user.subExpires, "YYYY-MM-DD HH:mm:ss", "America/New_York");
+      if (subExpires !== null && now.isBefore(subExpires)) {
+        bcrypt.compare(req.body.password, user.password, function(err, res) {
+          if (res) {
+            processUser(user);
+          } else {
+            errorMsg = {
+              status: "error",
+              message: {
+                response: "Invalid email and/or password."
+              }
+            };
+            sendBack(errorMsg, 401, resource);
+          }
+        });
+      } else {
+        errorMsg = {
+          status: "error",
+          message: {
+            response: "Subscription has expired. Free accounts do not have mobile app access."
+          }
+        };
+        sendBack(errorMsg, 401, resource);
+      }
     } else {
-      var errorMsg = {
-            status: "error",
-            messsage: {
-              response: "Unable to authenticate user"
-            }
-          };
+      errorMsg = {
+        status: "error",
+        message: {
+          response: "Invalid email and/or password."
+        }
+      };
       sendBack(errorMsg, 401, resource);
     }
   });

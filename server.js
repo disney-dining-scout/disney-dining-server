@@ -131,43 +131,6 @@ app.use(bodyParser.json()); // parse application/json
 app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
 app.use(methodOverride('X-HTTP-Method-Override')); // override with the X-HTTP-Method-Override header in the request
 app.use(cors());
-app.use(
-  eJwt(
-    {
-      secret: publicKey
-    }
-  ).unless(
-    function (req) {
-      var skipPaths = [
-            "/",
-            "/payments",
-            "/searches",
-            "/start",
-            "/user-profile",
-            "/update-notifications",
-            "/change-password",
-            "/api/user/authenticate",
-            "/api/user",
-            "/api/mobile/login",
-            "/user/password/reset",
-            "/api/search/carriers"
-          ],
-          inPath = skipPaths.indexOf(req.originalUrl);
-      if (inPath > -1) {
-        console.log("skip based on url");
-        return true;
-      } else if (RegExp('^(/api/search/carriers/\\w+)$').test(req.originalUrl)) {
-        return true;
-      } else {
-        console.log("do not skip based on url");
-        var ext = url.parse(req.originalUrl).pathname.substr(-4),
-            index = ['otf', 'woff', 'ttf', 'svg', 'eot', '.png', '.jpg', '.html', '.css', '.js', '.map'].indexOf(ext);
-            val = (index > -1) ? true : false;
-        return val;
-      }
-    }
-  )
-);
 
 var routes = require('./routes'),
     ioEvents = require('./ioEvents');
@@ -189,6 +152,7 @@ router.get('/change-password', routes.index);
 router.get('/update-notifications', routes.index);
 router.get('/payments', routes.index);
 router.get('/start', routes.index);
+router.get('/activation/:token', routes.index);
 app.use('/', router);
 
 //API
@@ -216,8 +180,50 @@ apiRouter.post('/token/check', routes.checkResetToken);
 apiRouter.post('/charge', routes.makePayment);
 apiRouter.post('/mobile/login', routes.mobileAuth);
 apiRouter.post('/mobile/messaging/token', routes.addUserDeviceToken);
+apiRouter.use(
+  eJwt(
+    {
+      secret: publicKey
+    }
+  ).unless(
+    function (req) {
+      var skipPaths = [
+            "/",
+            "/robots.txt",
+            "/payments",
+            "/searches",
+            "/start",
+            "/user-profile",
+            "/update-notifications",
+            "/change-password",
+            "/api/user/authenticate",
+            "/api/user",
+            "/api/mobile/login",
+            "/user/password/reset",
+            "/api/search/carriers"
+          ],
+          inPath = skipPaths.indexOf(req.originalUrl),
+          fileExtension = function(url) {
+            return url.split('.').pop().split(/\#|\?/)[0];
+          };
+      if (inPath > -1) {
+        console.log("skip based on url");
+        return true;
+      } else if (RegExp('^(/api/search/carriers/\\w+)$').test(req.originalUrl)) {
+        return true;
+      } else if (RegExp('^(/api/user/activation/\\w+)$').test(req.originalUrl)) {
+        return true;
+      } else {
+        console.log("do not skip based on url");
+        var ext = fileExtension(req.originalUrl),
+            index = ['otf', 'woff', 'ttf', 'svg', 'eot', 'png', 'jpg', 'html', 'css', 'js', 'map'].indexOf(ext);
+            val = (index > -1) ? true : false;
+        return val;
+      }
+    }
+  )
+);
 app.use('/api', apiRouter);
-
 
 /*  ==============================================================
     Socket.IO Routes
