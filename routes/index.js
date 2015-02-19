@@ -1309,7 +1309,7 @@ var getUserPayments = function(userId, callback) {
   models.Payments.findAll({
     where: {
       userId: userId,
-      failureCode: {eq: null}
+      failureCode: {$eq: null}
     },
     order: [Sequelize.literal('date DESC')]
   }).success(function(payments) {
