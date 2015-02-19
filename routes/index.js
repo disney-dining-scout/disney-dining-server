@@ -223,7 +223,11 @@ exports.initialize = function() {
       type: Sequelize.DATE,
       defaultValue: null,
       get: function(name) {
-        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+        if (this.getDataValue(name) !== null) {
+          return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+        } else {
+         return null; 
+        }
       }
     },
     eula:           {
@@ -383,7 +387,7 @@ exports.addUser = function(req, res) {
       };
   bcrypt.hash(req.body.password, 8, function(err, hash) {
     user.password = hash;
-    models.Users.create(user).success(function(userRec) {
+    models.Users.create(user).then(function(userRec) {
       //console.log(userRec);
       userRec = userRec.toJSON();
       createUserModel(userRec, function(user) {
@@ -395,7 +399,8 @@ exports.addUser = function(req, res) {
           });
         });
       });
-    }).error(function(error) {
+    },
+    function(error) {
       var errorMsg = {
             success: false,
             data: {
@@ -424,8 +429,8 @@ exports.updateUser = function(req, res) {
         smsTimeout: req.body.smsTimeout,
         activated: req.body.activated
       };
-  models.Users.find(req.params.userId).success(function(user) {
-    user.updateAttributes(userAttributes).success(function(user) {
+  models.Users.find(req.params.userId).then(function(user) {
+    user.updateAttributes(userAttributes).then(function(user) {
       user = user.toJSON();
       opts.io.to("user:"+user.id).emit(
         'talk',
@@ -472,7 +477,7 @@ exports.authUser = function(req, res) {
         });
       },
       errorMsg;
-  models.Users.find({ where: { email: req.body.email } }).success(function(user) {
+  models.Users.find({ where: { email: req.body.email } }).then(function(user) {
     if (user !== null) {
       bcrypt.compare(req.body.password, user.password, function(err, res) {
         if (res) {
@@ -521,7 +526,7 @@ exports.mobileAuth = function(req, res) {
         email: req.body.email
       } 
     }
-  ).success(function(user) {
+  ).then(function(user) {
     if (user !== null) {
       var subExpires = moment.tz(user.subExpires, "YYYY-MM-DD HH:mm:ss", "America/New_York");
       if (subExpires !== null && now.isBefore(subExpires)) {
@@ -576,7 +581,7 @@ exports.resetPassword = function(req, res) {
       'email': req.body.email,
       'zipCode': req.body.zipCode
     }
-  }).success(function(user) {
+  }).then(function(user) {
     if (user) {
       var passToken = {
             user: user.id,
@@ -584,7 +589,7 @@ exports.resetPassword = function(req, res) {
             expire: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
           };
       user = user.toJSON();
-      models.PasswordReset.create(passToken).success(function(result) {
+      models.PasswordReset.create(passToken).then(function(result) {
         emailTemplates(emailTemplatesDir, function(err, template) {
           if (err) {
             console.log(err);
@@ -645,7 +650,7 @@ exports.checkResetToken = function(req, res) {
         gt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
       }
     }
-  }).success(function(token) {
+  }).then(function(token) {
     if (token) {
       getUser(token.user, true, function(user) {
         token = token.toJSON();
@@ -673,14 +678,14 @@ exports.updatePassword = function(req, res) {
           gt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
         }
       }
-    }).success(function(token) {
+    }).then(function(token) {
       if (token) {
         getUser(token.user, true, function(user) {
           updateUserPassword(user, req.body.password, function(user) {
             var tokenAttributes = {
                   used: true
                 };
-            token.updateAttributes(tokenAttributes).success(function(token) {
+            token.updateAttributes(tokenAttributes).then(function(token) {
               delete user.password;
               sendBack(user, 200, res);
             });
@@ -743,7 +748,7 @@ exports.addSearch = function(req, res) {
   results.uid = uid;
   models.UserSearches.create(
     results
-  ).success(function(search) {
+  ).then(function(search) {
     console.log(search);
 
     getUserSearch(search.id, function(search) {
@@ -772,7 +777,7 @@ exports.addSearch = function(req, res) {
 exports.updateSearch = function(req, res) {
   models.UserSearches
   .find(req.params.searchId)
-  .success(function(userSearch) {
+  .then(function(userSearch) {
     var vals = [
           'id',
           'uid',
@@ -797,7 +802,7 @@ exports.updateSearch = function(req, res) {
     checkUids(oldUid, uid, function() {
       userSearch.updateAttributes(
         results
-      ).success(function(search) {
+      ).then(function(search) {
         getUserSearch(search.id, function(search) {
           if (oldUid !== uid) {
             checkUids(oldUid, uid, function() {
@@ -875,14 +880,14 @@ exports.deleteUserSearch = function(req, res) {
   models.UserSearches.find(
     req.params.searchId
   )
-  .success(function(search) {
+  .then(function(search) {
     if (search) {
       var attributes = {
             "deleted": 1,
             "enabled": 0,
             "deletedAt": moment.utc().format("YYYY-MM-DD HH:mm:ss")
           };
-      search.updateAttributes(attributes).success(function() {
+      search.updateAttributes(attributes).then(function() {
         checkUids(search.uid, null, function() {
           opts.io.to("user:"+req.user.user).emit(
             'talk',
@@ -960,8 +965,8 @@ exports.activateUser = function(req, res) {
         activated: true
       };
   console.log("userId:", userId);
-  models.Users.find(userId).success(function(user) {
-    user.updateAttributes(userAttributes).success(function(user) {
+  models.Users.find(userId).then(function(user) {
+    user.updateAttributes(userAttributes).then(function(user) {
       user = user.toJSON();
       getUser(user.id, true, function(user) {
         createUserModel(user, function(user) {
@@ -1029,7 +1034,7 @@ exports.makePayment = function(req, res) {
         failureMess: null
       };
     }
-    models.Payments.create(paid).success(function(paymentRec) {
+    models.Payments.create(paid).then(function(paymentRec) {
       if (paid.expires !== null) {
         updateUserExpires(req.session.user.id, expirationDate, function(user) {
           req.session.user = user;
@@ -1067,7 +1072,7 @@ var getUser = function(userId, toJson, callback) {
   toJson = toJson || true;
   async.waterfall([
     function(cb){
-      models.Users.find(userId).success(function(user) {
+      models.Users.find(userId).then(function(user) {
         if (toJson) {
           user = user.toJSON();
         }
@@ -1076,7 +1081,7 @@ var getUser = function(userId, toJson, callback) {
     },
     function(user, cb){
       if (user.carrier !== "") {
-        models.SmsGateways.find(user.carrier).success(function(carrier) {
+        models.SmsGateways.find(user.carrier).then(function(carrier) {
           user.sms = carrier.toJSON();
           cb(null, user);
         });
@@ -1097,7 +1102,7 @@ var updateUserPassword = function(user, password, cb) {
     var userAttributes = {
       password: hash
     };
-    user.updateAttributes(userAttributes).success(function(user) {
+    user.updateAttributes(userAttributes).then(function(user) {
       user = user.toJSON();
       createUserModel(user, function(user) {
         cb(user);
@@ -1110,8 +1115,8 @@ var updateUserExpires = function(userId, expires, cb) {
   var userAttributes = {
     subExpires: expires
   };
-  models.Users.find(userId).success(function(user) {
-    user.updateAttributes(userAttributes).success(function(user) {
+  models.Users.find(userId).then(function(user) {
+    user.updateAttributes(userAttributes).then(function(user) {
       user = user.toJSON();
       createUserModel(user, function(user) {
         cb(user);
@@ -1129,7 +1134,7 @@ var getRestaurants = function(updatedAt, callback) {
       }
     },
     order: "name ASC"
-  }).success(function(restaurants) {
+  }).then(function(restaurants) {
     var convertToJson = function(item, cback) {
           cback(null, item.toJSON());
         };
@@ -1140,7 +1145,7 @@ var getRestaurants = function(updatedAt, callback) {
 };
 
 var getRestaurant = function(id, callback) {
-  models.Restaurants.find(id).success(function(restaurant) {
+  models.Restaurants.find(id).then(function(restaurant) {
     var convertToJson = function(item, cback) {
           cback(null, item.toJSON());
         };
@@ -1158,7 +1163,7 @@ var searchRestaurants = function(name, callback) {
       }
     },
     order: "name ASC"
-  }).success(function(restaurants) {
+  }).then(function(restaurants) {
     var convertToJson = function(item, cback) {
           cback(null, item.toJSON());
         };
@@ -1176,7 +1181,7 @@ var searchCarriers = function(name, callback) {
       }
     },
     order: "name ASC"
-  }).success(function(carriers) {
+  }).then(function(carriers) {
     var convertToJson = function(item, cback) {
           cback(null, item.toJSON());
         };
@@ -1208,16 +1213,16 @@ var checkUids = function(oldUid, newUid, callback) {
             enabled: 1
           }
         })
-        .success(function(result) {
+        .then(function(result) {
           console.log(result.count);
           if (result.count === 0) {
             models.GlobalSearches.find({
               where: {
                 uid: oldUid
               }
-            }).success(function(search) {
+            }).then(function(search) {
               if (search) {
-                search.destroy().success(function() {
+                search.destroy().then(function() {
                   goNext();
                 });
               } else {
@@ -1238,14 +1243,14 @@ var checkUids = function(oldUid, newUid, callback) {
           where: {
             uid: newUid
           }
-        }).success(function(result) {
+        }).then(function(result) {
           if (result.count > 0) {
             cb(null, null);
           } else {
             models.GlobalSearches.create({
               "uid": newUid,
               "lastChecked": "1970-01-01 00:00:00"
-            }).success(function(search) {
+            }).then(function(search) {
               cb(null, search);
             });
           }
@@ -1293,7 +1298,7 @@ var getUserSearches = function(user, callback) {
       enabled: 1
     },
     order: [Sequelize.literal('(CASE WHEN date < UTC_TIMESTAMP() THEN 0 ELSE 1 END) DESC'), Sequelize.literal('date ASC')]
-  }).success(function(searches) {
+  }).then(function(searches) {
     var convertToJson = function(item, cback) {
           getUserSearch(item.id, function(search) {
             cback(null, search);
@@ -1312,7 +1317,7 @@ var getUserPayments = function(userId, callback) {
       failureCode: {$eq: null}
     },
     order: [Sequelize.literal('date DESC')]
-  }).success(function(payments) {
+  }).then(function(payments) {
     var convertToJson = function(item, cback) {
           cback(null, item.toJSON());
         };
@@ -1330,13 +1335,13 @@ var getUserSearch = function(id, callback) {
           id: id,
           deleted: 0,
           enabled: 1
-      }}).success(function(search) {
+      }}).then(function(search) {
         search = search.toJSON();
         cb(null, search);
       });
     },
     function(search, cb){
-      models.Restaurants.find(search.restaurant).success(function(restaurant) {
+      models.Restaurants.find(search.restaurant).then(function(restaurant) {
         search.restaurant = restaurant.toJSON();
         cb(null, search);
       });
@@ -1348,7 +1353,7 @@ var getUserSearch = function(id, callback) {
         },
         order: 'dateSearched DESC',
         limit: 10
-      }).success(function(logs) {
+      }).then(function(logs) {
           var convertToJson = function(item, cback) {
                 item.times = ( item.times !== "" ) ? JSON.parse(item.times) : [];
                 cback(null, item);
@@ -1368,8 +1373,8 @@ var expireActivationCode = function(code, callback) {
   var tokenAttributes = {
         "used": 1
       };
-  models.ActivationCodes.find({where:{token:code}}).success(function(token) {
-    token.updateAttributes(tokenAttributes).success(function(token) {
+  models.ActivationCodes.find({where:{token:code}}).then(function(token) {
+    token.updateAttributes(tokenAttributes).then(function(token) {
       callback(token);
     });
   });
@@ -1441,10 +1446,10 @@ var addUserDeviceToken = function(device, callback) {
         token: device.token
       }
     }
-  ).success(
+  ).then(
     function(records) {
       if (records.length === 0) {
-        models.DeviceTokens.create(device).success(
+        models.DeviceTokens.create(device).then(
           function(record) {
             models.DeviceTokens.destroy(
               { 
@@ -1456,13 +1461,12 @@ var addUserDeviceToken = function(device, callback) {
                 }
               },
               {}
-            ).success(
+            ).then(
               function(affectedRows) {
                 callback(record);
               }
             );
-          }
-        ).error(
+          },
           function(error) {
             var errorMsg = {
                   success: false,
@@ -1478,8 +1482,7 @@ var addUserDeviceToken = function(device, callback) {
       } else {
         callback(records[0]);
       }
-    }
-  ).error(
+    },
     function(error) {
       var errorMsg = {
             success: false,

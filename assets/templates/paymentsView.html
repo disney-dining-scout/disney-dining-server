@@ -5,7 +5,13 @@
     </div>
     <div class="panel-body">
       <div class="col-md-12">
-        <h3 class="pull-left">Subscription Expires: June 24, 2015</h3>
+        <h3 class="pull-left">
+          {{#if subExpires}}
+          Subscription Expires: {{momentFormat subExpires format="ddd. MMM. DD, YYYY"}}
+          {{else}}
+          Free Account
+          {{/if}}
+        </h3>
         <button type="button" class="btn btn-primary pull-right make-payment"><i class="fa fa-credit-card"></i> Make a Payment</button>
       </div>
       <div class="col-md-12">
