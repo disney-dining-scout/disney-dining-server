@@ -1145,7 +1145,7 @@ var getRestaurants = function(updatedAt, callback) {
 };
 
 var getRestaurant = function(id, callback) {
-  models.Restaurants.find(id).then(function(restaurant) {
+  models.Restaurants.find(id).then(function(restaurants) {
     var convertToJson = function(item, cback) {
           cback(null, item.toJSON());
         };
@@ -1429,11 +1429,11 @@ var expires = function(sub, user) {
 
 var addUserToSession = function(user, request, cb) {
   if ("session" in request) {
-    if (user !== null) request.session.user = user;
+    if (user !== null) { request.session.user = user; }
     cb();
   } else {
-    req.session.regenerate(function(err) {
-      if (user !== null) request.session.user = user;
+    request.session.regenerate(function(err) {
+      if (user !== null) { request.session.user = user; }
       cb();
     });
   }
@@ -1500,7 +1500,7 @@ var addUserDeviceToken = function(device, callback) {
 
 function pad(num, size) {
     var s = num+"";
-    while (s.length < size) s = "0" + s;
+    while (s.length < size) { s = "0" + s; }
     return s;
 }
 
