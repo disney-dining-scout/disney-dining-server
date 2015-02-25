@@ -121,6 +121,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     className: "row",
     events: {
       "click .btn-add"          : "showAddSearch",
+      "click .addSearchLink"    : "showAddSearch",
       "keyup #search"           : "filterSearches",
       "click .clearer"          : "clearerOnClick",
       "keyup .hasclear"         : "hasClearKeyUp",

@@ -32,7 +32,7 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
       var view = this;
       this.opts = _.extend({light: false}, options);
       App.vent.on('user:update', function (model) {
-        view.showAlert(model);
+        view.updateUserModel(model);
       });
     },
     template: Templates.header,
@@ -56,6 +56,9 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
     },
     upgrade: function(e) {
       Backbone.history.navigate("payments", { trigger: true });
+    },
+    updateUserModel: function(model) {
+      this.model.set("user", Dining.user.toJSON());
     }
   });
 

@@ -45,7 +45,11 @@ Dining.ioEvent = function(data) {
       Dining.Io.emit('room:join', "user:"+data.user.user.id);
     }
   } else if (data.objectType === "user-update") {
-    Dining.user.fetch();
+    Dining.user.fetch({
+      success: function(model, response, options)  {
+        App.vent.trigger("user:update", model);
+      }
+    });
   } else if (data.objectType === "search-edit") {
     s = Dining.user.get("searches").findWhere({id: data.id});
     s.fetch();
