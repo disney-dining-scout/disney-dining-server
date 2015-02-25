@@ -1,12 +1,17 @@
-<div class="navbar-header pull-left">
-  <a class="navbar-brand" href="searches"><i class="fa pull-left fa-cutlery"></i> Disney Dining Scout</a>
-</div>
+<a class="navbar-brand navbar-left" href="searches"><i class="fa pull-left fa-cutlery"></i> Disney Dining Scout</a>
+
 {{#if user.id}}
-<div class="pull-right">
-  <button type="button" class="btn btn-default navbar-btn" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
-    <i class="fa fa-user fa-fw"></i> <span class="settingsUserName">{{user.firstName}} {{user.lastName}}</span>
-  </button>
-</div>
+
+<ul class="nav navbar-nav navbar-right">
+  {{#isPast user.subExpires}}
+  <li><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
+  {{/isPast}}
+  <li>
+    <button type="button" class="btn btn-default navbar-btn displayMenuBtn" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
+      <i class="fa fa-user fa-fw"></i> <span class="settingsUserName">{{user.firstName}} {{user.lastName}}</span>
+    </button>
+  </li>
+</ul>
 
 <nav id="navMenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation">
   <h3><i class="fa fa-user fa-fw"></i> {{user.firstName}} {{user.lastName}}</h3>
@@ -18,7 +23,11 @@
       <a href="change-password"><i class="fa fa-lock fa-fw"></i> Change Password</a>
     </li>
     <li>
+      {{#isPast user.subExpires}}
+      <a href="#"><i class="fa fa-envelope fa-fw"></i> Notification Settings <i class="fa fa-usd"></i></a>
+      {{else}}
       <a href="update-notifications"><i class="fa fa-envelope fa-fw"></i> Notification Settings</a>
+      {{/isPast}}
     </li>
     <li>
       <a href="payments"><i class="fa fa-credit-card fa-fw"></i> Subscription and Payments</a>

@@ -278,6 +278,10 @@ a {
   .settingsUserName {
     display: none;
   }
+
+  .displayMenuBtn {
+    margin-top: 0px;
+  }
 }
 
 

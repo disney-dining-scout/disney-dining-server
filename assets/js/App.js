@@ -41,7 +41,9 @@ Dining.ioEvent = function(data) {
       $(".checkedInNumber").text(message);
     }
   } else if (data.objectType === "user-info") {
-    Dining.Io.emit('room:join', "user:"+data.user.user.id);
+    if ("user" in data.user) {
+      Dining.Io.emit('room:join', "user:"+data.user.user.id);
+    }
   } else if (data.objectType === "user-update") {
     Dining.user.fetch();
   } else if (data.objectType === "search-edit") {
@@ -192,7 +194,9 @@ Dining.vent.on('loggedin', function() {
 });
 
 Dining.vent.on('hideMenu', function() {
-  $('#navMenu').offcanvas('hide');
+  if ($('#navMenu').hasClass("in")) {
+    $('#navMenu').offcanvas('hide');
+  }
 });
 
 Dining.fixTime = function(model, attr) {

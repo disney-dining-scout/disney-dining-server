@@ -107,10 +107,17 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     }
   });
 
+  Views.NoSearchesView = Marionette.ItemView.extend({
+    template: Templates.noSearchesView,
+    className: "col-xs-12"
+  });
+
+
   Views.SearchesView = Marionette.CompositeView.extend({
     template: Templates.searchesView,
     childView : Views.SearchView,
     childViewContainer: "#searches",
+    emptyView: Views.NoSearchesView,
     className: "row",
     events: {
       "click .btn-add"          : "showAddSearch",

@@ -144,6 +144,7 @@
       function (req) {
         var skipPaths = [
               "/",
+              "/new",
               "/robots.txt",
               "/payments",
               "/searches",
@@ -155,18 +156,24 @@
               "/api/user",
               "/api/mobile/login",
               "/user/password/reset",
-              "/api/search/carriers"
+              "/api/search/carriers",
+              "/api/mobile/token/refresh/"
             ],
             inPath = skipPaths.indexOf(req.originalUrl),
             fileExtension = function(url) {
               return url.split('.').pop().split(/\#|\?/)[0];
-            };
+            },
+            carriers = new RegExp('^(/api/search/carriers/\\w+)$'),
+            restaurants = new RegExp('^(/api/search/restaurants/\\w+)$'),
+            activation = new RegExp('^(/api/user/activation/\\w+)$');
         if (inPath > -1) {
           console.log("skip based on url");
           return true;
-        } else if (RegExp('^(/api/search/carriers/\\w+)$').test(req.originalUrl)) {
+        } else if (carriers.test(req.originalUrl)) {
           return true;
-        } else if (RegExp('^(/api/user/activation/\\w+)$').test(req.originalUrl)) {
+        } else if (activation.test(req.originalUrl)) {
+          return true;
+        } else if (restaurants.test(req.originalUrl)) {
           return true;
         } else {
           console.log("do not skip based on url");
@@ -226,6 +233,7 @@
   apiRouter.post('/charge', routes.makePayment);
   apiRouter.post('/mobile/login', routes.mobileAuth);
   apiRouter.post('/mobile/messaging/token', routes.addUserDeviceToken);
+  apiRouter.post('/mobile/token/refresh', routes.mobileRefreshToken);
   app.use('/api', apiRouter);
 
   /*  ==============================================================

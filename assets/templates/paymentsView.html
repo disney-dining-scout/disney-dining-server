@@ -1,13 +1,17 @@
 <div class="col-md-12 col-sm-12 bootcards-list">
   <div class="panel panel-default">
     <div class="panel-heading clearfix">
-      <h3 class="panel-title pull-left">Payments</h3>
+      <h3 class="panel-title pull-left">Subscription and Payments</h3>
     </div>
     <div class="panel-body">
       <div class="col-md-12">
         <h3 class="pull-left">
           {{#if subExpires}}
-          Subscription Expires: {{momentFormat subExpires format="ddd. MMM. DD, YYYY"}}
+            {{#isPast subExpires}}
+            Subscription Expired: <span class="text-danger">{{momentFormat subExpires format="ddd. MMM. DD, YYYY"}}</span>
+            {{else}}
+            Subscription Expires: {{momentFormat subExpires format="ddd. MMM. DD, YYYY"}}
+            {{/isPast}}
           {{else}}
           Free Account
           {{/if}}

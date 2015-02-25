@@ -564,6 +564,15 @@ exports.mobileAuth = function(req, res) {
   });
 };
 
+exports.mobileRefreshToken = function(req, res) {
+  var decoded = jwt.decode(req.body.token),
+      token = jwt.sign({ user: decoded.user, mobile: true }, opts.configs.get("privateKey"), { expiresInMinutes: 1440 * 60, algorithm: 'RS256' }),
+      data = {
+        token: token
+      };
+  sendBack(data, 200, res);
+};
+
 exports.addUserDeviceToken = function(req, res) {
   var callback = function(result) {
         var code = ("success" in result) ? 500 : 200;

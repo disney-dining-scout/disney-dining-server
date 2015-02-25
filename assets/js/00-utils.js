@@ -138,6 +138,15 @@ Handlebars.registerHelper('fromNow', function(date) {
     return moment(date).fromNow();
 });
 
+// usage: {{#isPast date}}{{/isPast}}
+Handlebars.registerHelper('isPast', function(date, options) {
+  var now = moment();
+  if (moment(date).isBefore(now)) {
+    return options.fn(this);
+  } else {
+    return options.inverse(this);
+  }
+});
 
 // Comparison Helper for handlebars.js
 // Pass in two values that you want and specify what the operator should be

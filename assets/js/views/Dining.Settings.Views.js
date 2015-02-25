@@ -357,6 +357,12 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       App.vent.on('payment:showAlert', function (model) {
         view.showAlert(model);
       });
+      App.vent.on("payment:showProcessing", function (model) {
+        view.showPaymentProcessing(model);
+      });
+      App.vent.on("payment:removeAlert", function () {
+        $(".alert", view.$el).remove();
+      });
     },
     onRender: function() {
 
@@ -382,6 +388,13 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
         }, 2000);
       }
       **/
+    },
+    showPaymentProcessing: function(model) {
+      var alert = new App.Public.Views.AlertView({model: model});
+      $(".alert", this.$el).remove();
+      alert.render();
+      $(alert.$el).removeClass("alert-danger").addClass("alert-info");
+      $(alert.$el).prependTo(".panel-body", this.$el);
     },
     showPaymentScreen: function(e) {
       var paymentModal = new Views.PaymentModal({model: this.model});
@@ -446,6 +459,11 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
     },
     beforeSubmit: function(e) {
       if (this.creditcard.isValid()) {
+        var alertModel = new App.Models.AlertModel({
+              message: "Payment is being processed",
+              spinner: true
+            });
+        App.vent.trigger("payment:showProcessing", alertModel);
         return true;
       } else {
         var model = new App.Models.AlertModel(this.model.validationError);
@@ -469,6 +487,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
                   });
               App.vent.trigger("payment:showAlert", alertModel);
             } else {
+              App.vent.trigger("payment:removeAlert");
               var payments = App.user.get('payments');
               payments.add(model);
               Messenger().post(message);

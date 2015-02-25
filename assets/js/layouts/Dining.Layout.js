@@ -10,20 +10,17 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
         App.layoutView.main.$el.addClass("loginContainer");
       });
     },
-
     // UI bindings create cached attributes that
     // point to jQuery selected objects
     ui: {
 
     },
-
     events: {
 
     },
     resize: function() {
 
     },
-
     onShow: function() {
 
       this.resize();
@@ -32,12 +29,16 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
 
   Layout.Header = Marionette.ItemView.extend({
     initialize: function(options){
+      var view = this;
       this.opts = _.extend({light: false}, options);
+      App.vent.on('user:update', function (model) {
+        view.showAlert(model);
+      });
     },
     template: Templates.header,
     className: "container",
     events: {
-
+      "click .btn-upgrade" : "upgrade"
     },
     onRender: function() {
         /**
@@ -48,11 +49,13 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
       }
       **/
     },
-
     handleLink: function(e) {
       e.preventDefault();
       Backbone.history.navigate($(e.currentTarget).data().url, { trigger: true });
 
+    },
+    upgrade: function(e) {
+      Backbone.history.navigate("payments", { trigger: true });
     }
   });
 
