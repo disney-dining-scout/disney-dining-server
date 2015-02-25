@@ -205,6 +205,7 @@
   router.get('/change-password', routes.index);
   router.get('/update-notifications', routes.index);
   router.get('/start', routes.index);
+  router.get('/new', routes.index);
   router.get('/activation/:token', routes.index);
   app.use('/', router);
 
