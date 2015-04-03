@@ -165,13 +165,14 @@
             },
             carriers = new RegExp('^(/api/search/carriers/\\w+)$'),
             restaurants = new RegExp('^(/api/search/restaurants/\\w+)$'),
-            activation = new RegExp('^(/api/user/activation/\\w+)$');
+            activation = new RegExp('^(/api/user/activation/\\w+)$'),
+            activation0 = new RegExp('^(/activation/\\w+)$');
         if (inPath > -1) {
           console.log("skip based on url");
           return true;
         } else if (carriers.test(req.originalUrl)) {
           return true;
-        } else if (activation.test(req.originalUrl)) {
+        } else if (activation.test(req.originalUrl) || activation0.test(req.originalUrl)) {
           return true;
         } else if (restaurants.test(req.originalUrl)) {
           return true;
