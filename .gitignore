@@ -7,3 +7,4 @@ config/analytics.txt
 access.log
 public/
 tmp/
+/docs/server-setup.md

@@ -34,11 +34,6 @@ Dining.ioEvent = function(data) {
           }
         });
       }
-    } 
-  } else if (data.objectType === "updates") {
-    if (data.modType == "checkedIn") {
-      message = data.restaurant + ": " + data.objectId;
-      $(".checkedInNumber").text(message);
     }
   } else if (data.objectType === "user-info") {
     if ("user" in data.user) {

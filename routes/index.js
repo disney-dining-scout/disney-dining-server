@@ -1274,7 +1274,7 @@ var checkUids = function(oldUid, newUid, callback) {
 };
 
 var createUserModel = function(user, cb) {
-  if ("id" in user) {
+  if (typeof user !== "undefined" && "id" in user) {
     async.waterfall([
       function(callback){
         getUserSearches(user, function(searches) {
