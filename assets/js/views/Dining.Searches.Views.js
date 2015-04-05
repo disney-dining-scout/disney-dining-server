@@ -158,7 +158,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         60000
       );
 
-      if (moment(App.user.get("subExpires")).isBefore()) {
+      if (App.user.get("subExpires") === null || moment(App.user.get("subExpires")).isBefore()) {
         $('.adunit', this.$el).dfp({
           dfpID:'177812472',
           enableSingleRequest: false,
