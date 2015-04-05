@@ -161,7 +161,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       if (moment(App.user.get("subExpires")).isBefore()) {
         $('.adunit', this.$el).dfp({
           dfpID:'177812472',
-          enableSingleRequest: true,
+          enableSingleRequest: false,
           sizeMapping: {
             'my-default': [
               {browser: [1024, 768], ad_sizes: [728, 90]},
@@ -169,6 +169,19 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
               {browser: [640, 480], ad_sizes: [320, 50]},
               {browser: [   0,   0], ad_sizes: [120, 60]}
             ],
+          },
+          afterEachAdLoaded: function (e) {
+            var adUnit = $(e);
+            var refreshTimeOut = adUnit.data('refresh');
+            var adUnitData = adUnit.data('googleAdUnit');
+            if (adUnitData && adUnit.hasClass('display-block')) {
+              console.log('setting timeout of 60000 to ' + adUnit.attr('id'));
+
+              setTimeout(function () {
+                  console.log('refreshing ' + adUnit.attr('id'));
+                  window.googletag.pubads().refresh([adUnitData]);
+              }, 60000);
+            }
           }
         });
       } else {
