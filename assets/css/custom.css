@@ -10,9 +10,7 @@ body {
   overflow: hidden;
 }
 
-#main {
-  padding-top: 56px;
-}
+
 .dashboard {
   margin-right: 0px;
   margin-left: 0px;
@@ -272,6 +270,10 @@ a {
   .settingsUserName {
     display: inline-block;
   }
+
+  #main {
+    padding-top: 56px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -281,6 +283,10 @@ a {
 
   .displayMenuBtn {
     margin-top: 0px;
+  }
+
+  #main {
+    padding-top: 80px;
   }
 }
 

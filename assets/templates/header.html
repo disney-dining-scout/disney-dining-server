@@ -4,10 +4,10 @@
 
 <ul class="nav navbar-nav navbar-right">
   {{#isPast user.subExpires}}
-  <li><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
+  <li class="hidden-xs"><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
   {{else}}
     {{#unless user.subExpires}}
-    <li><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
+    <li class="hidden-xs"><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
     {{/unless}}
   {{/isPast}}
   <li>
