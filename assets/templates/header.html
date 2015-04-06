@@ -5,6 +5,10 @@
 <ul class="nav navbar-nav navbar-right">
   {{#isPast user.subExpires}}
   <li><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
+  {{else}}
+    {{#unless user.subExpires}}
+    <li><button type="button" class="btn btn-link navbar-btn btn-upgrade"><i class="fa fa-lightbulb-o fa-fw"></i> Upgrade now!</button></li>
+    {{/unless}}
   {{/isPast}}
   <li>
     <button type="button" class="btn btn-default navbar-btn displayMenuBtn" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
@@ -26,7 +30,11 @@
       {{#isPast user.subExpires}}
       <a href="#"><i class="fa fa-envelope fa-fw"></i> Notification Settings <i class="fa fa-usd"></i></a>
       {{else}}
-      <a href="update-notifications"><i class="fa fa-envelope fa-fw"></i> Notification Settings</a>
+        {{#if user.subExpires}}
+        <a href="update-notifications"><i class="fa fa-envelope fa-fw"></i> Notification Settings</a>
+        {{else}}
+        <a href="#"><i class="fa fa-envelope fa-fw"></i> Notification Settings <i class="fa fa-usd"></i></a>
+        {{/if}}
       {{/isPast}}
     </li>
     <li>

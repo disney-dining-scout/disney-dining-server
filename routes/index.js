@@ -1507,6 +1507,14 @@ var addUserDeviceToken = function(device, callback) {
 
 };
 
+var heatmapUid = function(uid) {
+  sql = 'SELECT DATE_FORMAT(dateSearched,"%Y-%m-%d %H:00:00") as date, count(*) as count ' +
+        'FROM searchLogs ' +
+        'WHERE uid = :uid AND foundSeats = 1 ' +
+        'GROUP BY hour( dateSearched ) , day( dateSearched ) ' +
+        'ORDER BY dateSearched ASC ';
+};
+
 function pad(num, size) {
     var s = num+"";
     while (s.length < size) { s = "0" + s; }
