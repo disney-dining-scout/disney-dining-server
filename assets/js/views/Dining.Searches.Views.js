@@ -164,10 +164,11 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           enableSingleRequest: false,
           sizeMapping: {
             'my-default': [
-              {browser: [1024, 768], ad_sizes: [728, 90]},
-              {browser: [800, 600], ad_sizes: [468, 90]},
-              {browser: [640, 480], ad_sizes: [320, 50]},
-              {browser: [   0,   0], ad_sizes: [120, 60]}
+              {browser: [970, 400], ad_sizes: [970, 90] },
+              {browser: [728, 300], ad_sizes: [728, 90] },
+              {browser: [468, 300], ad_sizes: [468, 60] },
+              {browser: [320, 200], ad_sizes: [320, 50] },
+              {browser: [1, 1], ad_sizes: [234, 60]},
             ],
           },
           afterEachAdLoaded: function (e) {

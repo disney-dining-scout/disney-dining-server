@@ -266,7 +266,7 @@ a {
   padding-left: 0px;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 640px) {
   .settingsUserName {
     display: inline-block;
   }
@@ -276,7 +276,7 @@ a {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .settingsUserName {
     display: none;
   }
