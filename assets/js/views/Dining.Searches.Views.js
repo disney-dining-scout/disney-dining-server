@@ -168,7 +168,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
               {browser: [764, 300], ad_sizes: [728, 90] },
               {browser: [480, 300], ad_sizes: [468, 60] },
               {browser: [360, 200], ad_sizes: [320, 50] },
-              {browser: [1, 1], ad_sizes: [234, 60]},
+              {browser: [1, 1], ad_sizes: [300, 100]},
             ],
           },
           afterEachAdLoaded: function (e) {
