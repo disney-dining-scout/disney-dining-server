@@ -4,8 +4,8 @@
       <h3 class="panel-title pull-left">Subscription and Payments</h3>
     </div>
     <div class="panel-body">
-      <div class="col-md-12">
-        <h3 class="pull-left">
+      <div class="col-md-8 col-sm-12 col-xs-12 pull-left">
+        <h3>
           {{#if subExpires}}
             {{#isPast subExpires}}
             Subscription Expired: <span class="text-danger">{{momentFormat subExpires format="ddd. MMM. DD, YYYY"}}</span>
@@ -16,23 +16,27 @@
           Free Account
           {{/if}}
         </h3>
+      </div>
+      <div class="col-md-4 col-sm-12 col-xs-12 pull-right">
         <button type="button" class="btn btn-primary pull-right make-payment"><i class="fa fa-credit-card"></i> Make a Payment</button>
       </div>
-      <div class="col-md-12">
+      <div class="col-md-12 col-sm-12 col-xs-12">
         <br />
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Date</th>
-              <th>Subscription</th>
-              <th>Amount</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="payments">
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Date</th>
+                <th>Subscription</th>
+                <th>Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="payments">
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
