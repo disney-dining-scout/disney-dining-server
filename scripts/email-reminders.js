@@ -52,10 +52,10 @@ db.dining = new Sequelize(
 });
 
 transport = nodemailer.createTransport(smtpTransport({
-    host: config.get("mail:host"),
-    port: config.get("mail:port"),
-    ignoreTLS: true
-  }));
+  host: config.get("mail:host"),
+  port: config.get("mail:port"),
+  ignoreTLS: true
+}));
 transport.use('compile', htmlToText());
 
 var sql = 'SELECT users.* ' +
@@ -93,11 +93,11 @@ var sql = 'SELECT users.* ' +
               var mailOptions = {
                     from: "Disney Dining Scout <noreply@disneydining.io>", // sender address
                     to: "", // list of receivers
-                    subject: "Search Summary for :today", // Subject line
+                    subject: "Search Summary for "+day.format("MMMM Do YYYY"), // Subject line
                     generateTextFromHTML: true
                   },
                   pageBuilder = handlebars.compile(template),
-                  html = pageBuilder({'user':user, 'seaches': searches, summaryDate: day});
+                  html = pageBuilder({'user':user, 'searches': searches, summaryDate: day});
               mailOptions.to = "voss.matthew@gmail.com"; //user.email
               mailOptions.html = html;
               transport.sendMail(
