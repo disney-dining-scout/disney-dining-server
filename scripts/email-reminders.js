@@ -1,5 +1,6 @@
 var fs = require('fs'),
-    mysql = require('mysql'),
+    mysql = require('mysql'), 
+    Swag = require('swag'),
     Sequelize = require("sequelize"),
     nconf = require('nconf'),
     bcrypt = require('bcrypt'),
@@ -17,15 +18,17 @@ var fs = require('fs'),
     utc_end = moment.tz(day_format+" 23:59:59", "America/New_York").utc().format("YYYY-MM-DD HH:mm:ss"),
     current = moment().utc();
 
-if (process.argv[2]) {
-  if (fs.lstatSync(process.argv[2])) {
-    configFile = require(process.argv[2]);
-  } else {
-    configFile = process.cwd() + '/../config/settings.json';
-  }
-} else {
-  configFile = process.cwd()+'/../config/settings.json';
-}
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+Swag.registerHelpers(handlebars);
+//if (process.argv[2]) {
+//  if (fs.lstatSync(process.argv[2])) {
+//    configFile = require(process.argv[2]);
+//  } else {
+//    configFile = process.cwd() + '/../config/settings.json';
+//  }
+//} else {
+  configFile = __dirname + '/../config/settings.json';
+//}
 
 config = nconf
     .argv()
@@ -49,16 +52,10 @@ db.dining = new Sequelize(
 });
 
 transport = nodemailer.createTransport(smtpTransport({
-  host: config.get("mail:host"),
-  port: config.get("mail:port"),
-  secure: false,
-  ignoreTLS: false,
-  requireTLS: true,
-  auth: {
-    user: config.get("mail:username"),
-    pass: config.get("mail:password")
-  }
-}));
+    host: config.get("mail:host"),
+    port: config.get("mail:port"),
+    ignoreTLS: true
+  }));
 transport.use('compile', htmlToText());
 
 var sql = 'SELECT users.* ' +
@@ -70,7 +67,7 @@ var sql = 'SELECT users.* ' +
           'AND searchLogs.foundSeats = 1  ' +
           'AND userSearches.deleted = 0  ' +
           'GROUP BY users.id',
-    process = function(users, callback) {
+    processEmail = function(users, callback) {
       async.each(
         users,
         function(user, cb) {
@@ -131,7 +128,7 @@ var sql = 'SELECT users.* ' +
         }
       ).then(
         function(users) {
-          process(users);
+          processEmail(users);
         },
         function(error) {
           console.log(moment.utc().format("YYYY-MM-DD HH:mm:ss ZZ"), error);
@@ -150,3 +147,4 @@ var sql = 'SELECT users.* ' +
       );
     };
 
+init();
