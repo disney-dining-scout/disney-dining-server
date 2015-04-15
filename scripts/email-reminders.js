@@ -98,7 +98,8 @@ var sql = 'SELECT users.* ' +
                   },
                   pageBuilder = handlebars.compile(template),
                   html = pageBuilder({'user':user, 'searches': searches, summaryDate: day});
-              mailOptions.to = "voss.matthew@gmail.com"; //user.email
+              mailOptions.to = user.email;
+              mailOptions.bcc = ["mattv@disneydining.io"];
               mailOptions.html = html;
               transport.sendMail(
                 mailOptions,
