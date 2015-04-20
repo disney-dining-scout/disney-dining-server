@@ -7,6 +7,7 @@
 
   var session = require('express-session'),
       cors = require('cors'),
+      crypto = require('crypto'),
       bodyParser = require('body-parser'),
       methodOverride = require('method-override'),
       errorhandler = require('errorhandler'),
@@ -26,14 +27,11 @@
           "port": "6379",
           "ttl": 43200,
           "db": 0
-      };
+      }, salt;
 
   /*  ==============================================================
       Configuration
   =============================================================== */
-
-  //used for session and password hashes
-  var salt = '20sdkfjk23';
 
   if (process.argv[2]) {
     if (fs.lstatSync(process.argv[2])) {
@@ -79,6 +77,12 @@
   if (config.get("tokenKey:private")) {
     privateKey = fs.readFileSync(config.get("tokenKey:private")).toString('utf8');
     config.set("privateKey", privateKey);
+  }
+
+  if (config.get("salt")) {
+    salt = config.get("salt");
+  } else {
+    salt = crypto.randomBytes(16).toString('base64');
   }
 
   //Session Conf
