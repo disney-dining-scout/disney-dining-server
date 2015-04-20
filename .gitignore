@@ -8,3 +8,4 @@ access.log
 public/
 tmp/
 /docs/server-setup.md
+scripts/addUser.js
