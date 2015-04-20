@@ -161,7 +161,8 @@
               "/api/mobile/login",
               "/user/password/reset",
               "/api/search/carriers",
-              "/api/mobile/token/refresh/"
+              "/api/mobile/token/refresh/",
+              "/api/user/password/reset"
             ],
             inPath = skipPaths.indexOf(req.originalUrl),
             fileExtension = function(url) {
