@@ -33,7 +33,7 @@ var fs = require('fs'),
     opts = {},
     config = {},
     reconnectTries = 0, cacheBuster = moment().format("X"),
-    hmac, signature, connection, client, key, cert,
+    hmac, signature, connection, client, key, cert, indexHtml,
     transport, acl, subClient, analytics = "", appInfo = {}, pubClient,
     CheckinMemberFieldValues, RegMemberFieldValues, CheckinGroupMembers,
     RegGroupMembers, CheckinEventFields, CheckinBiller, RegBiller,
@@ -52,6 +52,14 @@ fs.exists(__dirname + '/../config/analytics.txt', function(exists) {
   if (exists) {
     fs.readFile(__dirname + '/../config/analytics.txt', 'utf8', function(error, content) {
       analytics = content;
+    });
+  }
+});
+
+fs.exists(__dirname + '/../assets/templates/index.html', function(exists) {
+  if (exists) {
+    fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
+      indexHtml = content;
     });
   }
 });
@@ -311,21 +319,18 @@ exports.index = function(req, res){
   var init = "$(document).ready(function() { Dining.appInfo = new Dining.Models.AppInfoModel(" + JSON.stringify(appInfo) + ");Dining.start(); });",
 
       send = function() {
-        fs.readFile(__dirname + '/../assets/templates/index.html', 'utf8', function(error, content) {
-          if (error) { console.log(error); }
-          var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
-          init += (analytics.length > 0) ? analytics : "";
-          var pageBuilder = handlebars.compile(content),
-              html = pageBuilder({
-                'init': init,
-                'prefix':prefix,
-                'cacheBuster': cacheBuster
-              });
+        var prefix = (opts.configs.get("prefix")) ? opts.configs.get("prefix") : "";
+        init += (analytics.length > 0) ? analytics : "";
+        var pageBuilder = handlebars.compile(indexHtml),
+            html = pageBuilder({
+              'init': init,
+              'prefix':prefix,
+              'cacheBuster': cacheBuster
+            });
 
-          res.writeHead(200, { 'Content-Type': 'text/html' });
-          res.write(html, 'utf-8');
-          res.end('\n');
-        });
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write(html, 'utf-8');
+        res.end('\n');
       };
   var userId, decipher;
   if ((typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') || "remember" in req.cookies) {
