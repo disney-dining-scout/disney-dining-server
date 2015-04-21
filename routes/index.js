@@ -73,7 +73,7 @@ exports.initialize = function() {
   var setSubscription = function() {
         subClient.psubscribe("disneydining:*");
         subClient.on("pmessage", function (pattern, channel, message) {
-          console.log("channel ", channel, ": ", message);
+          //console.log("channel ", channel, ": ", message);
           if (channel === "disneydining:searchupdate") {
             message = JSON.parse(message);
             message.objectType = "search-update";
@@ -99,7 +99,7 @@ exports.initialize = function() {
     opts.configs.get("stripe:key")
   );
 
-  console.log(opts.configs.get("redis"));
+  //console.log(opts.configs.get("redis"));
   subClient = redis.createClient(
     opts.configs.get("redis:port"),
     opts.configs.get("redis:host")
@@ -112,7 +112,7 @@ exports.initialize = function() {
     subClient.select(
       opts.configs.get("redis:db"),
       function() {
-        console.log("Redis DB set to:", opts.configs.get("redis:db"));
+        //console.log("Redis DB set to:", opts.configs.get("redis:db"));
         setSubscription();
       }
     );
@@ -353,7 +353,7 @@ exports.index = function(req, res){
       });
     });
   } else {
-    console.log(req.cookies);
+    //console.log(req.cookies);
     if ("remember" in req.cookies) {
       decipher = crypto.createDecipher('aes-256-cbc', key);
       decipher.update(req.cookies.remember, 'base64', 'utf8');
@@ -375,7 +375,7 @@ exports.index = function(req, res){
 
 //Add a user
 exports.addUser = function(req, res) {
-  console.log("adding user");
+  //console.log("adding user");
   var request = req,
       user = {
         email: req.body.email,
@@ -396,7 +396,7 @@ exports.addUser = function(req, res) {
       //console.log(userRec);
       userRec = userRec.toJSON();
       createUserModel(userRec, function(user) {
-        console.log("Sending back new user");
+        //console.log("Sending back new user");
         addUserToSession(user, request, function() {
           delete user.password;
           sendActivationEmail(user, function() {
@@ -473,7 +473,7 @@ exports.authUser = function(req, res) {
             var token = cipher.final('base64');
             res.cookie('remember', token, { maxAge: day });
           } else {
-            console.log("Delete cookie");
+            //console.log("Delete cookie");
             res.clearCookie('remember');
           }
           addUserToSession(user, request, function() {
@@ -606,7 +606,7 @@ exports.resetPassword = function(req, res) {
       models.PasswordReset.create(passToken).then(function(result) {
         emailTemplates(emailTemplatesDir, function(err, template) {
           if (err) {
-            console.log(err);
+            //console.log(err);
           } else {
             // Send a single email
             // An example users object with formatted email function
@@ -614,7 +614,7 @@ exports.resetPassword = function(req, res) {
             // Send a single email
             template('resetPassword', user, function(err, html, text) {
               if (err) {
-                console.log(err);
+                //console.log(err);
               } else {
                 transport.sendMail({
                   from: 'Disney Dining Scout <noreply@disneydining.io>',
@@ -624,9 +624,9 @@ exports.resetPassword = function(req, res) {
                   generateTextFromHTML: true
                 }, function(err, responseStatus) {
                   if (err) {
-                    console.log(err);
+                    //console.log(err);
                   } else {
-                    console.log(responseStatus.message);
+                    //console.log(responseStatus.message);
                     sendBack(
                       {
                         "success": true,
@@ -669,7 +669,7 @@ exports.checkResetToken = function(req, res) {
       getUser(token.user, true, function(user) {
         token = token.toJSON();
         token = underscore.extend(token, user);
-        console.log(token);
+        //console.log(token);
         sendBack(token, 200, res);
       });
     } else {
@@ -763,7 +763,7 @@ exports.addSearch = function(req, res) {
   models.UserSearches.create(
     results
   ).then(function(search) {
-    console.log(search);
+    //console.log(search);
 
     getUserSearch(search.id, function(search) {
       checkUids(null, uid, function() {
@@ -807,7 +807,7 @@ exports.updateSearch = function(req, res) {
         results[key] = req.body[key];
       }
     });
-    console.log(results);
+    //console.log(results);
     results.restaurant = req.body.restaurantId || req.body.restaurant;
     results.id = req.params.searchId;
     var oldUid = results.uid,
@@ -871,7 +871,7 @@ exports.getRestaurants = function(req, res) {
 };
 
 exports.searchRestaurants = function(req, res) {
-  console.log("searching for", req.params.name);
+  //console.log("searching for", req.params.name);
   searchRestaurants(
     req.params.name,
     function(restaurants) {
@@ -881,7 +881,7 @@ exports.searchRestaurants = function(req, res) {
 };
 
 exports.searchCarriers = function(req, res) {
-  console.log("searching for", req.params.name);
+  //console.log("searching for", req.params.name);
   searchCarriers(
     req.params.name,
     function(carriers) {
@@ -927,7 +927,7 @@ exports.deleteUserSearch = function(req, res) {
 };
 
 exports.getSearch = function(req, res) {
-  console.log("searching for", req.params.searchId);
+  //console.log("searching for", req.params.searchId);
   getUserSearch(
     req.params.searchId,
     function(search) {
@@ -971,14 +971,14 @@ exports.sendUserActivation = function(req, res) {
 };
 
 exports.activateUser = function(req, res) {
-  console.log("Begin user activation:", req.params.token);
+  //console.log("Begin user activation:", req.params.token);
   var decipher = crypto.createDecipher('aes-256-cbc', key);
       decipher.update(req.params.token, 'hex', 'utf8');
   var userId = decipher.final('utf8'),
       userAttributes = {
         activated: true
       };
-  console.log("userId:", userId);
+  //console.log("userId:", userId);
   models.Users.find(userId).then(function(user) {
     user.updateAttributes(userAttributes).then(function(user) {
       user = user.toJSON();
@@ -998,7 +998,7 @@ exports.makePayment = function(req, res) {
   var payment = req.body;
   payment.number = payment.number.replace(/\s+/g, '');
   payment.expiration = payment.expiration.replace(/\s+/g, '');
-  console.log("payment: ", payment);
+  //console.log("payment: ", payment);
   stripe.charges.create({
     amount: payment.amount * 100,
     currency: "usd",
@@ -1015,7 +1015,7 @@ exports.makePayment = function(req, res) {
   }, function(err, charge) {
     var paid = {};
     if (err) {
-      console.log("error: ", err);
+      //console.log("error: ", err);
       paid = {
         userId: payment.userId,
         amount: payment.amount,
@@ -1031,7 +1031,7 @@ exports.makePayment = function(req, res) {
         failureMess: err.message
       };
     } else {
-      console.log("charge: ", charge);
+      //console.log("charge: ", charge);
       var expirationDate = expires(payment.subscription, req.session.user);
       paid = {
         userId: payment.userId,
@@ -1229,7 +1229,7 @@ var checkUids = function(oldUid, newUid, callback) {
           }
         })
         .then(function(result) {
-          console.log(result.count);
+          //console.log(result.count);
           if (result.count === 0) {
             models.GlobalSearches.find({
               where: {
@@ -1284,14 +1284,14 @@ var createUserModel = function(user, cb) {
     async.waterfall([
       function(callback){
         getUserSearches(user, function(searches) {
-          console.log("searches", searches);
+          //console.log("searches", searches);
           user.searches = searches;
           callback(null, user);
         });
       },
       function(user, callback) {
         getUserPayments(user.id, function(payments) {
-          console.log("payments", payments);
+          //console.log("payments", payments);
           user.payments = payments;
           callback(null, user);
         });
@@ -1300,7 +1300,7 @@ var createUserModel = function(user, cb) {
         cb(results);
     });
   } else {
-    console.log("Missing user!");
+    //console.log("Missing user!");
     cb(null);
   }
 };
@@ -1398,7 +1398,7 @@ var expireActivationCode = function(code, callback) {
 var sendActivationEmail = function(user, callback) {
   emailTemplates(emailTemplatesDir, function(err, template) {
     if (err) {
-      console.log(err);
+      //console.log(err);
     } else {
       // Send a single email
       // An example users object with formatted email function
@@ -1408,7 +1408,7 @@ var sendActivationEmail = function(user, callback) {
       // Send a single email
       template('activation', user, function(err, html, text) {
         if (err) {
-          console.log(err);
+          //console.log(err);
         } else {
           transport.sendMail({
             from: 'Disney Dining Scout <noreply@disneydining.io>',
@@ -1418,9 +1418,9 @@ var sendActivationEmail = function(user, callback) {
             generateTextFromHTML: true
           }, function(err, responseStatus) {
             if (err) {
-              console.log(err);
+              //console.log(err);
             } else {
-              console.log(responseStatus.message);
+              //console.log(responseStatus.message);
             }
 
             callback();
