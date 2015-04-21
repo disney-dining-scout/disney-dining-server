@@ -656,7 +656,7 @@ exports.checkResetToken = function(req, res) {
       token: req.body.token,
       used: 0,
       expire: {
-        gt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
+        lt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
       }
     }
   }).then(function(token) {
@@ -859,7 +859,7 @@ exports.getUserSearches = function(req, res) {
 
 
 exports.getRestaurants = function(req, res) {
-  var lastUpdated = ("lastUpdated" in req.params) ? req.params.lastUpdated : 31536000;
+  var lastUpdated = ("lastUpdated" in req.params) ? req.params.lastUpdated : null;
   getRestaurants(lastUpdated, function(restaurants) {
     sendBack(restaurants, 200, res);
   });
@@ -1135,21 +1135,23 @@ var updateUserExpires = function(userId, expires, cb) {
 };
 
 var getRestaurants = function(updatedAt, callback) {
+  var deletedAt = (updatedAt === null) ? "AND deletedAt IS NULL " : "",
+      sql = 'SELECT * ' +
+        'FROM restaurants ' +
+        'WHERE updatedAt >= :updatedAt ' +
+        deletedAt +
+        'ORDER BY name ASC ';
   updatedAt = updatedAt || 31536000;
-  models.Restaurants.findAll({
-    where: {
-      updatedAt: {
-        gte: moment.utc(updatedAt, "X").format("YYYY-MM-DD HH:m:ssZ")
-      }
-    },
-    order: "name ASC"
-  }).then(function(restaurants) {
-    var convertToJson = function(item, cback) {
-          cback(null, item.toJSON());
-        };
-    async.map(restaurants, convertToJson, function(err, results){
-      callback(results);
-    });
+  db.dining.query(
+    sql,
+    {
+      replacements: {
+        updatedAt: moment.utc(updatedAt, "X").format("YYYY-MM-DD HH:m:ssZ")
+      },
+      type: Sequelize.QueryTypes.SELECT
+    }
+  ).then(function(restaurants) {
+    callback(restaurants);
   });
 };
 

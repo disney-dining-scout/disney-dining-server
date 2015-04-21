@@ -162,7 +162,8 @@
               "/user/password/reset",
               "/api/search/carriers",
               "/api/mobile/token/refresh/",
-              "/api/user/password/reset"
+              "/api/user/password/reset",
+              "/api/token/check"
             ],
             inPath = skipPaths.indexOf(req.originalUrl),
             fileExtension = function(url) {
@@ -172,7 +173,7 @@
             restaurants = new RegExp('^(/api/search/restaurants/\\w+)$'),
             activation = new RegExp('^(/api/user/activation/\\w+)$'),
             activation0 = new RegExp('^(/activation/\\w+)$'),
-            passwordReset = new RegExp('^(/reset/password/\\w+)$');
+            passwordReset = new RegExp('^(/reset/password/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})$');
         if (inPath > -1) {
           console.log("skip based on url");
           return true;
@@ -216,6 +217,7 @@
   router.get('/start', routes.index);
   router.get('/new', routes.index);
   router.get('/activation/:token', routes.index);
+  router.get('/reset/password/:token', routes.index);
   app.use('/', router);
 
   //API
