@@ -684,12 +684,12 @@ exports.updatePassword = function(req, res) {
         token: req.body.token,
         used: 0,
         expire: {
-          gt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
+          lt: moment.utc().add(30, 'm').format('YYYY-MM-DD HH:mm:ss')
         }
       }
     }).then(function(token) {
       if (token) {
-        getUser(token.user, true, function(user) {
+        getUser(token.user, false, function(user) {
           updateUserPassword(user, req.body.password, function(user) {
             var tokenAttributes = {
                   used: true
@@ -712,7 +712,7 @@ exports.updatePassword = function(req, res) {
       }
     });
   } else {
-    getUser(req.session.user.id, function(user) {
+    getUser(req.session.user.id, false, function(user) {
       updateUserPassword(user, true, req.body.password, function(user) {
         delete user.password;
          var successMsg = {
@@ -1060,7 +1060,7 @@ exports.makePayment = function(req, res) {
 };
 
 exports.getUser = function(req, res) {
-  getUser(req.params.userId,true, function(user) {
+  getUser(req.params.userId, true, function(user) {
     createUserModel(user, function(user) {
       if (req.user.mobile) {
         user = [user];
@@ -1078,7 +1078,6 @@ var sendBack = function(data, status, res) {
 };
 
 var getUser = function(userId, toJson, callback) {
-  toJson = toJson || true;
   async.waterfall([
     function(cb){
       models.Users.find(userId).then(function(user) {

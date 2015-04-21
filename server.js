@@ -173,7 +173,8 @@
             restaurants = new RegExp('^(/api/search/restaurants/\\w+)$'),
             activation = new RegExp('^(/api/user/activation/\\w+)$'),
             activation0 = new RegExp('^(/activation/\\w+)$'),
-            passwordReset = new RegExp('^(/reset/password/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})$');
+            passwordReset = new RegExp('^(/reset/password/[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12})$'),
+            passwordReset0 = new RegExp('^(/api/user/password/update/\\w+)$');
         if (inPath > -1) {
           console.log("skip based on url");
           return true;
@@ -183,7 +184,7 @@
           return true;
         } else if (restaurants.test(req.originalUrl)) {
           return true;
-        } else if (passwordReset.test(req.originalUrl)) {
+        } else if (passwordReset.test(req.originalUrl) || passwordReset0.test(req.originalUrl)) {
           return true;
         } else {
           console.log("do not skip based on url");
