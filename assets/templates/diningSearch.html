@@ -3,10 +3,14 @@
     {{#if past}}
       <i class="fa fa-3x pull-left fa-exclamation-circle text-danger"></i>
     {{else}}
-      {{#if logs.0.foundSeats}}
-      <i class="fa fa-3x pull-left fa-smile-o text-success"></i>
+      {{#if over}}
+        <i class="fa fa-3x pull-left fa-clock-o text-danger"></i>
       {{else}}
-      <i class="fa fa-3x pull-left fa-frown-o text-danger"></i>
+        {{#if logs.0.foundSeats}}
+          <i class="fa fa-3x pull-left fa-smile-o text-success"></i>
+        {{else}}
+          <i class="fa fa-3x pull-left fa-frown-o text-danger"></i>
+        {{/if}}
       {{/if}}
     {{/if}}
   </div>

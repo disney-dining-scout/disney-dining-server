@@ -197,6 +197,11 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
             "error": "email",
             "message": "Email address must be entered"
           };
+        } else if (!this.validateEmail(attrs.email)) {
+          return {
+            "error": "email",
+            "message": "Email address is not valid"
+          };
         } else if (attrs.password.length === 0 && this.isNew()) {
           return {
             "error": "passwordNew",
@@ -219,6 +224,11 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
             "error": "username",
             "message": "Email address must be entered"
           };
+        } else if (!this.validateEmail(attrs.email)) {
+          return {
+            "error": "email",
+            "message": "Email address is not valid"
+          };
         } else if (attrs.password.length === 0) {
           return {
             "error": "password",
@@ -229,6 +239,10 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     },
     initialize: function() {
       //if (this.isNew()) this.set('created', Date.now());
+    },
+    validateEmail: function (email) {
+      var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+      return re.test(email);
     }
   });
 

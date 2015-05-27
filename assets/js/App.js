@@ -42,7 +42,7 @@ Dining.ioEvent = function(data) {
   } else if (data.objectType === "user-update") {
     Dining.user.fetch({
       success: function(model, response, options)  {
-        App.vent.trigger("user:update", model);
+        Dining.vent.trigger("user:update", model);
       }
     });
   } else if (data.objectType === "search-edit") {
@@ -64,7 +64,7 @@ Dining.ioEvent = function(data) {
     Dining.vent.trigger("searches:delete", s);
   }
   if ("token" in data) {
-    var decoded = jwt_decode(data.token);
+    var decoded = atob(data.token.split('.')[1]);
     window.localStorage.setItem('token', data.token);
     window.localStorage.setItem('tokenExpires', parseInt(decoded.exp, 10));
     var checkToken = function() {
@@ -159,7 +159,7 @@ Dining.on('start', function() {
     });
     searches.on('add', this.updateRooms, this);
     searches.on('change:uid', this.updateRooms, this);
-    if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
+    if (Backbone.history.fragment === newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
     } else if (Backbone.history.fragment.indexOf("activation/") > -1) {
       Backbone.history.loadUrl();
@@ -171,7 +171,7 @@ Dining.on('start', function() {
 
   } else {
     var newFragment = Backbone.history.getFragment($(this).attr('href'));
-    if (Backbone.history.fragment == newFragment && Backbone.history.fragment !== "") {
+    if (Backbone.history.fragment === newFragment && Backbone.history.fragment !== "") {
       Backbone.history.loadUrl();
     } else if (Backbone.history.fragment.indexOf("activation/") > -1) {
       Backbone.history.loadUrl();
@@ -218,6 +218,7 @@ Dining.fixTime = function(model, attr) {
     if (attr === "date") {
       var date = moment(model.get("date"));
       model.set("past", date.isBefore(moment()));
+      model.set("over", date.isAfter(moment.utc().add(180, "days")));
     }
   }
 };

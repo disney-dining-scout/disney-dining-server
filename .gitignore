@@ -7,4 +7,6 @@ config/analytics.txt
 access.log
 public/
 tmp/
-/docs/server-setup.md
+docs/server-setup.md
+scripts/addUser.js
+bower2.json

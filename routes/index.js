@@ -171,7 +171,14 @@ exports.initialize = function() {
       type: Sequelize.DATE,
       defaultValue: null,
       get: function(name) {
-        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+        var t = moment.utc(this.getDataValue(name));
+        if (t.isUTC()) {
+          return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+        } else {
+          var d = t.format("YYYY-MM-DD HH:mm:ss");
+          t = moment.utc(d+"+00:00", "YYYY-MM-DD HH:mm:ssZ");
+          return t.format("YYYY-MM-DD HH:mm:ssZ");
+        }
       }
     },
     lastSMSNotification:  {
@@ -484,8 +491,8 @@ exports.authUser = function(req, res) {
       errorMsg;
   models.Users.find({ where: { email: req.body.email } }).then(function(user) {
     if (user !== null) {
-      bcrypt.compare(req.body.password, user.password, function(err, res) {
-        if (res) {
+      bcrypt.compare(req.body.password, user.password, function(err, result) {
+        if (result) {
           processUser(user);
         } else {
           errorMsg = {
@@ -922,6 +929,17 @@ exports.deleteUserSearch = function(req, res) {
           }
         });
       });
+    } else {
+      pubClient.publish("disneydining:searchdelete", JSON.stringify({id: req.params.searchId}));
+      if (req.user.mobile) {
+        sendBack({}, 200, res);
+      } else {
+        createUserModel(req.session.user, function(user) {
+          addUserToSession(user, req, function() {
+            sendBack({}, 200, res);
+          });
+        });
+      }
     }
   });
 };
@@ -1356,10 +1374,16 @@ var getUserSearch = function(id, callback) {
       });
     },
     function(search, cb){
-      models.Restaurants.find(search.restaurant).then(function(restaurant) {
-        search.restaurant = restaurant.toJSON();
-        cb(null, search);
-      });
+      models.Restaurants.find(search.restaurant).then(
+        function(restaurant) {
+          if (restaurant) {
+            search.restaurant = restaurant.toJSON();
+            cb(null, search);
+          } else {
+            cb("cannot find restaurant", null);
+          }
+        }
+      );
     },
     function(search, cb) {
       models.SearchLogs.findAll({
@@ -1514,7 +1538,7 @@ var addUserDeviceToken = function(device, callback) {
 };
 
 var heatmapUid = function(uid) {
-  sql = 'SELECT DATE_FORMAT(dateSearched,"%Y-%m-%d %H:00:00") as date, count(*) as count ' +
+  var sql = 'SELECT DATE_FORMAT(dateSearched,"%Y-%m-%d %H:00:00") as date, count(*) as count ' +
         'FROM searchLogs ' +
         'WHERE uid = :uid AND foundSeats = 1 ' +
         'GROUP BY hour( dateSearched ) , day( dateSearched ) ' +

@@ -92,7 +92,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
       'click .sign-in'        :   'logIn',
       'click .create'         :   'createAccount',
       'click .forgotPassword' :   'forgotPassword',
-      'click .terms'          :   'showTerms'
+      'click .terms'          :   'showTerms',
+      'click .newUserTab'     :   'newUserTab'
     },
 
     ui: {
@@ -135,6 +136,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         searchField: 'name',
         dataAttr: 'data-data',
         create: false,
+        maxItems: '1',
+        placeholder: 'Enter your carrier',
         render: {
             option: function(item, escape) {
                 return '<div>' +
@@ -145,7 +148,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
             }
         },
         load: function(query, callback) {
-            if (!query.length) return callback();
+            if (!query.length) { return callback(); }
             $.ajax({
                 url: '/api/search/carriers/' + encodeURIComponent(query),
                 type: 'GET',
@@ -158,6 +161,8 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
             });
         }
       });
+      var carrier = $('#carrier', this.$el).data('selectize');
+      carrier.updatePlaceholder();
       $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         if (e.target.hash === "#new") {
           $(".btn-primary").attr("disabled", "disabled");
@@ -166,8 +171,14 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         }
       });
 
+      /*
       $('#phone').inputmask({
         mask: '(999) 999-9999'
+      });
+      */
+      $('#phone').intlTelInput({
+        defaultCountry: "auto",
+        utilsScript: "/lib/intl-tel-input/utils.js"
       });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
@@ -179,6 +190,11 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
           $(".btn-primary").attr("disabled", "disabled");
         }
       };
+    },
+
+    newUserTab: function(e) {
+      $(".selectize-input input").css("width", "165px");
+      this.ui.firstName.focus();
     },
 
     onInputKeypress: function(evt) {
@@ -253,7 +269,7 @@ Dining.module('Public.Views', function(Views, App, Backbone, Marionette, $, _) {
         password: this.ui.passwordNew.val().trim(),
         passwordConfirm: this.ui.passwordConfirm.val().trim(),
         email: this.ui.email.val().trim(),
-        phone: this.ui.phone.val().trim(),
+        phone: this.ui.phone.intlTelInput("getNumber").trim(),
         firstName: this.ui.firstName.val().trim(),
         lastName: this.ui.lastName.val().trim(),
         zipCode: this.ui.zipCode.val().trim(),

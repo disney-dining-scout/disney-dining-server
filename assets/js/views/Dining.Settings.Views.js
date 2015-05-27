@@ -32,7 +32,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
 
     },
     onShow: function(e) {
-      $('#carrier', this.$el).selectize({
+      var s = $('#carrier', this.$el).selectize({
         valueField: 'id',
         labelField: 'name',
         searchField: 'name',
@@ -48,7 +48,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
           }
         },
         load: function(query, callback) {
-          if (!query.length) return callback();
+          if (!query.length) { return callback(); }
           $.ajax({
               url: '/api/search/carriers/' + encodeURIComponent(query),
               type: 'GET',
@@ -61,8 +61,15 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
           });
         }
       });
+      s[0].selectize.setValue(this.model.get("carrier"));
+      /*
       $('#phone').inputmask({
         mask: '(999) 999-9999'
+      });
+      */
+      $('#phone').intlTelInput({
+        defaultCountry: "auto",
+        utilsScript: "/lib/intl-tel-input/utils.js"
       });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
@@ -89,7 +96,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       this.model.set({
         checkAttrs: true,
         email: this.ui.email.val().trim(),
-        phone: this.ui.phone.val().trim(),
+        phone: this.ui.phone.intlTelInput("getNumber").trim(),
         firstName: this.ui.firstName.val().trim(),
         lastName: this.ui.lastName.val().trim(),
         zipCode: this.ui.zipCode.val().trim(),
@@ -222,7 +229,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
 
     },
     onShow: function(e) {
-      $('#carrier', this.$el).selectize({
+      var s = $('#carrier', this.$el).selectize({
         valueField: 'id',
         labelField: 'name',
         searchField: 'name',
@@ -238,7 +245,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
           }
         },
         load: function(query, callback) {
-          if (!query.length) return callback();
+          if (!query.length) { return callback(); }
           $.ajax({
               url: '/api/search/carriers/' + encodeURIComponent(query),
               type: 'GET',
@@ -251,8 +258,15 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
           });
         }
       });
+      s[0].selectize.setValue(this.model.get("carrier"));
+      /*
       $('#phone').inputmask({
         mask: '(999) 999-9999'
+      });
+      */
+      $('#phone').intlTelInput({
+        defaultCountry: "auto",
+        utilsScript: "/lib/intl-tel-input/utils.js"
       });
       this.switcherySendEmail = new Switchery($("#sendEmail")[0]);
       this.switcherySendTxt = new Switchery($("#sendTxt")[0]);
@@ -298,7 +312,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       this.model.set({
         checkAttrs: true,
         email: this.ui.email.val().trim(),
-        phone: this.ui.phone.val().trim(),
+        phone: this.ui.phone.intlTelInput("getNumber").trim(),
         carrier: this.ui.carrier.val().trim(),
         sendEmail: (this.ui.sendEmail.prop('checked')) ? 1 : 0,
         sendTxt: (this.ui.sendTxt.prop('checked')) ? 1 : 0,

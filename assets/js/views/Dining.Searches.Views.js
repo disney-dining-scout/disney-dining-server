@@ -44,6 +44,13 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       );
     },
 
+    onShow: function(e) {
+      if (this.model.get("over")) {
+       this.$el.css("background-color", "rgb(252, 241, 241)");
+      }
+
+    },
+
     editSearch: function(e) {
       var entities = JSON.stringify({
             "name": this.model.get("restaurant").get("name"),
@@ -69,7 +76,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
               $(".update", view.$el).removeAttr("disabled");
             },
             error: function(model, xhr, options) {
-              if (view.$el.find('.alert').length > 0) view.$el.find('.alert').remove();
+              if (view.$el.find('.alert').length > 0) { view.$el.find('.alert').remove(); }
               view.$el.find('.page-header').before('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>There has been a error trying to create this search. This is what the server told me: <strong>'+xhr.responseJSON.messsage.detail+'</strong></div>');
               $(".update", view.$el).removeAttr("disabled");
               $('html, body').animate({
@@ -344,7 +351,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           }
         },
         load: function(query, callback) {
-          if (!query.length) return callback();
+          if (!query.length) { return callback(); }
           $.ajax({
             url: '/api/search/restaurants/' + encodeURIComponent(query),
             type: 'GET',
@@ -357,6 +364,10 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
           });
         }
       });
+      if (this.model.get("over")) {
+        if (this.$el.find('.alert').length > 0) { this.$el.find('.alert').remove(); }
+        this.$el.find('.modal-body').prepend('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>This search is outside the Disney 180 limit. It will not be searched until it is within 180 days.</strong></div>');
+      }
     },
     showAlert: function(model) {
       var alert = new App.Public.Views.AlertView({model: model});
@@ -386,7 +397,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
         "partySize": $("#partySize", this.$el).val(),
-        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A Z").tz("UTC").format("YYYY-MM-DD HH:mm:ssZ"),
+        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A Z").tz("UTC").format("YYYY-MM-DDTHH:mm:ss") + ".000Z",
         "user": App.user.get("id")
       });
       if (this.model.isValid()) {
@@ -493,7 +504,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
                   }, 2000);
               },
               error: function(model, xhr, options) {
-                if ($('.alert').length > 0) $('.alert').remove();
+                if ($('.alert').length > 0) { $('.alert').remove(); }
                 $('.page-header').before('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>There has been a error trying to create your user. This is what the server told me: <strong>'+xhr.responseJSON.messsage.detail+'</strong></div>');
                 $('html, body').animate({
                   scrollTop: $(".alert-dismissable").offset().top-70

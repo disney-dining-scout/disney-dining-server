@@ -32,4 +32,32 @@ ALTER TABLE `globalSearches` CHANGE `deletedAt` `deletedAt` TIMESTAMP NULL DEFAU
 
 SELECT `id`, `email`, `password`, `firstName`, `lastName`, `zipCode`, `phone`, `carrier`, `sendTxt`, `sendEmail`, `emailTimeout`, `smsTimeout`, `activated`, `subExpires`, `createdAt`, `updatedAt`, `deletedAt` FROM `users` AS `users` WHERE (`users`.`deletedAt` IS NULL AND `users`.`email`='voss.matthew@gmail.com') LIMIT 1;
 
-Executing (undefined): SELECT `id`, `restaurant`, `date`, `partySize`, `uid`, `user`, `enabled`, `deleted`, `lastEmailNotification`, `lastSMSNotification`, `createdAt`, `updatedAt`, `deletedAt` FROM `userSearches` AS `userSearches` WHERE (`userSearches`.`deletedAt` IS NULL AND `userSearches`.`user`=1 AND `userSearches`.`deleted`=0 AND `userSearches`.`enabled`=1) ORDER BY (CASE WHEN date < UTC_TIMESTAMP() THEN 0 ELSE 1 END) DESC, date ASC;
+SELECT `id`, `restaurant`, `date`, `partySize`, `uid`, `user`, `enabled`, `deleted`, `lastEmailNotification`, `lastSMSNotification`, `createdAt`, `updatedAt`, `deletedAt` FROM `userSearches` AS `userSearches` WHERE (`userSearches`.`deletedAt` IS NULL AND `userSearches`.`user`=1 AND `userSearches`.`deleted`=0 AND `userSearches`.`enabled`=1) ORDER BY (CASE WHEN date < UTC_TIMESTAMP() THEN 0 ELSE 1 END) DESC, date ASC;
+
+SELECT users.*
+FROM users
+LEFT JOIN userSearches ON users.id = userSearches.user AND userSearches.deleted = 0
+WHERE userSearches.uid IN (
+  SELECT uid FROM searchLogs WHERE dateSearched >= NOW() - INTERVAL 1 DAY AND foundSeats = 1 GROUP BY uid
+) AND (users.subExpires < NOW() OR users.subExpires IS NULL)
+GROUP BY users.id;
+
+SELECT users.*
+FROM users
+JOIN userSearches ON users.id = userSearches.user
+JOIN searchLogs ON userSearches.uid = searchLogs.uid
+WHERE (users.subExpires < NOW() OR users.subExpires IS NULL)
+AND searchLogs.dateSearched >= NOW() - INTERVAL 1 DAY
+AND searchLogs.foundSeats = 1
+AND userSearches.deleted = 0
+GROUP BY users.id;
+
+SELECT userSearches.*, restaurants.name, count(searchLogs.id) as count
+FROM userSearches
+JOIN searchLogs ON userSearches.uid = searchLogs.uid
+JOIN restaurants ON userSearches.restaurant = restaurants.id
+WHERE userSearches.user = 45
+AND searchLogs.dateSearched >= NOW() - INTERVAL 1 DAY
+AND searchLogs.foundSeats = 1
+AND userSearches.deleted = 0
+GROUP BY userSearches.uid;

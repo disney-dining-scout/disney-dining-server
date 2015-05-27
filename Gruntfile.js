@@ -3,7 +3,8 @@ module.exports = function(grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
   var jsSrc = [
         'lib/jquery/jquery.js',
-        'lib/jwt-decode/jwt-decode.js',
+        'bower_components/intl-tel-input/build/js/intlTelInput.js',
+        'lib/intl-tel-input/utils.js',
         'lib/modernizr/modernizr.js',
         'lib/handlebars/handlebars.js',
         'lib/swag/swag.js',
@@ -59,6 +60,7 @@ module.exports = function(grunt) {
         'lib/seiyria-bootstrap-slider/bootstrap-slider.css',
         'lib/card/card.css',
         'lib/bootstrap-select/bootstrap-select.css',
+        'lib/intl-tel-input/intlTelInput.css',
         'assets/css/custom.css'
       ];
   // Project configuration.
@@ -158,7 +160,15 @@ module.exports = function(grunt) {
             dest: 'public/images/',
             filter: 'isFile'
           },
-
+          {
+            expand: true,
+            flatten: true,
+            src: [
+              'lib/intl-tel-input/*.png'
+            ],
+            dest: 'public/images/',
+            filter: 'isFile'
+          },
           {
             expand: true,
             flatten: true,
