@@ -300,7 +300,7 @@ exports.initialize = function() {
     },
     userId :              { type: Sequelize.INTEGER },
     amount   :            { type: Sequelize.DECIMAL(10,2) },
-    subscription :        { type: Sequelize.ENUM('standard', 'plus') },
+    subscription :        { type: Sequelize.ENUM('standard', 'plus', 'pro', 'searches') },
     expires:              {
       type: Sequelize.DATE,
       defaultValue: null,
@@ -315,6 +315,26 @@ exports.initialize = function() {
     discount :            { type: Sequelize.DECIMAL(10,2) },
     failureCode:          { type: Sequelize.STRING(255) },
     failureMess:          { type: Sequelize.STRING }
+  });
+
+  models.Subscriptions = db.dining.define('subscriptions', {
+    id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    user:                 { type: Sequelize.INTEGER },
+    type :                { type: Sequelize.ENUM('standard','plus','pro') },
+    unlimited:            { type: Sequelize.BOOLEAN, defaultValue: 0 },
+    expires:  {
+      type: Sequelize.DATE,
+      defaultValue: null,
+      get: function(name) {
+        return moment.utc(this.getDataValue(name)).format("YYYY-MM-DD HH:mm:ssZ");
+      }
+    }
+  });
+
+  models.ExtraSearches = db.dining.define('extraSearches', {
+    id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    subscription:         { type: Sequelize.INTEGER },
+    user:                 { type: Sequelize.INTEGER }
   });
 };
 
@@ -1029,7 +1049,7 @@ exports.makePayment = function(req, res) {
       address_zip: req.session.user.zipCode
     },
     receipt_email: req.session.user.email,
-    description: "Disney Dining charge for " + payment.name
+    description: "Disney Dining Scout charge for " + payment.name
   }, function(err, charge) {
     var paid = {};
     if (err) {
