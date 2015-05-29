@@ -541,7 +541,7 @@ module.exports = {
             migration.addIndex('payments', ['userId']);
             callback(null);
           });
-        },
+        }
       ],
       function(error) {
         console.log("complete");
