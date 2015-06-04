@@ -544,6 +544,10 @@ exports.mobileAuth = function(req, res) {
       processUser = function(user) {
         user = user.toJSON();
         createUserModel(user, function(user) {
+          delete user.availableSearches;
+          delete user.extraSearches;
+          delete user.subscription;
+          delete user.totalPaidSearches;
           var token = jwt.sign({ user: user.id, mobile: true }, opts.configs.get("privateKey"), { expiresInMinutes: 1440 * 60, algorithm: 'RS256' }),
               data = {
                 user: user,
