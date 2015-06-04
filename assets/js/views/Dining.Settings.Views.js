@@ -377,6 +377,9 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       App.vent.on("payment:removeAlert", function () {
         $(".alert", view.$el).remove();
       });
+      App.vent.on("user:update", function () {
+        view.render();
+      });
     },
     onRender: function() {
 
@@ -411,7 +414,8 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       $(alert.$el).prependTo(".panel-body", this.$el);
     },
     showPaymentScreen: function(e) {
-      var paymentModal = new Views.PaymentModal({model: this.model});
+      var type = (e.currentTarget.className.split(" ").indexOf("subscription") > -1) ? "subscription" : "extraSearches",
+          paymentModal = new Views.PaymentModal({model: this.model, type: type});
       App.layoutView.modal.show(paymentModal);
     }
 
@@ -432,10 +436,13 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
     initialize: function(options) {
       _.extend(this, _.pick(options, "collection"));
       this.ui = {};
+      this.subType = options.type;
       this.creditcard = new App.Models.Charge({
         userId: this.model.get("id"),
-        subscription: "standard"
+        subscription: "standard",
+        type: this.subType
       });
+      this.model.set("subType", this.subType);
     },
     onShow: function() {
       this.ui.name = $('#name', this.$el);
@@ -443,8 +450,36 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
       this.ui.number = $('#number', this.$el);
       this.ui.expiration = $('#expiry', this.$el);
       this.ui.security = $('#cvc', this.$el);
-      var name = this.model.get("firstName") + " " + this.model.get("lastName");
+      var name = this.model.get("firstName") + " " + this.model.get("lastName"),
+          view = this;
       this.ui.name.val(name);
+      if (this.subType === "extraSearches") {
+        var tspin = $("#extraSearches", this.$el).TouchSpin({
+            min: 3,
+            max: 60,
+            step: 3,
+            boostat: 15,
+            maxboostedstep: 6,
+        });
+
+        tspin.on("touchspin.on.stopspin", function () {
+          var num = $("#extraSearches", view.$el).val() / 3,
+             price = num * 1.99;
+          $(".calcPrice", view.$el).html("$"+price.toString());
+          view.ui.amount.html(price.toString());
+          view.creditcard.set({
+            numberOfSearches: $("#extraSearches", view.$el).val(),
+            amount: parseFloat(price)
+          });
+        });
+        this.ui.amount.html("1.99");
+        this.creditcard.set({
+          numberOfSearches: 3,
+          amount: 1.99,
+          subscriptionId: Dining.user.get("subscription").get("id"),
+          subscription: "searches"
+        });
+      }
       $('#cardForm', this.$el).card({
         container: '.card-wrapper',
 
@@ -502,6 +537,7 @@ Dining.module('Settings.Views', function(Views, App, Backbone, Marionette, $, _)
               App.vent.trigger("payment:showAlert", alertModel);
             } else {
               App.vent.trigger("payment:removeAlert");
+              Dining.updateUserModel();
               var payments = App.user.get('payments');
               payments.add(model);
               Messenger().post(message);

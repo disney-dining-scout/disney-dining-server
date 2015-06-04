@@ -322,6 +322,7 @@ exports.initialize = function() {
     user:                 { type: Sequelize.INTEGER },
     type :                { type: Sequelize.ENUM('standard','plus','pro') },
     unlimited:            { type: Sequelize.BOOLEAN, defaultValue: 0 },
+    monthly:              { type: Sequelize.BOOLEAN, defaultValue: 0 },
     expires:  {
       type: Sequelize.DATE,
       defaultValue: null,
@@ -334,6 +335,7 @@ exports.initialize = function() {
   models.ExtraSearches = db.dining.define('extraSearches', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     subscription:         { type: Sequelize.INTEGER },
+    numberOfSearches:     { type: Sequelize.INTEGER },
     user:                 { type: Sequelize.INTEGER }
   });
 };
@@ -884,7 +886,7 @@ exports.updateSearch = function(req, res) {
 
 exports.getUserSearches = function(req, res) {
   var user = {id: req.user.user};
-  getUserSearches(user, function(searches) {
+  getUserSearches(user, false, function(searches) {
     sendBack(searches, 200, res);
   });
 };
@@ -1033,73 +1035,129 @@ exports.activateUser = function(req, res) {
 };
 
 exports.makePayment = function(req, res) {
-  var payment = req.body;
+  var payment = req.body,
+      type = (payment.type === "extraSearches") ? "Extra Searches" : payment.type.ucfirst() + " Subscription";
   payment.number = payment.number.replace(/\s+/g, '');
   payment.expiration = payment.expiration.replace(/\s+/g, '');
   //console.log("payment: ", payment);
-  stripe.charges.create({
-    amount: payment.amount * 100,
-    currency: "usd",
-    card: {
-      number: payment.number,
-      exp_month: payment.expiration.split("/")[0],
-      exp_year: payment.expiration.split("/")[1],
-      cvc: payment.security,
-      name: payment.name,
-      address_zip: req.session.user.zipCode
+  stripe.charges.create(
+    {
+      amount: payment.amount * 100,
+      currency: "usd",
+      card: {
+        number: payment.number,
+        exp_month: payment.expiration.split("/")[0],
+        exp_year: payment.expiration.split("/")[1],
+        cvc: payment.security,
+        name: payment.name,
+        address_zip: req.session.user.zipCode
+      },
+      receipt_email: req.session.user.email,
+      description: "Disney Dining Scout: " + type + " charge for " + payment.name
     },
-    receipt_email: req.session.user.email,
-    description: "Disney Dining Scout charge for " + payment.name
-  }, function(err, charge) {
-    var paid = {};
-    if (err) {
-      //console.log("error: ", err);
-      paid = {
-        userId: payment.userId,
-        amount: payment.amount,
-        subscription: payment.subscription,
-        transId: err.raw.charge,
-        date: moment.utc().format("YYYY-MM-DD HH:m:ssZ"),
-        discountCode: payment.discountCode,
-        discount: payment.discount,
-        expires: null,
-        cardType: payment.cardType,
-        last4: payment.number.slice(-4),
-        failureCode: err.code,
-        failureMess: err.message
-      };
-    } else {
-      //console.log("charge: ", charge);
-      var expirationDate = expires(payment.subscription, req.session.user);
-      paid = {
-        userId: payment.userId,
-        amount: payment.amount,
-        subscription: payment.subscription,
-        transId: charge.id,
-        date: moment.utc(charge.created, "X").format("YYYY-MM-DD HH:m:ssZ"),
-        discountCode: payment.discountCode,
-        discount: payment.discount,
-        expires: expirationDate,
-        cardType: payment.cardType,
-        last4: charge.card.last4,
-        failureCode: null,
-        failureMess: null
-      };
-    }
-    models.Payments.create(paid).then(function(paymentRec) {
-      if (paid.expires !== null) {
-        updateUserExpires(req.session.user.id, expirationDate, function(user) {
-          req.session.user = user;
-          sendBack(paymentRec, 200, res);
-        });
+    function(err, charge) {
+      var paid = {};
+      if (err) {
+        //console.log("error: ", err);
+        paid = {
+          userId: payment.userId,
+          amount: payment.amount,
+          subscription: payment.subscription,
+          transId: err.raw.charge,
+          date: moment.utc().format("YYYY-MM-DD HH:m:ssZ"),
+          discountCode: payment.discountCode,
+          discount: payment.discount,
+          expires: null,
+          cardType: payment.cardType,
+          last4: payment.number.slice(-4),
+          failureCode: err.code,
+          failureMess: err.message
+        };
       } else {
-        createUserModel(req.session.user, function(user) {
-          req.session.user = user;
-          sendBack(paymentRec, 200, res);
-        });
+        //console.log("charge: ", charge);
+        var expirationDate = (payment.type === "subscription") ? expires(payment.subscription, req.session.user) : null;
+        paid = {
+          userId: payment.userId,
+          amount: payment.amount,
+          subscription: payment.subscription,
+          transId: charge.id,
+          date: moment.utc(charge.created, "X").format("YYYY-MM-DD HH:m:ssZ"),
+          discountCode: payment.discountCode,
+          discount: payment.discount,
+          expires: expirationDate,
+          cardType: payment.cardType,
+          last4: charge.card.last4,
+          failureCode: null,
+          failureMess: null
+        };
       }
-    });
-  });
+      async.waterfall(
+        [
+          function(cb){
+            models.Payments.create(paid).then(
+              function(paymentRec) {
+                cb(null, paymentRec);
+              }
+            );
+          },
+          function(paymentRec, cb){
+            var sub;
+            if (paid.expires !== null) {
+              if (payment.type === "subscription") {
+                var monthly = (payment.subscription === "pro") ? true : false,
+                    unlimited = (payment.subscription === "pro") ? true : false;
+                sub = {
+                  user: payment.userId,
+                  type: payment.subscription,
+                  unlimited: unlimited,
+                  monthly: monthly,
+                  expires: paid.expires
+                };
+                models.Subscriptions.create(sub).then(
+                  function(subscription) {
+                    cb(null, paymentRec, subscription);
+                  }
+                );
+              }
+            } else if (payment.type === "extraSearches") {
+              sub = {
+                user: payment.userId,
+                subscription: payment.subscriptionId,
+                numberOfSearches: payment.numberOfSearches
+              };
+              models.ExtraSearches.create(sub).then(
+                function(subscription) {
+                  cb(null, paymentRec, subscription);
+                }
+              );
+            } else {
+              cb(null, paymentRec, null);
+            }
+          }
+        ],
+        function (err, paymentRec, subscription) {
+          if (paid.expires !== null) {
+            updateUserExpires(
+              req.session.user.id,
+              expirationDate,
+              function(user) {
+                req.session.user = user;
+                sendBack(paymentRec, 200, res);
+              }
+            );
+          } else {
+            createUserModel(
+              req.session.user,
+              function(user) {
+                req.session.user = user;
+                sendBack(paymentRec, 200, res);
+              }
+            );
+          }
+        }
+      );
+    }
+  );
 };
 
 exports.getUser = function(req, res) {
@@ -1321,18 +1379,35 @@ var createUserModel = function(user, cb) {
   if (typeof user !== "undefined" && "id" in user) {
     async.waterfall([
       function(callback){
-        getUserSearches(user, function(searches) {
-          //console.log("searches", searches);
-          user.searches = searches;
-          callback(null, user);
-        });
+        getUserSearches(
+          user,
+          false,
+          function(searches) {
+            //console.log("searches", searches);
+            user.searches = searches;
+            callback(null, user);
+          }
+        );
       },
       function(user, callback) {
-        getUserPayments(user.id, function(payments) {
-          //console.log("payments", payments);
-          user.payments = payments;
-          callback(null, user);
-        });
+        getUserPayments(
+          user.id,
+          function(payments) {
+            //console.log("payments", payments);
+            user.payments = payments;
+            callback(null, user);
+          }
+        );
+      },
+      function(user, callback) {
+        getSubscription(
+          user,
+          function(subscription) {
+            console.log("subscription",subscription);
+            user = underscore.extend(user, subscription);
+            callback(null, user);
+          }
+        );
       }
     ],function(err, results) {
         cb(results);
@@ -1343,13 +1418,21 @@ var createUserModel = function(user, cb) {
   }
 };
 
-var getUserSearches = function(user, callback) {
-  models.UserSearches.findAll({
-    where: {
+var getUserSearches = function(user, active, callback) {
+  console.log("isActive:", active);
+  active = active || false;
+  var where = {
       user: user.id,
       deleted: 0,
       enabled: 1
-    },
+    };
+  if (active) {
+    where.date = {
+      gte: Sequelize.literal("UTC_TIMESTAMP()")
+    };
+  }
+  models.UserSearches.findAll({
+    where: where,
     order: [Sequelize.literal('(CASE WHEN date < UTC_TIMESTAMP() THEN 0 ELSE 1 END) DESC'), Sequelize.literal('date ASC')]
   }).then(function(searches) {
     var convertToJson = function(item, cback) {
@@ -1425,6 +1508,96 @@ var getUserSearch = function(id, callback) {
     }
   ], function (err, search) {
    callback(search);
+  });
+};
+
+var getSubscription = function(user, callback) {
+  async.waterfall([
+    function(cb){
+      models.Subscriptions.find(
+        {
+          where: {
+            user: user.id
+          },
+          order: 'expires DESC'
+        }
+      ).then(
+        function(subscription) {
+          subscription = (subscription) ? subscription.toJSON() : subscription;
+          cb(null, subscription);
+        }
+      );
+    },
+    function(subscription, cb) {
+      getUserSearches(
+        user,
+        true,
+        function(searches) {
+          //console.log("searches", searches);
+          cb(null, subscription, searches);
+        }
+      );
+    },
+    function(subscription, activeSearches, cb) {
+      var calc = function(extraSearches) {
+        var number = 2,
+            type = {
+              "standard" : {
+                number: 4
+              },
+              "plus" : {
+                number: 8
+              },
+              "pro" : {
+                number: 101001
+              },
+            },
+            sub = {
+              subscription: subscription,
+              extraSearches: extraSearches,
+              totalPaidSearches: 2,
+              availableSearches: 2
+            };
+        if (subscription) {
+          if (subscription.unlimited) {
+            number = 101001;
+          } else {
+            number = type[subscription.type].number;
+            //console.log("extraSearches:", extraSearches);
+            if (extraSearches) {
+              number += parseInt(extraSearches.totalSearches, 10);
+            }
+          }
+        }
+        sub.totalPaidSearches = number;
+        sub.availableSearches = number - activeSearches.length;
+        cb(null, sub);
+      };
+      if (subscription) {
+        models.ExtraSearches.findAll(
+          {
+            where: {
+              subscription: subscription.id
+            },
+            attributes: [
+              [Sequelize.fn('SUM', Sequelize.col('numberOfSearches')), 'totalSearches'],
+              'subscription'
+            ],
+            group: ['subscription'],
+            order: 'id DESC'
+          }
+        ).then(
+          function(extraSearches) {
+            extraSearches = (extraSearches.length > 0) ? extraSearches[0].toJSON() : {totalSearches: 0};
+            calc(extraSearches);
+          }
+        );
+      } else {
+        calc([]);
+      }
+    }
+  ], function (err, sub) {
+   callback(sub);
   });
 };
 
@@ -1576,5 +1749,10 @@ if (!String.prototype.trim) {
     return this.replace(/^\s+|\s+$/g, '');
   };
 }
+
+String.prototype.ucfirst = function(notrim) {
+  var s = notrim ? this : this.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g,'').replace(/\s+/g,' ');
+  return s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+};
 
 }());

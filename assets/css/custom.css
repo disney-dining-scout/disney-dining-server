@@ -289,6 +289,14 @@ a {
 .intl-tel-input {width: 100%;}
 .iti-flag {background-image: url(/images/flags.png");}
 
+.footer {
+  background-color: #f8f8f8;
+  position: fixed;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  min-height: 20px;
+}
+
 @media (min-width: 640px) {
   .settingsUserName {
     display: inline-block;
@@ -296,6 +304,7 @@ a {
 
   #main {
     padding-top: 56px;
+    padding-bottom: 56px;
   }
 }
 
@@ -310,6 +319,7 @@ a {
 
   #main {
     padding-top: 80px;
+    padding-bottom: 80px;
   }
 }
 

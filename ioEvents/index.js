@@ -26,10 +26,13 @@
   };
 
   exports.refreshToken = function (socket, data) {
-    var token = jwt.sign({ user: socket.session.user.id }, config.get("privateKey"), { expiresInMinutes: 60, algorithm: 'RS256' });
-    socket.emit('talk', {
-      token: token
-    });
+    console.log(socket.session);
+    if ("user" in socket.session) {
+      var token = jwt.sign({ user: socket.session.user.id }, config.get("privateKey"), { expiresInMinutes: 60, algorithm: 'RS256' });
+      socket.emit('talk', {
+        token: token
+      });
+    }
   };
 
   exports.initialize = function(options) {

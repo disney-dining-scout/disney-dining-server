@@ -48,6 +48,7 @@ Dining.ioEvent = function(data) {
   } else if (data.objectType === "search-edit") {
     s = Dining.user.get("searches").findWhere({id: data.id});
     s.fetch();
+    Dining.updateUserModel();
   } else if (data.objectType === "search-add") {
     var search = new Dining.Models.Search({id: data.id});
     searches = Dining.user.get("searches");
@@ -55,6 +56,8 @@ Dining.ioEvent = function(data) {
       success: function(model, response, options)  {
         searches.add(model);
         Dining.vent.trigger("searches:add", model);
+        Dining.updateRoom(model);
+        Dining.updateUserModel();
       }
     });
   } else if (data.objectType === "search-delete") {
@@ -62,6 +65,7 @@ Dining.ioEvent = function(data) {
     searches = Dining.user.get("searches");
     searches.remove(s);
     Dining.vent.trigger("searches:delete", s);
+    Dining.updateUserModel();
   }
   if ("token" in data) {
     var decoded = atob(data.token.split('.')[1]);
@@ -227,6 +231,16 @@ Dining.updateRoom = function(model) {
   if (model.get("uid") !== "") {
     Dining.Io.emit('room:join', model.get("uid"));
   }
+};
+
+Dining.updateUserModel = function() {
+  Dining.user.fetch(
+    {
+      success: function(model, response, options)  {
+        Dining.vent.trigger("user:update", model);
+      }
+    }
+  );
 };
 
 String.prototype.capitalize = function() {

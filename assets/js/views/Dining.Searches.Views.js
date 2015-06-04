@@ -152,6 +152,14 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       App.vent.on('searches:delete', function (model) {
         view.modelDeleted(model);
       });
+
+      App.vent.on('user:update', function (model) {
+        if (Dining.user.get("availableSearches") <= 0) {
+          $(".btn-add").attr("disabled", "disabled");
+        } else {
+          $(".btn-add").removeAttr("disabled");
+        }
+      });
     },
 
     onRender: function() {
@@ -195,8 +203,6 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       } else {
         $('.adunit', this.$el).hide();
       }
-
-
     },
 
     onShow: function(e) {
@@ -208,6 +214,10 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
               'class': 'alert-danger'
             });
         this.showAlert(alertModel);
+      }
+
+      if (Dining.user.get("availableSearches") <= 0) {
+        $(".btn-add").attr("disabled", "disabled");
       }
     },
 
@@ -429,6 +439,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
               message += " updated.";
             }
             Messenger().post(message);
+            Dining.updateUserModel();
           },
           error: function(error) {
             var test = error;
@@ -443,9 +454,11 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
         {
           success: function(model, response, options) {
             modal.close();
+            Dining.updateUserModel();
           },
           error: function(error) {
             modal.close();
+            Dining.updateUserModel();
           }
         }
       );

@@ -8,6 +8,17 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
       var view = this;
       App.vent.on('showLogin', function (view) {
         App.layoutView.main.$el.addClass("loginContainer");
+        $(".footer", view.$el).hide();
+      });
+
+      App.vent.on('loggedin', function() {
+        view.displaySearchesAvailable();
+        $(".footer", view.$el).show();
+      });
+
+      App.vent.on('user:update', function() {
+        view.displaySearchesAvailable();
+        //$(".footer", view.$el).show();
       });
     },
     // UI bindings create cached attributes that
@@ -21,8 +32,18 @@ Dining.module('Layout', function(Layout, App, Backbone, Marionette, $, _) {
     resize: function() {
 
     },
+    displaySearchesAvailable: function() {
+      if (typeof App.user !== 'undefined' && "id" in App.user) {
+        if (Dining.user.get("totalPaidSearches") > 100000) {
+          $(".total-paid-searches", this.$el).html("unlimited");
+        } else {
+          var available = (App.user.get("availableSearches") < 0) ? 0 : App.user.get("availableSearches");
+          $(".total-paid-searches", this.$el).html(available.toString() + "/" + App.user.get("totalPaidSearches") );
+        }
+      }
+    },
     onShow: function() {
-
+      this.displaySearchesAvailable();
       this.resize();
     }
   });

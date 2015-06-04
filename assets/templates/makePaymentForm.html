@@ -6,18 +6,37 @@
       </button>
     </div>
     <h3 class="modal-title">
-      Make Payment
+      {{#is subType "subscription"}}
+      Subscription
+      {{else}}
+      Extra Searches
+      {{/is}}
     </h3>
   </div>
   <div class="modal-body">
     <div class="row">
     <div class="col-md-12">
+      {{#is subType "subscription"}}
         <strong>Select a service level</strong>
+      {{else}}
+        <p><strong>Select how many extra searches to add (increments of 3)</strong></p>
+        <p class="text-muted">Searches are available for the remaining length of your current subscription.</p>
+      {{/is}}
     </div>
+    {{#is subType "subscription"}}
     <div class="btn-group-vertical col-md-12" role="group">
       <button type="button" class="btn btn-default btn-standard btn-service">Standard (6 months)<span class="badge pull-right"><span class="glyphicon glyphicon-usd"></span>3.99</span></button>
       <button type="button" class="btn btn-default btn-plus btn-service">Plus (12 months)<span class="badge pull-right"><span class="glyphicon glyphicon-usd"></span>5.99</span></button>
     </div>
+    {{else}}
+    <div class="col-md-10 col-sm-10 sol-xs-10">
+      <input type="text" name="extraSearches" id="extraSearches" class="form-control" placeholder="Search Packs" value="1" />
+    </div>
+    <div class="col-md-2 col-sm-2 sol-xs-2">
+      <h3 class="pull-right calcPrice" style="margin-top: 2px;">$1.99</h3>
+    </div>
+    {{/is}}
+
     <div class="card-wrapper col-md-12" style="margin: 10px 0 10px;"></div>
     <div class="col-md-12">
       <form id="cardForm" role="form">

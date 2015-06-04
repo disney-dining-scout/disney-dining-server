@@ -307,7 +307,7 @@ module.exports = function(grunt) {
     grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
   });
 
-  grunt.registerTask('server', [ 'build-dev', 'express:dev', 'open:dev', 'watch' ]);
+  grunt.registerTask('server', [ 'build-dev', 'open:dev', 'express:dev', 'watch' ]);
 
   // Default task(s).
   grunt.registerTask('default', ['build']);

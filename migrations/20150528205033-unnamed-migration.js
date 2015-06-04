@@ -27,6 +27,10 @@ module.exports = {
                 type: DataTypes.BOOLEAN,
                 defaultValue: 0
               },
+              monthly: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: 0
+              },
               expires: {
                 type: DataTypes.DATE,
                 defaultValue: null
@@ -72,6 +76,9 @@ module.exports = {
                 type: DataTypes.INTEGER(11)
               },
               subscription: {
+                type: DataTypes.INTEGER(11)
+              },
+              numberOfSearches: {
                 type: DataTypes.INTEGER(11)
               },
               createdAt: {

@@ -5,7 +5,7 @@
     </div>
     <div class="panel-body">
       <div class="col-md-8 col-sm-12 col-xs-12 pull-left">
-        <h3>
+        <h3 class="">
           {{#if subExpires}}
             {{#isPast subExpires}}
             Subscription Expired: <span class="text-danger">{{momentFormat subExpires format="ddd. MMM. DD, YYYY"}}</span>
@@ -16,9 +16,17 @@
           Free Account
           {{/if}}
         </h3>
+        <h4 class="text-muted">
+          Searches Purchased:
+          {{#if subscription.unlimited}}
+            Unlimited
+          {{else}}
+            {{totalPaidSearches}} <button type="button" class="btn btn-success btn-xs make-payment searches">Buy more searches</button>
+          {{/if}}
+        </h4>
       </div>
       <div class="col-md-4 col-sm-12 col-xs-12 pull-right">
-        <button type="button" class="btn btn-primary pull-right make-payment"><i class="fa fa-credit-card"></i> Make a Payment</button>
+        <button type="button" class="btn btn-primary pull-right make-payment subscription"><i class="fa fa-credit-card"></i> Subscribe</button>
       </div>
       <div class="col-md-12 col-sm-12 col-xs-12">
         <br />
