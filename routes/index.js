@@ -1164,6 +1164,10 @@ exports.getUser = function(req, res) {
   getUser(req.params.userId, true, function(user) {
     createUserModel(user, function(user) {
       if (req.user.mobile) {
+        delete user.availableSearches;
+        delete user.extraSearches;
+        delete user.subscription;
+        delete user.totalPaidSearches;
         user = [user];
       }
       sendBack(user, 200, res);
