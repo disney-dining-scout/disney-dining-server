@@ -1040,7 +1040,7 @@ exports.activateUser = function(req, res) {
 
 exports.makePayment = function(req, res) {
   var payment = req.body,
-      type = (payment.type === "extraSearches") ? "Extra Searches" : payment.type.ucfirst() + " Subscription";
+      type = (payment.type === "extraSearches") ? "Extra Searches" : payment.subscription.ucfirst() + " Subscription";
   payment.number = payment.number.replace(/\s+/g, '');
   payment.expiration = payment.expiration.replace(/\s+/g, '');
   //console.log("payment: ", payment);

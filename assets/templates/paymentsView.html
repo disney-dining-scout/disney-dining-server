@@ -21,7 +21,12 @@
           {{#if subscription.unlimited}}
             Unlimited
           {{else}}
-            {{totalPaidSearches}} <button type="button" class="btn btn-success btn-xs make-payment searches">Buy more searches</button>
+            {{totalPaidSearches}}
+            {{#if subExpires}}
+              {{#isCurrent subExpires}}
+                <button type="button" class="btn btn-success btn-xs make-payment searches">Buy more searches</button>
+              {{/isCurrent}}
+            {{/if}}
           {{/if}}
         </h4>
       </div>
