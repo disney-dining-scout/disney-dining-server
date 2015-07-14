@@ -138,6 +138,7 @@ exports.initialize = function() {
         dialect: 'mysql',
         host: opts.configs.get("mysql:host") || "localhost",
         port: opts.configs.get("mysql:port") || 3306,
+        pool: { maxConnections: 5, maxIdleTime: 30},
         define: {
           freezeTableName: true,
           timestamps: true,
