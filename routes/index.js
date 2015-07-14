@@ -135,11 +135,9 @@ exports.initialize = function() {
     opts.configs.get("mysql:username"),
     opts.configs.get("mysql:password"),
     {
-        dialect: 'mariadb',
-        omitNull: true,
+        dialect: 'mysql',
         host: opts.configs.get("mysql:host") || "localhost",
         port: opts.configs.get("mysql:port") || 3306,
-        pool: { maxConnections: 5, maxIdleTime: 30},
         define: {
           freezeTableName: true,
           timestamps: true,
@@ -149,12 +147,14 @@ exports.initialize = function() {
 
   models.Restaurants = db.dining.define('restaurants', {
     id:                   { type: Sequelize.STRING(255), primaryKey: true },
-    name :                { type: Sequelize.STRING(255) }
+    name :                { type: Sequelize.STRING(255) },
+    secondary :           { type: Sequelize.BOOLEAN }
   });
 
   models.UserSearches = db.dining.define('userSearches', {
     id:                   { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     restaurant:           { type: Sequelize.STRING(255) },
+    secondary:            { type: Sequelize.STRING(255) },
     date:                 {
       type: Sequelize.DATE,
       defaultValue: null,
@@ -215,7 +215,8 @@ exports.initialize = function() {
       },
       message:              { type: Sequelize.STRING(255) },
       foundSeats:           { type: Sequelize.BOOLEAN, defaultValue: 0 },
-      times:                { type: Sequelize.STRING }
+      times:                { type: Sequelize.STRING },
+      urls:                 { type: Sequelize.STRING }
     }
   );
 
@@ -575,6 +576,7 @@ exports.mobileAuth = function(req, res) {
             errorMsg = {
               status: "error",
               message: {
+                code: "credential_error",
                 response: "Invalid email and/or password."
               }
             };
@@ -585,6 +587,7 @@ exports.mobileAuth = function(req, res) {
         errorMsg = {
           status: "error",
           message: {
+            code: "subscription_expired",
             response: "Subscription has expired. Free accounts do not have mobile app access."
           }
         };
@@ -594,6 +597,7 @@ exports.mobileAuth = function(req, res) {
       errorMsg = {
         status: "error",
         message: {
+          code: "credential_error",
           response: "Invalid email and/or password."
         }
       };
@@ -791,8 +795,13 @@ exports.addSearch = function(req, res) {
   });
 
   results.restaurant = req.body.restaurantId;
+  results.secondary = null;
+  if (req.body.secondaryId) {
+    results.secondary = req.body.secondaryId;
+  }
   var uid = generateUid(results);
   results.uid = uid;
+  console.log("Add search:", results);
   models.UserSearches.create(
     results
   ).then(function(search) {
@@ -840,13 +849,17 @@ exports.updateSearch = function(req, res) {
         results[key] = req.body[key];
       }
     });
-    //console.log(results);
     results.restaurant = req.body.restaurantId || req.body.restaurant;
+    results.secondary = null;
+    if (req.body.secondaryId) {
+      results.secondary = req.body.secondaryId;
+    }
     results.id = req.params.searchId;
     var oldUid = results.uid,
         uid = generateUid(results);
     results.uid = uid;
     checkUids(oldUid, uid, function() {
+      console.log(results);
       userSearch.updateAttributes(
         results
       ).then(function(search) {
@@ -1046,7 +1059,7 @@ exports.makePayment = function(req, res) {
   //console.log("payment: ", payment);
   stripe.charges.create(
     {
-      amount: payment.amount * 100,
+      amount: Math.floor(parseFloat(payment.amount) * 100),
       currency: "usd",
       card: {
         number: payment.number,
@@ -1123,7 +1136,7 @@ exports.makePayment = function(req, res) {
                   }
                 );
               }
-            } else if (payment.type === "extraSearches") {
+            } else if (payment.type === "extraSearches" && !err) {
               sub = {
                 user: payment.userId,
                 subscription: payment.subscriptionId,
@@ -1168,10 +1181,10 @@ exports.getUser = function(req, res) {
   getUser(req.params.userId, true, function(user) {
     createUserModel(user, function(user) {
       if (req.user.mobile) {
-        delete user.availableSearches;
-        delete user.extraSearches;
-        delete user.subscription;
-        delete user.totalPaidSearches;
+        //delete user.availableSearches;
+        //delete user.extraSearches;
+        //delete user.subscription;
+        //delete user.totalPaidSearches;
         user = [user];
       }
       sendBack(user, 200, res);
@@ -1313,7 +1326,8 @@ var searchCarriers = function(name, callback) {
 var generateUid = function(search) {
   var md5 = crypto.createHash('md5'),
       timestamp = moment(search.date, "YYYY-MM-DD HH:mm:ssZ").format("X"),
-      uid = md5.update(search.restaurant + timestamp + search.partySize).digest("base64");
+      restaurantUid = (search.secondary) ? search.restaurant + search.secondary : search.restaurant,
+      uid = md5.update(restaurantUid + timestamp + search.partySize).digest("base64");
 
   return uid;
 };
@@ -1458,7 +1472,7 @@ var getUserPayments = function(userId, callback) {
   models.Payments.findAll({
     where: {
       userId: userId,
-      failureCode: {$eq: null}
+      failureMess: {$eq: null}
     },
     order: [Sequelize.literal('date DESC')]
   }).then(function(payments) {
@@ -1496,6 +1510,22 @@ var getUserSearch = function(id, callback) {
         }
       );
     },
+    function(search, cb){
+      if (search.secondary) {
+        models.Restaurants.find(search.secondary).then(
+          function(restaurant) {
+            if (restaurant) {
+              search.secondary = restaurant.toJSON();
+              cb(null, search);
+            } else {
+              cb("cannot find seondary restaurant", null);
+            }
+          }
+        );
+      } else {
+        cb(null, search);
+      }
+    },
     function(search, cb) {
       models.SearchLogs.findAll({
         where: {
@@ -1506,6 +1536,7 @@ var getUserSearch = function(id, callback) {
       }).then(function(logs) {
           var convertToJson = function(item, cback) {
                 item.times = ( item.times !== "" ) ? JSON.parse(item.times) : [];
+                item.urls = ( item.urls !== "" ) ? JSON.parse(item.urls) : [];
                 cback(null, item);
               };
           async.map(logs, convertToJson, function(err, results){

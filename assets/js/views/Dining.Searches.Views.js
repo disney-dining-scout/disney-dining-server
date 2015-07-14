@@ -19,6 +19,19 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     initialize: function() {
       //if (this.model.get("id")) this.model.set({uuid: this.model.get("id")});
       this.justUpdated = false;
+      if (this.model.get("logs").length > 0) {
+        var times = this.model.get("logs").at(0).get("times"),
+            urls = this.model.get("logs").at(0).get("urls"),
+            timeUrls = [];
+        if (urls) {
+          times.forEach(function(time, index, array) {
+            timeUrls.push("<a href='https://disneyworld.disney.go.com/dining-reservation/book-dining-event/?offerId[]="+urls[index]+"'>"+time+"</a>");
+          });
+        } else {
+          timeUrls = times;
+        }
+        this.model.get("logs").at(0).set("timeUrls", timeUrls);
+      }
     },
 
     fieldsChanged: function() {
@@ -54,9 +67,18 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     editSearch: function(e) {
       var entities = JSON.stringify({
             "name": this.model.get("restaurant").get("name"),
-            "id": this.model.get("restaurant").get("id")
-          });
+            "id": this.model.get("restaurant").get("id"),
+            "secondary": this.model.get("restaurant").get("secondary")
+          }),
+          secondaryEntities;
       this.model.set({"entities": he.encode(entities)});
+      if (typeof this.model.get("restaurant").get("secondary") !== "boolean") {
+        secondaryEntities = JSON.stringify({
+          "name": this.model.get("secondary").get("name"),
+          "id": this.model.get("secondary").get("id")
+        });
+        this.model.set({"secondaryEntities": he.encode(secondaryEntities)});
+      }
       var searchModal = new Views.SearchModal({model: this.model});
       App.layoutView.modal.show(searchModal);
     },
@@ -323,6 +345,7 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       _.extend(this, _.pick(options, "collection"));
     },
     onShow: function() {
+      var view = this;
       $('#date', this.$el).pickadate({
         container: 'body',
         format: 'dddd, mmm dd, yyyy',
@@ -372,11 +395,55 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
                 callback(res);
             }
           });
+        },
+        onItemAdd: function(value, $item) {
+          if (this.options[value].secondary) {
+            $(".packageRestaurant", view.$el).show();
+          } else {
+            $(".packageRestaurant", view.$el).hide();
+            var $select = view.secondarySelectize,
+                control = $select[0].selectize;
+            control.clear();
+          }
+        }
+      });
+
+      this.secondarySelectize = $('#secondary', this.$el).selectize({
+        valueField: 'id',
+        labelField: 'name',
+        searchField: 'name',
+        dataAttr: 'data-data',
+        create: false,
+        render: {
+          option: function(item, escape) {
+            return '<div>' +
+                '<span class="title">' +
+                    '<span class="name"></i>' + escape(item.name) + '</span>' +
+                '</span>' +
+            '</div>';
+          }
+        },
+        load: function(query, callback) {
+          if (!query.length) { return callback(); }
+          $.ajax({
+            url: '/api/search/restaurants/' + encodeURIComponent(query),
+            type: 'GET',
+            error: function() {
+                callback();
+            },
+            success: function(res) {
+                callback(res);
+            }
+          });
         }
       });
       if (this.model.get("over")) {
         if (this.$el.find('.alert').length > 0) { this.$el.find('.alert').remove(); }
         this.$el.find('.modal-body').prepend('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>This search is outside the Disney 180 limit. It will not be searched until it is within 180 days.</strong></div>');
+      }
+
+      if (this.model.get("restaurant").get("secondary")) {
+        $(".packageRestaurant", view.$el).show();
       }
     },
     showAlert: function(model) {
@@ -399,15 +466,17 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
       **/
     },
     beforeSubmit: function(e) {
-      var offset = moment($("#date", this.$el).val(), "dddd, MMMM DD YYYY").tz("America/New_York").format("Z"),
-          dateTime = $("#date", this.$el).val() + " " + $("#time", this.$el).val() + " " + offset,
+      var d = moment($("#date", this.$el).val()).format("YYYY-MM-DD"),
+          t = moment($("#time", this.$el).val(), "h:mm A").format("HH:mm:ss"),
+          dateTime = moment.tz(d + " " + t, "America/New_York"),
           isThisNew = (this.model.get("uid") === "") ? true : false,
           modal = this,
           changedAttributes = this.model.changedAttributes();
       this.model.set({
         "restaurantId": $("#restaurant", this.$el).val(),
+        "secondaryId": $("#secondary", this.$el).val(),
         "partySize": $("#partySize", this.$el).val(),
-        "date": moment(dateTime, "dddd, MMM DD, YYYY h:mm A Z").tz("UTC").format("YYYY-MM-DDTHH:mm:ss") + ".000Z",
+        "date": moment(dateTime).tz("UTC").format("YYYY-MM-DDTHH:mm:ss") + ".000Z",
         "user": App.user.get("id")
       });
       if (this.model.isValid()) {

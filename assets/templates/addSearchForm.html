@@ -18,10 +18,18 @@
     <form role="form">
       <input type="hidden" name="_method" value="put">
       <div class="form-group">
-        <label class="control-label">Restaurant</label>
-        <select id="restaurant" placeholder="Pick a restaurant..." >
+        <label class="control-label">Restaurant/Dining Package</label>
+        <select id="restaurant" placeholder="Pick a restaurant/dinner package..." >
           {{#if restaurant.name}}
           <option value="{{restaurant.id}}" data-data='{{{entities}}}'>{{restaurant.name}}</option>
+          {{/if}}
+        </select>
+      </div>
+      <div class="form-group packageRestaurant" style="display: none;">
+        <label class="control-label">Dining Package Restaurant</label>
+        <select id="secondary" placeholder="Pick a restaurant..." >
+          {{#if secondary.name}}
+          <option value="{{secondary.id}}" data-data='{{{secondaryEntities}}}'>{{secondary.name}}</option>
           {{/if}}
         </select>
       </div>

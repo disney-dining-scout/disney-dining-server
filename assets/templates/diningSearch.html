@@ -16,6 +16,9 @@
   </div>
   <div class="col-sm-7">
     <h4 class="list-group-item-heading">{{restaurant.name}} <i class="fa fa-history" style="text-align: left;"></i></h4>
+    {{#if secondary}}
+    <h5 class="list-group-item-heading">{{secondary.name}}</h5>
+    {{/if}}
     <p class="list-group-item-text"><i class="fa fa-calendar"></i>{{{momentTZFormat date format="ddd. MMM. DD, YYYY"}}}</p>
     <p class="list-group-item-text"><i class="fa fa-clock-o"></i>{{{momentTZFormat date format="h:mm A"}}}</p>
     <p class="list-group-item-text"><i class="fa fa-users"></i><strong>{{partySize}}</strong> </p>
@@ -35,8 +38,8 @@
       {{/any}}
     </p>
     <p class="list-group-item-text">
-      {{#if logs.0.times}}
-        {{join logs.0.times ", "}}
+      {{#if logs.0.timeUrls}}
+        {{{join logs.0.timeUrls ", "}}}
       {{/if}}
     </p>
   </div>

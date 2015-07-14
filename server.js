@@ -134,9 +134,9 @@
   app.use('/lib', app.express.static(__dirname + '/lib'));
   app.use('/bower_components', app.express.static(__dirname + '/bower_components'));
   app.use(morgan('dev')); // log every request to the console
-  app.use(bodyParser.urlencoded({'extended':'true'})); // parse application/x-www-form-urlencoded
-  app.use(bodyParser.json()); // parse application/json
-  app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+  app.use(bodyParser.urlencoded({limit: '50mb','extended':'true'})); // parse application/x-www-form-urlencoded
+  app.use(bodyParser.json({limit: '50mb'}));
+  app.use(bodyParser.json({limit: '50mb', type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
   app.use(methodOverride('X-HTTP-Method-Override')); // override with the X-HTTP-Method-Override header in the request
   app.use(cors());
   app.use(

@@ -204,7 +204,8 @@ Dining.vent.on('hideMenu', function() {
 
 Dining.fixTime = function(model, attr) {
   attr = attr || "date";
-  var newDate = null;
+  var newDate = null,
+      isUTC = model.get(attr).indexOf("+00:00");
   if (model.isNew()) {
     var now = moment().add('days', 1),
         hour = parseInt(now.format("HH"), 10),
@@ -216,8 +217,10 @@ Dining.fixTime = function(model, attr) {
     newDate = day.toString() + h.toString() + ":" + m.toString() + ":00";
     model.set(attr, newDate);
   } else {
-    var offset = (moment(model.get(attr)).isDST()) ? 240 - moment(model.get(attr)).zone() : 300 - moment(model.get(attr)).zone();
-    newDate = moment(model.get(attr)).utc().add("minutes", offset);
+    if (isUTC === false) {
+      var offset = (moment(model.get(attr)).isDST()) ? 240 - moment(model.get(attr)).zone() : 300 - moment(model.get(attr)).zone();
+      newDate = moment(model.get(attr)).utc().add("minutes", offset);
+    }
     //model.set(attr, newDate);
     if (attr === "date") {
       var date = moment(model.get("date"));
