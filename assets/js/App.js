@@ -205,7 +205,7 @@ Dining.vent.on('hideMenu', function() {
 Dining.fixTime = function(model, attr) {
   attr = attr || "date";
   var newDate = null,
-      isUTC = model.get(attr).indexOf("+00:00");
+      isUTC = (typeof model.get(attr) === "object") ? false : model.get(attr).indexOf("+00:00");
   if (model.isNew()) {
     var now = moment().add('days', 1),
         hour = parseInt(now.format("HH"), 10),
