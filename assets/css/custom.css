@@ -23,6 +23,11 @@ body {
   margin-right: 0px;
 }
 
+#main {
+  padding-top: 56px;
+  padding-bottom: 56px;
+}
+
 #main #dash-row-1 {
   margin-right: 0px;
 }
