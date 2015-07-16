@@ -31,6 +31,7 @@ Dining.ioEvent = function(data) {
         results.fetch({
           success: function(model, response, options)  {
             Dining.fixTime(model);
+            model.timeURls();
           }
         });
       }
