@@ -102,9 +102,26 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     },
     initialize: function() {
       Dining.fixTime(this);
+      this.timeUrls();
     },
     update: function () {
       Dining.fixTime(this);
+      this.timeUrls();
+    },
+    timeUrls: function() {
+      if (this.get("logs").length > 0) {
+        var times = this.get("logs").at(0).get("times"),
+            urls = this.get("logs").at(0).get("urls"),
+            timeUrls = [];
+        if (urls) {
+          times.forEach(function(time, index, array) {
+            timeUrls.push("<a href='https://disneyworld.disney.go.com/dining-reservation/book-dining-event/?offerId[]="+urls[index]+"'>"+time+"</a>");
+          });
+        } else {
+          timeUrls = times;
+        }
+        this.get("logs").at(0).set("timeUrls", timeUrls);
+      }
     },
     validate: function(attrs, options) {
       if (attrs.restaurantId === "") {

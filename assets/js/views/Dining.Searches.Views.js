@@ -35,19 +35,6 @@ Dining.module('Searches.Views', function(Views, App, Backbone, Marionette, $, _)
     onRender: function(e) {
       var view = this,
           millis = (!this.model.get("past")) ? 30000 : 3600000;
-      if (this.model.get("logs").length > 0) {
-        var times = this.model.get("logs").at(0).get("times"),
-            urls = this.model.get("logs").at(0).get("urls"),
-            timeUrls = [];
-        if (urls) {
-          times.forEach(function(time, index, array) {
-            timeUrls.push("<a href='https://disneyworld.disney.go.com/dining-reservation/book-dining-event/?offerId[]="+urls[index]+"'>"+time+"</a>");
-          });
-        } else {
-          timeUrls = times;
-        }
-        this.model.get("logs").at(0).set("timeUrls", timeUrls);
-      }
       this.timeout = setTimeout(
         function() {
           view.render();
