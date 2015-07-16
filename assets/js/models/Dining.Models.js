@@ -109,7 +109,7 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
       this.timeUrls();
     },
     timeUrls: function() {
-      if (this.get("logs").length > 0) {
+      if (this.get("logs") && this.get("logs").length > 0) {
         var times = this.get("logs").at(0).get("times"),
             urls = this.get("logs").at(0).get("urls"),
             timeUrls = [];

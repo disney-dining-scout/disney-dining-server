@@ -10,3 +10,5 @@ tmp/
 docs/server-setup.md
 scripts/addUser.js
 bower2.json
+/facebook-limited-post.txt
+/scratch/response.json
