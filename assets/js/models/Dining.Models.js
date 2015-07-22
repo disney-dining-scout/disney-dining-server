@@ -113,6 +113,12 @@ Dining.module('Models', function(Models, App, Backbone, Marionette, $, _) {
         var times = this.get("logs").at(0).get("times"),
             urls = this.get("logs").at(0).get("urls"),
             timeUrls = [];
+        if (times === "null") {
+         times = null;
+        }
+        if (urls === "null") {
+         urls = null;
+        }
         if (urls) {
           times.forEach(function(time, index, array) {
             timeUrls.push("<a href='https://disneyworld.disney.go.com/dining-reservation/book-dining-event/?offerId[]="+urls[index]+"'>"+time+"</a>");
