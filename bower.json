@@ -49,6 +49,7 @@
   },
   "resolutions": {
     "handlebars": "~2.0.0",
-    "fastclick": "~1.0.3"
+    "fastclick": "~1.0.3",
+    "underscore": "~1.8.3"
   }
 }
