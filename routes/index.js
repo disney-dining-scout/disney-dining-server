@@ -1,6 +1,6 @@
 (function(){
   "use strict";
-
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var fs = require('fs'),
     pjson = require('../package.json'),
     path = require('path'),
