@@ -82,22 +82,22 @@ exports.initialize = function() {
           }
         });
       };
-  if (configs.get("mail:username") && configs.get("mail:password")) {
+  if (opts.configs.get("mail:username") && opts.configs.get("mail:password")) {
     transport = nodemailer.createTransport(smtpTransport({
-      host: configs.get("mail:host"),
-      port: configs.get("mail:port"),
+      host: opts.configs.get("mail:host"),
+      port: opts.configs.get("mail:port"),
       secure: false,
       ignoreTLS: false,
       requireTLS: true,
       auth: {
-        user: configs.get("mail:username"),
-        pass: configs.get("mail:password")
+        user: opts.configs.get("mail:username"),
+        pass: opts.configs.get("mail:password")
       }
     }));
   } else {
     transport = nodemailer.createTransport(smtpTransport({
-      host: configs.get("mail:host"),
-      port: configs.get("mail:port")
+      host: opts.configs.get("mail:host"),
+      port: opts.configs.get("mail:port")
     }));
   }
 
