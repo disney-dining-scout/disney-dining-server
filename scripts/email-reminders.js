@@ -51,11 +51,24 @@ db.dining = new Sequelize(
       }
 });
 
-transport = nodemailer.createTransport(smtpTransport({
-  host: config.get("mail:host"),
-  port: config.get("mail:port"),
-  ignoreTLS: true
-}));
+if (config.get("mail:username") && config.get("mail:password")) {
+  transport = nodemailer.createTransport(smtpTransport({
+    host: config.get("mail:host"),
+    port: config.get("mail:port"),
+    secure: false,
+    ignoreTLS: false,
+    requireTLS: true,
+    auth: {
+      user: config.get("mail:username"),
+      pass: config.get("mail:password")
+    }
+  }));
+} else {
+  transport = nodemailer.createTransport(smtpTransport({
+    host: config.get("mail:host"),
+    port: config.get("mail:port")
+  }));
+}
 transport.use('compile', htmlToText());
 
 var sql = 'SELECT users.* ' +

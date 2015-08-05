@@ -378,7 +378,7 @@ exports.index = function(req, res){
         res.end('\n');
       };
   var userId, decipher;
-  if ((typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined') || "remember" in req.cookies) {
+  if ((typeof req.session !== 'undefined' && typeof req.session.user !== 'undefined' && req.session.user) || "remember" in req.cookies) {
 
     if ("remember" in req.cookies) {
       decipher = crypto.createDecipher('aes-256-cbc', key);
@@ -403,14 +403,18 @@ exports.index = function(req, res){
       decipher = crypto.createDecipher('aes-256-cbc', key);
       decipher.update(req.cookies.remember, 'base64', 'utf8');
       userId = decipher.final('utf8');
-      getUser(userId, true, function(user) {
-        createUserModel(user, function(user) {
-          addUserToSession(user, req, function() {
-            init = "$(document).ready(function() { Dining.appInfo = new Dining.Models.AppInfoModel(" + JSON.stringify(appInfo) + ");Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
-            send();
+      if (userId) {
+        getUser(userId, true, function(user) {
+          createUserModel(user, function(user) {
+            addUserToSession(user, req, function() {
+              init = "$(document).ready(function() { Dining.appInfo = new Dining.Models.AppInfoModel(" + JSON.stringify(appInfo) + ");Dining.user = new Dining.Models.User(" + JSON.stringify(req.session.user) + "); Dining.start(); });";
+              send();
+            });
           });
         });
-      });
+      } else {
+       send();
+      }
     } else {
       send();
     }
